@@ -56,20 +56,20 @@
  *   yet copied the options from the DataObject into it. If you plan to use the
  *   functions in FB in this method, call populateOptions() on it first.
  *  </li>
- *  <li>postGenerateForm(&$form):
+ *  <li>postGenerateForm(&$form, &$formBuilder):
  *   This method will be called after the form is generated. The form is passed in by reference so you can
  *   alter it. Use this method to add, remove, or alter elements in the form or the form itself.
  *  </li>
- *  <li>preProcessForm(&$values):
+ *  <li>preProcessForm(&$values, &$formBuilder):
  *   This method is called just before FormBuilder processes the submitted form data. The values are sent
  *   by reference in the first parameter as an associative array. The key is the element name and the value
  *   the submitted value. You can alter the values as you see fit (md5 on passwords, for example).
  *  </li>
- *  <li>postProcessForm(&$values):
+ *  <li>postProcessForm(&$values, &$formBuilder):
  *   This method is called just after FormBuilder processed the submitted form data. The values are again
  *   sent by reference. This method could be used to inform the user of changes, alter the DataObject, etc.
  *  </li>
- *  <li>getForm():
+ *  <li>getForm($action, $target, $formName, $method, &$formBuilder):
  *   If this function exists, it will be used instead of FormBuilder's internal form generation routines
  *   Use this only if you want to create the entire form on your own.
  *  </li>
@@ -97,7 +97,7 @@
  *
  * @package  DB_DataObject_FormBuilder
  * @author   Markus Wolff <mw21st@php.net>
- * @version  $Id: FormBuilder.php,v 1.122 2005/02/25 00:25:38 justinpatrin Exp $
+ * @version  $Id: FormBuilder.php,v 1.124 2005/02/28 05:21:39 justinpatrin Exp $
  */
 
 // Import requirements
@@ -1831,7 +1831,7 @@ class DB_DataObject_FormBuilder
         }
         
         if (method_exists($this->_do, 'getform')) {
-            $obj = $this->_do->getForm($action, $target, $formName, $method);
+            $obj = $this->_do->getForm($action, $target, $formName, $method, &$this);
         } else {
             $obj = &$this->_generateForm($action, $target, $formName, $method);
         }
@@ -2073,9 +2073,9 @@ class DB_DataObject_FormBuilder
         $this->debug('<br>...processing form data...<br>');
         if (method_exists($this->_do, 'preprocessform')) {
             if ($this->useCallTimePassByReference) {
-                eval('$this->_do->preProcessForm(&$values);');
+                eval('$this->_do->preProcessForm(&$values, &$this);');
             } else {
-                $this->_do->preProcessForm($values);
+                $this->_do->preProcessForm($values, $this);
             }
         }
         
@@ -2364,9 +2364,9 @@ class DB_DataObject_FormBuilder
 
         if (method_exists($this->_do, 'postprocessform')) {
             if ($this->useCallTimePassByReference) {
-                eval('$this->_do->postProcessForm(&$values);');
+                eval('$this->_do->postProcessForm(&$values, &$this);');
             } else {
-                $this->_do->postProcessForm($values);
+                $this->_do->postProcessForm($values, $this);
             }
         }
 
