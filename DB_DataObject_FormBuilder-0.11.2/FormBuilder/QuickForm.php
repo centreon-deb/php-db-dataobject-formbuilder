@@ -21,7 +21,7 @@
  *
  * @package  DB_DataObject_FormBuilder
  * @author   Markus Wolff <mw21st@php.net>
- * @version  $Id: QuickForm.php,v 1.26 2005/01/08 01:39:26 justinpatrin Exp $
+ * @version  $Id: QuickForm.php,v 1.31 2005/02/10 23:02:29 justinpatrin Exp $
  */
 
 require_once ('HTML/QuickForm.php');
@@ -46,8 +46,10 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
                                 'longtext'  => 'textarea',
                                 'date'      => 'date',
                                 'time'      => 'date',
+                                'datetime'  => 'date',
                                 'integer'   => 'text',
                                 'float'     => 'text',
+                                'select'    => 'select',
                                 'elementTable' => 'elementTable');
 
     /**
@@ -191,8 +193,7 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
     function &_createHiddenField($fieldName)
     {
         $element =& HTML_QuickForm::createElement('hidden',
-                                                  $this->getFieldName($fieldName),
-                                                  $this->getFieldLabel($fieldName));   
+                                                  $this->getFieldName($fieldName));   
         $attr = $this->_getAttributes('hidden', $fieldName);
         $element->updateAttributes($attr);
         return $element;
@@ -341,13 +342,13 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
     function &_createSelectBox($fieldName, $options, $multiple = false)
     {
         if ($multiple) {
-            $element =& HTML_QuickForm::createElement('select',
+            $element =& HTML_QuickForm::createElement($this->_getQFType('select'),
                                                       $this->getFieldName($fieldName),
                                                       $this->getFieldLabel($fieldName),
                                                       $options,
                                                       array('multiple' => 'multiple'));
         } else {
-            $element =& HTML_QuickForm::createElement('select',
+            $element =& HTML_QuickForm::createElement($this->_getQFType('select'),
                                                       $this->getFieldName($fieldName),
                                                       $this->getFieldLabel($fieldName),
                                                       $options);
@@ -463,7 +464,8 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
      * @see DB_DataObject_FormBuilder::_generateForm()
      */
     function &_createDateElement($fieldName) {
-        $dateOptions = array('format' => $this->dateElementFormat, 'language' => $this->dateFieldLanguage);
+        $dateOptions = array('format' => $this->dateElementFormat,
+                             'language' => $this->dateFieldLanguage);
         if (method_exists($this->_do, 'dateoptions')) {
             $dateOptions = array_merge($dateOptions, $this->_do->dateOptions($fieldName));
         }
@@ -493,15 +495,48 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
      * @see DB_DataObject_FormBuilder::_generateForm()
      */
     function &_createTimeElement($fieldName) {
-        $timeOptions = array('format' => $this->timeElementFormat);
+        $timeOptions = array('format' => $this->timeElementFormat,
+                             'language' => $this->dateFieldLanguage);
         if (method_exists($this->_do, 'timeoptions')) { // Frank: I'm trying to trace this but am unsure of it //
             $timeOptions = array_merge($timeOptions, $this->_do->timeOptions($fieldName));
+        }
+        if (!isset($timeOptions['addEmptyOption']) && in_array($fieldName, $this->selectAddEmpty)) {
+            $timeOptions['addEmptyOption'] = true;
         }
         $element =& HTML_QuickForm::createElement($this->_getQFType('time'),
                                                   $this->getFieldName($fieldName),
                                                   $this->getFieldLabel($fieldName),
                                                   $timeOptions);
         $attr = $this->_getAttributes('time', $fieldName);
+        $element->updateAttributes($attr);
+        return $element;  
+    }
+
+    /**
+     * DB_DataObject_FormBuilder_QuickForm::_createDateTimeElement()
+     *
+     * Returns a QuickForm element for entering date values.
+     * Used in _generateForm().
+     *
+     * @param string $fieldName  The field name to use for the element
+     * @return object       The HTML_QuickForm_element object.
+     * @access protected
+     * @see DB_DataObject_FormBuilder::_generateForm()
+     */
+    function &_createDateTimeElement($fieldName) {
+        $dateOptions = array('format' => $this->dateTimeElementFormat,
+                             'language' => $this->dateFieldLanguage);
+        if (method_exists($this->_do, 'datetimeoptions')) {
+            $dateOptions = array_merge($dateOptions, $this->_do->dateTimeOptions($fieldName));
+        }
+        if (!isset($dateOptions['addEmptyOption']) && in_array($fieldName, $this->selectAddEmpty)) {
+            $dateOptions['addEmptyOption'] = true;
+        }
+        $element =& HTML_QuickForm::createElement($this->_getQFType('datetime'),
+                                                  $this->getFieldName($fieldName),
+                                                  $this->getFieldLabel($fieldName),
+                                                  $dateOptions);
+        $attr = $this->_getAttributes('datetime', $fieldName);
         $element->updateAttributes($attr);
         return $element;  
     }
@@ -562,7 +597,7 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
                                     array(array('validator' => 'required',
                                                 'rule' => false,
                                                 'message' => $this->requiredRuleMessage)),
-                                    $this->getFieldName($fieldName));
+                                    $fieldName);
     }
     
     /**
