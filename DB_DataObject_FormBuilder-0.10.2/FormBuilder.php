@@ -252,7 +252,7 @@
  *
  * @package  DB_DataObject_FormBuilder
  * @author   Markus Wolff <mw21st@php.net>
- * @version  $Id: FormBuilder.php,v 1.66 2004/10/26 22:24:28 justinpatrin Exp $
+ * @version  $Id: FormBuilder.php,v 1.67 2004/10/29 01:15:10 justinpatrin Exp $
  */
 
 // Import requirements
@@ -383,6 +383,14 @@ class DB_DataObject_FormBuilder
      */
     var $dateToDatabaseCallback = array('DB_DataObject_FormBuilder','_array2date');
     
+    /**
+     * A format string that represents the display settings for QuickForm date elements.
+     * Example: "d-m-Y". See QuickForm documentation for details on format strings.
+     * Legal letters to use in the format string that work with FormBuilder are:
+     * d,m,Y,H,i,s
+     */
+    var $dateElementFormat = 'd-m-Y';
+
     /**
      * Array to determine what QuickForm element types are being used for which
      * general field types. If you configure FormBuilder using arrays, the format is:

@@ -25,11 +25,11 @@
     </maintainer>
   </maintainers>
   <release>
-    <version>0.10.1</version>
-    <date>2004-10-26</date>
+    <version>0.10.2</version>
+    <date>2004-10-28</date>
     <license>PHP License</license>
     <state>beta</state>
-    <notes>Allow arrays in preDefElements (creates a group)
+    <notes>dateElementFormat member variable was missing. This configuration option should now work from DataObjects.
 
 If you are upgrading from a pre-0.10.0 version, read the 0.10.0 release notes!</notes>
     <deps>
@@ -40,11 +40,21 @@ If you are upgrading from a pre-0.10.0 version, read the 0.10.0 release notes!</
       <dep type="pkg" rel="has" optional="yes">HTML_Table</dep>
     </deps>
     <filelist>
-      <file role="php" baseinstalldir="/DB/DataObject" md5sum="953b7a681d5fb407f647a660198ed452" name="FormBuilder.php"/>
+      <file role="php" baseinstalldir="/DB/DataObject" md5sum="4e7c6effbaabef1c463643b11f0d6c7e" name="FormBuilder.php"/>
       <file role="php" baseinstalldir="/DB/DataObject" md5sum="2108c3298b2d7e0c2c89811841f844ac" name="FormBuilder/QuickForm.php"/>
     </filelist>
   </release>
   <changelog>
+    <release>
+      <version>0.10.1</version>
+      <date>2004-10-26</date>
+      <state>beta</state>
+      <notes>Allow arrays in preDefElements (creates a group)
+
+If you are upgrading from a pre-0.10.0 version, read the 0.10.0 release notes!
+    
+</notes>
+    </release>
     <release>
       <version>0.10.0</version>
       <date>2004-08-27</date>
