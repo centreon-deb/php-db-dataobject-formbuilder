@@ -246,13 +246,15 @@ class DB_DataObject_FormBuilder
                     	// Auto-detect field types depending on field´s database type
                     	switch ($type) {
     	                    case DB_DATAOBJECT_INT:
-                            	if (array_key_exists($key, $this->_do->links())) {
+    	                        $links = $this->_do->links();
+                            	if (is_array($links) && array_key_exists($key, $links)) {
     	                            $opt = $this->getSelectOptions($key);
         	                        $form->addElement('select', $key, $this->getFieldLabel($key), $opt);
             	                } else {
                 	                $form->addElement('text', $key, $this->getFieldLabel($key));
                     	            $elValidator = 'numeric';
                         	    }
+                        	    unset($links);
                             	break;
                         	case DB_DATAOBJECT_DATE: // TODO
                         	case DB_DATAOBJECT_TIME: // TODO
@@ -331,8 +333,9 @@ class DB_DataObject_FormBuilder
     function getSelectOptions($field, $displayfield=false)
     {
         global $_DB_DATAOBJECT;
-        $opts = $this->_do->getLink($field);
-        $opts = DB_DataObject::factory($opts->tableName()); // we need the raw object w/o values
+        $links = $this->_do->links();
+        $link = explode(':', $links[$field]);
+        $opts = DB_DataObject::factory($link[0]);
         if (is_a($opts, 'db_dataobject')) {
             if (isset($opts->_primary_key)) {
                 $pk = $opts->_primary_key;

@@ -23,18 +23,40 @@ the prototypes into fully-featured forms, and you can take control at any stage 
     </maintainer>
   </maintainers>
   <release>
-    <version>0.8</version>
-    <date>2003-08-21</date>
+    <version>0.8.1</version>
+    <date>2003-08-23</date>
     <license>PHP License</license>
     <state>beta</state>
-    <notes>- Initial release</notes>
+    <notes>Bugfix release:
+- Fixed a bug in getSelectOptions() that occured if the linked field was NULL
+- Fixed a bug with tables containing integer fields but having no entry in the links.ini (thanks to Fabien Franzen for reporting it)</notes>
     <deps>
       <dep type="php" rel="ge" version="4.1.0"/>
       <dep type="pkg" rel="has">HTML_QuickForm</dep>
       <dep type="pkg" rel="has">DB_DataObject</dep>
     </deps>
     <filelist>
-      <file role="php" baseinstalldir="/DB/DataObject" md5sum="bcc64d4c5fde492bfef083f80d36c133" name="FormBuilder.php"/>
+      <file role="php" baseinstalldir="/DB/DataObject" md5sum="442671b9ceba16b66f11a40ec19f7978" name="FormBuilder.php"/>
     </filelist>
   </release>
+  <changelog>
+    <release>
+      <version>0.8.1</version>
+      <date>2003-08-23</date>
+      <state>beta</state>
+      <notes>Bugfix release:
+- Fixed a bug in getSelectOptions() that occured if the linked field was NULL
+- Fixed a bug with tables containing integer fields but having no entry in the links.ini (thanks to Fabien Franzen for reporting it)
+
+</notes>
+    </release>
+    <release>
+      <version>0.8</version>
+      <date>2003-08-21</date>
+      <state>beta</state>
+      <notes>- Initial release.
+
+</notes>
+    </release>
+  </changelog>
 </package>
