@@ -22,25 +22,24 @@
   <email>norbert@php.net</email>
   <active>yes</active>
  </developer>
- <date>2005-03-03</date>
- <time>14:18:52</time>
+ <date>2005-03-04</date>
+ <time>16:55:45</time>
  <version>
-  <release>0.11.5</release>
-  <api>0.11.5</api>
+  <release>0.12.0</release>
+  <api>0.12.0</api>
  </version>
  <stability>
   <release>beta</release>
   <api>beta</api>
  </stability>
  <license uri="http://www.php.net/license">PHP License</license>
- <notes>-Fixed call-time-pass-by-ref warning with new getForm parameter
--Fixed date format &apos;A&apos; type not working due to copy/paste error
--Fixed possible problem in _date2Array when posting empty values</notes>
+ <notes>Added a new feature, linkNewValue. This is on by default for now. When a link select box is created the bottom entry is &quot;--New Value--&quot;. When selected, this un-hides a form below the select box for creation of a new linked record. If you&apos;re not sure what this is, try it, it&apos;s a very neat feature. Note: this requires JavaScript.
+Added error return when enum options are not found</notes>
  <contents>
   <dir name="/">
    <file baseinstalldir="/DB/DataObject" md5sum="0502b93978537701e19c9a677064e232" name="FormBuilder/QuickForm/ElementTable.php" role="php" />
-   <file baseinstalldir="/DB/DataObject" md5sum="12396146b464e34eac1987f990402e28" name="FormBuilder/QuickForm.php" role="php" />
-   <file baseinstalldir="/DB/DataObject" md5sum="a03791402fd3aaa00925531b10db8a31" name="FormBuilder.php" role="php" />
+   <file baseinstalldir="/DB/DataObject" md5sum="b023a5e7a605ac7939d2700f4e0932d8" name="FormBuilder/QuickForm.php" role="php" />
+   <file baseinstalldir="/DB/DataObject" md5sum="ac34791e9b22e4dea99b161f7ea85950" name="FormBuilder.php" role="php" />
   </dir>
  </contents>
  <dependencies>
@@ -74,6 +73,21 @@
  </dependencies>
  <phprelease />
  <changelog>
+  <release>
+   <version>
+    <release>0.11.5</release>
+    <api>0.11.5</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <date>2005-03-03</date>
+   <license uri="http://www.php.net/license">PHP License</license>
+   <notes>-Fixed call-time-pass-by-ref warning with new getForm parameter
+-Fixed date format &apos;A&apos; type not working due to copy/paste error
+-Fixed possible problem in _date2Array when posting empty values</notes>
+  </release>
   <release>
    <version>
     <release>0.11.4</release>
