@@ -25,16 +25,49 @@
     </maintainer>
   </maintainers>
   <release>
-    <version>0.10.3</version>
-    <date>2004-11-08</date>
+    <version>0.11.1</version>
+    <date>2005-01-08</date>
     <license>PHP License</license>
     <state>beta</state>
-    <notes>New functionality! Added elementNamePrefix and elementNamePostfix options which allow you to add a prefix and/or postfix to element names. Please see the wiki for more info:
-http://opensource.21st.de/tiki-index.php?page=Formbuilder+configuration+options#id178017
-
-Re-added support for requiredRuleMessage (bug 2719) Thanks to pavel dot kunc at beneta dot cz
-
-If you are upgrading from a pre-0.10.0 version, read the 0.10.0 release notes!</notes>
+    <notes>0.11.1 adds a file missing in the 0.11.0 release
+Lots of new options, bug fixes, and a few changes. Check the wiki for more detailed info on new options.
+fixes:
+- Re-added support for timeElementFormat option
+- Re-added &quot;copy&quot; support for dbDateFormat (although it is not currently used)
+- Auto-generated form name is now always lowercase to ensure identical behaviour in PHP4 and PHP5
+- Fixed hidePrimaryKey issues when set in the ini file
+- Moved the rest of the driver-specific to the QuickForm driver
+- Changed crossLink and tripleLink code to use setDefaults (bug #2913)
+- Fix tripleLinks not holding their value after a submit (related to bug #2913)
+- Added support for all date format types specified in bug# 2375
+   NOTE: 'l' and 'D' types are supported by _date2Array, but not _array2Date. This means they can be output, but upon submission they do nothing.
+- Fixed freezing problems with crossLinks and tripleLinks (bug #2915)
+   A new QuickForm element type has been created for this. It is in DB/DataObject/FormBuilder/QuickForm/ElementTable.php. This element creates an HTML_Table with rows of elements. The table may or may not have row and column headers. Any QF element may be in each cell.
+- Fixed bug where time elements were created with 'date' type options (this should change nothing unless you use elementTypeMap)
+- 0 as primary key no longer causes unwanted insert (bug #2979)
+- Fixed elementNamePrefix and elementNamePostfix when used with crosslink and triplelink and dates
+  [ and ] are no longer allowed in the prefix and postfix
+changes:
+- The Primary Key is now retrieved using a new internal method (_getPrimaryKey) which looks first in the _primary_key property of the DataObject, then tries sequenceKey(), then the first element in keys()
+- Added patch to &quot;sync&quot; crosslinks and triplelinks instead of deleting all and recreating (Bug #2841)
+- The numeric rule will only be set if FB creates the element (bug #3042)
+- Renamed getDataObjectSelectDisplayValue() to getDataObjectString()
+new:
+- Added multi-select support to QF driver
+- Re-added multi-select support for crossLinks
+- Added casting of '' to NULL for link fields (for selectAddEmpty)
+- Added automatic entry of an empty option for link fields which are not DB_DATAOBJECT_NOTNULL
+- Added selectAddEmpty support for enum fields
+- Enum fields will automatically have an empty option if they are allowed to be NULL (same as for links)
+- Added a new crossLinkExtraFields option for crossLinks which allows editing of extra fields in the crosslink table
+- Added prepareLinkedDataObject callback for DO to customize link options (bug #2958)
+- Added elementTypeAttributes and fieldAttributes configuration options to QF driver
+- Added a new option: useCallTimePassByReference which defaults to false (bug #2658)
+- Added support for reverseLinks (request #2889)
+- Added support for boolean fields. Boolean fields are rendered as checkboxes
+- Added new option booleanFields
+- getDataObjectString() is now statically callable
+If you are upgrading from a pre-0.10.0 version, read the 0.10.0 and 0.10.1 release notes!</notes>
     <deps>
       <dep type="php" rel="ge" version="4.1.0"/>
       <dep type="pkg" rel="has" optional="no">HTML_QuickForm</dep>
@@ -43,11 +76,22 @@ If you are upgrading from a pre-0.10.0 version, read the 0.10.0 release notes!</
       <dep type="pkg" rel="has" optional="yes">HTML_Table</dep>
     </deps>
     <filelist>
-      <file role="php" baseinstalldir="/DB/DataObject" md5sum="18e4d76e50d25125ea1d041293c7e116" name="FormBuilder.php"/>
-      <file role="php" baseinstalldir="/DB/DataObject" md5sum="adc3c8725b866cb40b42cb5a9f38a474" name="FormBuilder/QuickForm.php"/>
+      <file role="php" baseinstalldir="/DB/DataObject" md5sum="5278e86d265973e59f2abaea5884b974" name="FormBuilder.php"/>
+      <file role="php" baseinstalldir="/DB/DataObject" md5sum="ab75d8d01fcda451ee6ad4d61f605187" name="FormBuilder/QuickForm.php"/>
+      <file role="php" baseinstalldir="/DB/DataObject" md5sum="0502b93978537701e19c9a677064e232" name="FormBuilder/QuickForm/ElementTable.php"/>
     </filelist>
   </release>
   <changelog>
+    <release>
+      <version>0.10.3</version>
+      <date>2004-11-08</date>
+      <state>beta</state>
+      <notes>New functionality! Added elementNamePrefix and elementNamePostfix options which allow you to add a prefix and/or postfix to element names. Please see the wiki for more info:
+http://opensource.21st.de/tiki-index.php?page=Formbuilder+configuration+options#id178017
+Re-added support for requiredRuleMessage (bug 2719) Thanks to pavel dot kunc at beneta dot cz
+If you are upgrading from a pre-0.10.0 version, read the 0.10.0 release notes!
+</notes>
+    </release>
     <release>
       <version>0.10.2</version>
       <date>2004-10-28</date>

@@ -20,95 +20,6 @@
  * to speed up prototyping new applications - like auto-generating fully
  * functional forms using HTML_QuickForm.
  *
- * The following new options to the DataObject.ini file can be used to configure
- * the form-generating behaviour of this class:
- * <ul>
- *  <li>linkDisplayFields:
- *   These fields will be used when displaying a record in a select box. The fields listed
- *   will be seperated by ", ". If you specify a link field as a display field and linkDisplayLevel
- *   is not 0, the link will be followed and the display fields of the record linked to
- *   displayed within parenthesis.
- *   
- *   For example, say we have these tables:
- *   <code>
- *    [person]
- *    name = 130
- *    gender_id = 129
- *
- *    [gender]
- *    id = 129
- *    name = 130
- *   </code>
- *   this link:
- *   <code>
- *    [person]
- *    gender_id = gender:id
- *   </code>
- *   and this data:
- *   Person:
- *    name: "Justin Patrin"
- *    gender_id: 1
- *   Gender:
- *    id: 1
- *    name: "male"
- *   
- *   If person's display fields are:
- *   <code>
- *    var $fb_linkDisplayFields = array('name', 'gender_id');
- *    and gender's display fields are: 
- *    var $fb_linkDisplayFields = array('name');
- *   </code>
- *   and we set linkDisplayLevel to 0, the person record will be displayed as:
- *   "Justin Patrin, 1"
- *   
- *   If we set linkDisplayLevel to 1, the person record will be displayed as:
- *   "Justin Patrin, (male)"
- *  </li>
- *  <li>linkOrderFields:
- *   The field to be used for sorting the options of an auto-generated
- *   select element. Can be overridden individually by a similarly-named
- *   public class property or DataObject property.
- *  </li>
- *  <li>dbDateFormat:
- *   This is for the future support of string date formats other than ISO, but
- *   currently, that's the only supported one. Set to 1 for ISO, other values
- *   may be available later on.
- *  </li>
- *  <li>dateElementFormat:
- *   A format string that represents the display settings for QuickForm date elements.
- *   Example: "d-m-Y". See QuickForm documentation for details on format strings.
- *   Legal letters to use in the format string that work with FormBuilder are:
- *   d,m,Y,H,i,s
- *  </li>
- *  <li>timeElementFormat:
- *   A format string that represents the display settings for QuickForm time elements.
- *   Example: "H:i:s". See QuickForm documentation for details on format strings.
- *  </li>
- *  <li>hidePrimaryKey:
- *   By default, hidden fields are generated for the primary key of a DataObject.
- *   This behaviour can be deactivated by setting this option to 0.
- *  </li>
- *  <li>createSubmit:
- *   If set to 0, no submit button will be created for your forms. Useful when
- *   used together with QuickForm_Controller when you already have submit buttons
- *   for next/previous page. By default, a button is being generated.
- *  </li>
- *  <li>submitText:
- *   The caption of the submit button, if created.
- *  </li>
- *  <li>dateFieldLanguage:
- *   The language to be used in date fields (see HTML_QuickForm documentation on
- *   the date element for more details). This option is the only one that cannot be
- *   overridden in one of your classes.
- *  </li>
- *  <li>linkDisplayLevel:
- *   If this is set to 1 or above, links will be followed in the display fields and
- *   display the display fields of the record linked to. If this is set to 2, links
- *   will be followed in the linked record as well. This can be set to any number of
- *   links you wish but could easily slow down your application if set to more than
- *   1 or 2.
- *  </li>
- * </ul>
  * All the settings for FormBuilder must be in a section [DB_DataObject_FormBuilder]
  * within the DataObject.ini file (or however you've named it).
  * If you stuck to the DB_DataObject example in the doc, you'll read in your
@@ -127,89 +38,23 @@
  * </code>
  * Now you're ready to go!
  *
- * There are some more settings that can be set individually by altering
- * some special properties of your DataObject-derived classes.
- * These special properties are as follows:
- * <ul>
- *  <li>fb_preDefElements:
- *   Array of user-defined QuickForm elements that will be used
- *   for the field matching the array key. If no match is found,
- *   the element for that field will be auto-generated.
- *   Make your element objects either in the constructor or in
- *   the fb_getForm() method, before the _generateForm() method is
- *   called. Use HTML_QuickForm::createElement() to do this.
- *  </li>
- *  <li>fb_preDefOrder:
- *   Indexed array of element names. If defined, this will determine the order
- *   in which the form elements are being created. This is useful if you're using
- *   QuickForm's default renderer or dynamic templates and the order of the fields
- *   in the database doesn?t match your needs.
- *  </li>
- *  <li>fb_fieldLabels:
- *   Array of field labels. The key of the element represents the field name.
- *   Use this if you want to keep the auto-generated elements, but still define
- *   your own labels for them.
- *  </li>
- *  <li>fb_fieldsToRender:
- *   Array of fields to render elements for. If a field is not given, it will not be rendered.
- *  </li>
- *  <li>fb_userEditableFields:
- *   Array of fields which the user can edit. If a field is rendered but not specified in this array,
- *   it will be frozen. Ignored if not given.
- *  </li>
- *  <li>fb_dateFields:
- *   A simple array of field names indicating which of the fields in a particular table/class
- *   are actually to be treated date fields.
- *   This is an unfortunate workaround that is neccessary because the DataObject
- *   generator script does not make a difference between any other datatypes than
- *   string and integer. When it does, this can be dropped.
- *  </li>
- *  <li>fb_timeFields:
- *   A simple array of field names indicating which of the fields in a particular table/class
- *   are actually to be treated time fields.
- *  </li>
- *  <li>fb_textFields:
- *   A simple array of field names indicating which of the fields in a particular table/class
- *   are actually to be treated as textareas.
- *   This is an unfortunate workaround that is neccessary because the DataObject
- *   generator script does not make a difference between any other datatypes than
- *   string and integer. When it does, this can be dropped.</li>
- *  <li>fb_crossLinks:
- *   The crossLinks array holds data pertaining to many-many links. If you have a table which
- *   links two tables together, you can use this to automatically create a set of checkboxes
- *   on your form. The simplest way of using this is:
- *   <code>
- *    $crossLinks = array(array('table' => 'crossLinkTable'));
- *   </code>
- *   Where crossLinkTable is the name of the linking table. You can have as many cross-link
- *   entries as you want. Try it with just the table ewntry first. If it doesn't work, you
- *   can specify the fields to use as well.
- *   <code>
- *    'fromField' => 'linkFieldToCurrentTable' //This is the field which links to the current (from) table
- *    'toField' => 'linkFieldToLinkedTable' //This is the field which links to the "other" (to) table
- *   </code>
- *  </li>
- *  <li>fb_tripleLinks:
- *   The tripleLinks array can be used to display checkboxes for "triple-links". A triple link is set
- *   up with a table which links to three different tables. These will show up as a table of checkboxes
- *   The initial setting (table) is the same as for crossLinks. The field configuration keys (if you
- *   need them) are:
- *   <code>
- *    'fromField'
- *    'toField1'
- *    'toField2'
- *   </code>
- *  </li>
- *  <li>fb_selectAddEmpty:
- *   An array of the link or date fields which should have an empty option added to the select box.
- *   This is only a valid option for fields which link to another table or date fields.
- *  </li>
- * </ul>
+ * You can also set any option through your DB_DataObject derived classes by
+ * appending 'fb_' to the option name. Ex: 'fb_fieldLabels'. This is the
+ * preferred way of setting DataObject-specific options.
+ *
+ * You may also set all options manually by setting them in the DO ir FB objects.
+ *
+ * You may also set the options in an FB derived class, but this isn't as well
+ * supported.
+ *
  * In addition, there are special methods you can define in your DataObject classes for even more control.
  * <ul>
- *  <li>preGenerateForm():
- *   This method will be called before the form is generated. Use this to change property values or options
- *   in your DataObject. This is where you should set up fb_preDefElements.
+ *  <li>preGenerateForm(&$formBuilder):
+ *   This method will be called before the form is generated. Use this to change
+ *   property values or options in your DataObject. This is the normal plave to
+ *   set up fb_preDefElements. Note: the $formBuilder object passed in has not
+ *   yet copied the options from the DataObject into it. If you plan to use the
+ *   functions in FB in this method, call populateOptions() on it first.
  *  </li>
  *  <li>postGenerateForm(&$form):
  *   This method will be called after the form is generated. The form is passed in by reference so you can
@@ -252,7 +97,7 @@
  *
  * @package  DB_DataObject_FormBuilder
  * @author   Markus Wolff <mw21st@php.net>
- * @version  $Id: FormBuilder.php,v 1.72 2004/11/08 19:10:36 justinpatrin Exp $
+ * @version  $Id: FormBuilder.php,v 1.108 2005/01/08 22:27:20 justinpatrin Exp $
  */
 
 // Import requirements
@@ -268,6 +113,7 @@ define ('DB_DATAOBJECT_FORMBUILDER_QUERY_FORCENOACTION', 3);
 define ('DB_DATAOBJECT_FORMBUILDER_CROSSLINK',  1048576);
 define ('DB_DATAOBJECT_FORMBUILDER_TRIPLELINK', 2097152);
 define ('DB_DATAOBJECT_FORMBUILDER_ENUM',       4194304);
+define ('DB_DATAOBJECT_FORMBUILDER_REVERSELINK',8388608);
 
 // Error code constants
 define ('DB_DATAOBJECT_FORMBUILDER_ERROR_UNKNOWNDRIVER', 4711);
@@ -392,38 +238,101 @@ class DB_DataObject_FormBuilder
     var $dateElementFormat = 'd-m-Y';
 
     /**
-     * Array to determine what QuickForm element types are being used for which
-     * general field types. If you configure FormBuilder using arrays, the format is:
-     * array('nameOfFieldType' => 'QuickForm_Element_name', ...);
-     * If configured via .ini file, the format looks like this:
-     * elementTypeMap = shorttext:text,date:date,...
-     *
-     * Allowed field types:
-     * <ul><li>shorttext</li>
-     * <li>longtext</<li>
-     * <li>date</li>
-     * <li>integer</li>
-     * <li>float</li></ul>
+     * A format string that represents the display settings for QuickForm time elements.
+     * Example: "H:i:s". See QuickForm documentation for details on format strings.
      */
-    var $elementTypeMap = array('shorttext' => 'text',
-                                'longtext'  => 'textarea',
-                                'date'      => 'date',
-                                'time'      => 'time',
-                                'integer'   => 'text',
-                                'float'     => 'text');
+    var $timeElementFormat = 'H:i:s';
 
     /**
-     * An array of the default fields to display when creating a select box
+     * This is for the future support of string date formats other than ISO, but
+     * currently, that's the only supported one. Set to 1 for ISO, other values
+     * may be available later on.
+     */
+    var $dbDateFormat = 1;
+
+    /**
+     * These fields will be used when displaying a link record. The fields
+     * listed will be seperated by ", ". If you specify a link field as a
+     * display field and linkDisplayLevel is not 0, the link will be followed
+     * and the display fields of the record linked to displayed within parenthesis.
+     * 
+     * For example, say we have these tables:
+     * 
+     * [person]
+     * 
+     * name = 130
+     * gender_id = 129
+     * 
+     * [gender]
+     * id = 129
+     * name = 130
+     * 
+     * 
+     * this link:
+     * 
+     * [person]
+     * gender_id = gender:id
+     * 
+     * 
+     * and this data:
+     * Person:
+     * name: "Justin Patrin"
+     * gender_id: 1
+     * Gender:
+     * id: 1
+     * name: "male"
+     * 
+     * If person's display fields are:
+     * <?php
+     * class DataObject_Person extends DB_DataObject {
+     *   //...
+     *   var $fb_linkDisplayFields = array('name', 'gender_id');
+     * }
+     * ?>
+     * 
+     * and gender's display fields are:
+     * <?php
+     * class DataObject_Gender extends DB_DataObject {
+     * //...
+     *   var $fb_linkDisplayFields = array('name');
+     * }
+     * ?>
+     * 
+     * and we set linkDisplayLevel to 0, the person record will be displayed as:
+     * "Justin Patrin, 1"
+     * 
+     * If we set linkDisplayLevel to 1, the person record will be displayed as:
+     * "Justin Patrin, (male)"
      */
     var $linkDisplayFields = array();
 
     /**
-     * An array of the default fields to order records by when creating a select box
+     * The fields to be used for sorting the options of an auto-generated link
+     * element. You can specify ASC and DESC in these options as well:
+     * <?php
+     * class DataObject_SomeTable extends DB_DataObject {
+     *   //...
+     *   var $fb_linkOrderFields = array('field1', 'field2 DESC');
+     * }
+     * ?>
+     * 
+     * You may also want to escape the field names if they are reserved words in
+     * the database you're using:
+     * <?php
+     * class DataObject_SomeTable extends DB_DataObject {
+     *   //...
+     *   function preGenerateForm() {
+     *     $db = $this->getDatabaseConnection();
+     *     $this->fb_linkOrderFields = array($db->quoteIdentifier('config'),
+     *                                       $db->quoteIdentifier('select').' DESC');
+     *   }
+     * }
+     * ?>
      */
     var $linkOrderFields = array();
 
     /**
-     * Text for submit button
+     * The caption of the submit button, if created.
      */
     var $submitText = 'Submit';
 
@@ -556,6 +465,12 @@ class DB_DataObject_FormBuilder
     var $enumOptions = array();
 
     /**
+     * An array which holds the field names of those fields which are booleans.
+     * They will be displayed as checkboxes.
+     */
+    var $booleanFields = array();
+
+    /**
      * The text to put between crosslink elements.
      */
     var $crossLinkSeparator = '<br/>';
@@ -572,22 +487,88 @@ class DB_DataObject_FormBuilder
     var $linkDisplayLevel = 0;
 
     /**
-     * Holds cross link data.
-     *   The crossLinks array holds data pertaining to many-many links. If you have a table which
-     *   links two tables together, you can use this to automatically create a set of checkboxes
-     *   on your form. The simplest way of using this is:
-     *   <code>
-     *    $crossLinks = array(array('table' => 'crossLinkTable'));
-     *   </code>
-     *   Where crossLinkTable is the name of the linking table. You can have as many cross-link
-     *   entries as you want. Try it with just the table ewntry first. If it doesn't work, you
-     *   can specify the fields to use as well.
-     *   <code>
-     *    'fromField' => 'linkFieldToCurrentTable' //This is the field which links to the current (from) table
-     *    'toField' => 'linkFieldToLinkedTable' //This is the field which links to the "other" (to) table
-     *   </code>
+     * The crossLinks array holds data pertaining to many-many links. If you
+     * have a table which links two tables together, you can use this to
+     * automatically create a set of checkboxes or a multi-select on your form.
+     * The simplest way of using this is:
+     * <code>
+     * <?php
+     * class DataObject_SomeTable extends DB_DataObject {
+     * //...
+     *   var $fb_crossLinks = array(array('table' => 'crossLinkTable'));
+     * }
+     * ?>
+     * </code>
+     * Where crossLinkTable is the name of the linking table. You can have as
+     * many cross-link entries as you want. Try it with just the table ewntry
+     * first. If it doesn't work, you can specify the fields to use as well.
+     * <code>
+     * 'fromField' => 'linkFieldToCurrentTable' //This is the field which links to the current (from) table
+     * 'toField' => 'linkFieldToLinkedTable' //This is the field which links to the "other" (to) table
+     * </code>
+     * To get a multi-select add a 'type' key which it set to 'select'.
+     * <code>
+     * <?php
+     * class DataObject_SomeTable extends DB_DataObject {
+     *     //...
+     *     var $fb_crossLinks = array(array('table' => 'crossLinkTable', 'type' => 'select'));
+     * }
+     * ?>
+     * </code>
+     * An example: I have a user table and a group table, each with a primary
+     * key called id. There is a table called user_group which has fields user_id
+     * and group_id which are set up as links to user and group. Here's the
+     * configuration array that could go in both the user DO and the group DO:
+     * <code>
+     * <?php
+     * $fb_crossLinks = array(array('table' => 'user_group'));
+     * ?>
+     * </code>
+     * Here is the full configuration for the user DO:
+     * <code>
+     * <?php
+     * $fb_crossLinks = array(array('table' => 'user_group',
+     *                              'fromField' => 'user_id',
+     *                              'toField' => 'group_id'));
+     * ?>
+     * </code>
+     * And the full configuration for the group DO:
+     * <code>
+     * <?php
+     * $fb_crossLinks = array(array('table' => 'user_group',
+     *                              'fromField' => 'group_id',
+     *                              'toField' => 'user_id'));
+     * ?>
+     * </code>
+     * 
+     * You can also specify the seperator between the elements with crossLinkSeperator.
      */
     var $crossLinks = array();
+
+    /**
+     * You can also specify extra fields to edit in the a crossLink table with
+     * this option. For example, if the user_group table mentioned above had
+     * another field called 'role' which was a text field, you could specify it
+     * like this in the user_group DataObject class:
+     * <code>
+     * <?php
+     * class DataObject_User_group extends DB_DataObject {
+     *   //normal stuff here
+     *  
+     *   var $fb_crossLinkExtraFields = array('role');
+     * }
+     * ?>
+     * </code>
+     *
+     * This would cause a text box to show up next to each checkbox in the
+     * user_group section of the form for the field 'role'.
+     *
+     * You can specify as many fields as you want in the 'extraFields' array.
+     *
+     * Note: If you specify a linked field in 'extraFields' you'll get a select
+     * box just like when you do a normal link field in a FormBuilder form. :-)
+     */
+    var $crossLinkExtraFields = array();
 
     /**
      * Holds triple link data.
@@ -602,6 +583,70 @@ class DB_DataObject_FormBuilder
      *   </code>
      */
     var $tripleLinks = array();
+
+    /**
+     * Holds reverseLink configuration.
+     * A reverseLink is a table which links back to the current table. For
+     * example, let say we have a "gender" table which has Male and Female in it
+     * and a "person" table which has the fields "name", which holds the person's
+     * name and "genre_id" which links to the genre. If you set up a form for the
+     * gender table, the person table can be a reverseLink. The setup in the
+     * gender table would look like this:
+     * <code>
+     * <?php
+     * class DataObject_Gender extends DB_DataObject {
+     * //normal stuff here
+     * 
+     *   var $fb_reverseLinks = array(array('table' => 'person'));
+     * }
+     * ?>
+     * </code>
+     * Now a list of people will be shown in the gender form with a checkbox next
+     * to it which is checked if the record currently links to the one you're
+     * editing. In addition, some special text will be added to the end of the
+     * label for the person record if it's linked to another gender.
+     * 
+     * Say we have a person record with the name "Justin Patrin" which is linked
+     * to the gender "Male". If you view the form for the gender "Male", the
+     * checkbox next to "Justin Patrin" will be checked. If you choose the
+     * "Female" gender the checkbox will be unchecked and it will say:
+     * Justin Patrin - currently linked to - Male
+     * 
+     * If the link field is set as NOT NULL then FormBuilder will not process
+     * and unchecked checkbox unless you specify a default value to set the link
+     * to. If null is allowed, the link will be set to NULL. To specify a default
+     * value:
+     * <code>
+     * <?php
+     * class DataObject_Gender extends DB_DataObject {
+     * //normal stuff here
+     * 
+     *   var $fb_reverseLinks = array(array('table' => 'person',
+     *                                      'defaultLinkValue' => 5));
+     * }
+     * ?>
+     * </code>
+     * Now if a checkbox is unchecked the link field will be set to 5...whatever
+     * that means. Be careful here as you need to make sure you enter the correct
+     * value here (probably the value of the primary key of the record you want
+     * to link to by default).
+     * 
+     * You may also set the text which is displayed between the record and the
+     * currently linked to record.
+     * <code>
+     * <?php
+     * class DataObject_Gender extends DB_DataObject {
+     *     //normal stuff here
+     * 
+     *   var $fb_reverseLinks = array(array('table' => 'person',
+     *                                      'linkText' => ' is currently listed as a '));
+     * }
+     * ?>
+     * </code>
+     * If you select "Female" the Justin Patrin entry would now say:
+     * Justin Patrin__ is currently listed as a Male__
+     */
+    var $reverseLinks = array();
 
     /**
      * If set to true, validation rules will also be client side.
@@ -630,28 +675,9 @@ class DB_DataObject_FormBuilder
      * 
      * If you assume that "table: has one field, "name", then the resultant form will have two elements:
      * "formOnename" and "formTwoname".
-     * 
-     * You can also use prefixes and postfixes with array syntax to make things even simpler. For example:
-     * <?php
-     * $form = null;
-     * for ($i = 0; $i < 5; ++$i) {
-     *   $do = DB_DataObject::factory('table');
-     *   $fb = DB_DataObject_FormBuilder::create($do);
-     *   $fb->elementNamePrefix = 'form['.$i.'][';
-     *   $fb->elementNamePostfix = ']';
-     *   if ($form !== null) {
-     *     $fb->useForm($form);
-     *   }
-     *   $form = $fb->getForm();
-     * 
-     *   //normal processing here
-     * }
-     * ?>
-     * 
-     * This will give you five forms for the same table within one actual form.
-     * 
-     * Please note: You *cannot* use the string '[]' anywhere in the prefix or postfix. Doing so
-     * will cause FormBuilder to not be able to process the form. You must specify array indices.
+     *
+     * Please note: You *cannot* use '[' or ']' anywhere in the prefix or postfix. Doing so
+     * will cause FormBuilder to not be able to process the form.
      */
     var $elementNamePrefix = '';
 
@@ -660,6 +686,11 @@ class DB_DataObject_FormBuilder
      * @see DB_DataObject_FormBuilder::elementNamePrefix
      */
     var $elementNamePostfix = '';
+
+    /**
+     * Whether or not to use call-time-pass-by-reference when calling DataObject callbacks
+     */
+    var $useCallTimePassByReference = false;
 
     /**
      * DB_DataObject_FormBuilder::create()
@@ -702,7 +733,7 @@ class DB_DataObject_FormBuilder
             $obj = &new $className($do, $options);
             return $obj;
         }
-        $err =& PEAR::raiseError("DB_DataObject_FormBuilder::create(): Driver class '$className' not found.",
+        $err =& PEAR::raiseError('DB_DataObject_FormBuilder::create(): Driver class "'.$className.'" not found.',
                                  DB_DATAOBJECT_FORMBUILDER_ERROR_UNKNOWNDRIVER);
         return $err;        
     }
@@ -743,26 +774,33 @@ class DB_DataObject_FormBuilder
             }
         }
         
-        // Default mappings from global field types to QuickForm element types
-        foreach(array('elementTypeMap',
-                      'linkDisplayFields',
-                      'linkOrderFields',
-                      'preDefOrder',
-                      'textFields',
-                      'dateFields',
-                      'timeFields',
-                      'preDefGroups',
-                      'fieldLabels',
-                      'fieldsToRender',
-                      'userEditableFields',
-                      'linkElementTypes') as $member) {
-            if (isset($this->$member)) {
-                if (is_string($this->$member)) {
-                    $this->$member = $this->_explodeArrString($this->$member);
-                }
+        $defVars = get_class_vars(get_class($this));
+        foreach ($defVars as $member => $value) {
+            if (is_array($value) && isset($this->$member) && is_string($this->$member)) {
+                $this->$member = $this->_explodeArrString($this->$member);
             }
         }
         $this->_do = &$do;
+    }
+
+    /**
+     * Gets the primary key field name for a DataObject
+     * Looks for $do->_primary_key, $do->sequenceKey(), then $do->keys()
+     *
+     * @param DB_DataObject the DataObject to get the primary key of
+     * @return string the name of the primary key or false if none is found
+     */
+    function _getPrimaryKey(&$do) {
+        if (isset($do->_primary_key)) {
+            return $do->_primary_key;
+        } elseif (($seq = $do->sequenceKey()) && isset($seq[0])) {
+            return $seq[0];
+        } else {
+            if (($keys = $do->keys()) && isset($keys[0])) {
+                return $keys[0];
+            }
+        }
+        return false;
     }
 
     /**
@@ -830,7 +868,7 @@ class DB_DataObject_FormBuilder
     function &_generateForm($action = false, $target = '_self', $formName = false, $method = 'post')
     {
         if ($formName === false) {
-            $formName = get_class($this->_do);
+            $formName = strtolower(get_class($this->_do));
         }
         if ($action === false) {
             $action = $_SERVER['PHP_SELF'];   
@@ -854,9 +892,6 @@ class DB_DataObject_FormBuilder
             $elements = $this->_getFieldsToRender();
         }
 
-        //GROUPING
-        $groupelements = array_keys($this->preDefGroups);
-        
         //get elements to freeze
         $user_editable_fields = $this->_getUserEditableFields();
         if (is_array($user_editable_fields)) {
@@ -866,20 +901,16 @@ class DB_DataObject_FormBuilder
         }
 
         $links = $this->_do->links();
-        if (isset($this->_do->_primary_key)) {
-            $pk = $this->_do->_primary_key;
-        } else {
-            $k = $this->_do->keys();
-            $pk = $k[0];
-        }
+        $pk = $this->_getPrimaryKey($this->_do);
         $rules = array();
         foreach ($elements as $key => $type) {
             // Check if current field is primary key. And primary key hiding is on. If so, make hidden field
-            if (in_array($key, $keys) && $this->hidePrimaryKey === true) {
+            if (in_array($key, $keys) && $this->hidePrimaryKey == true) {
                 $element =& $this->_createHiddenField($key);
             } else {
                 unset($element);
                 // Try to determine field types depending on object properties
+                $notNull = $type & DB_DATAOBJECT_NOTNULL;
                 if (in_array($key, $this->dateFields)) {
                     $type = DB_DATAOBJECT_DATE;
                 } elseif (in_array($key, $this->timeFields)) {
@@ -888,6 +919,8 @@ class DB_DataObject_FormBuilder
                     $type = DB_DATAOBJECT_TXT;
                 } elseif (in_array($key, $this->enumFields)) {
                     $type = DB_DATAOBJECT_FORMBUILDER_ENUM;
+                } elseif (in_array($key, $this->booleanFields)) {
+                    $type = DB_DATAOBJECT_BOOL;
                 }
                 if (isset($this->preDefElements[$key]) 
                     && (is_object($this->preDefElements[$key]) || is_array($this->preDefElements[$key]))) {
@@ -895,7 +928,7 @@ class DB_DataObject_FormBuilder
                     $element =& $this->preDefElements[$key];
                 } elseif (is_array($links) && isset($links[$key])) {
                     // If this field links to another table, display selectbox or radiobuttons
-                    $opt = $this->getSelectOptions($key);
+                    $opt = $this->getSelectOptions($key, false, !$notNull);
                     if (isset($this->linkElementTypes[$key]) && $this->linkElementTypes[$key] == 'radio') {
                         $element =& $this->_createRadioButtons($key, $opt);
                     } else {
@@ -913,11 +946,11 @@ class DB_DataObject_FormBuilder
                 case ($type & DB_DATAOBJECT_INT):
                     if (!isset($element)) {
                         $element =& $this->_createIntegerField($key);
+                        $elValidator = 'numeric';
                     }
-                    $elValidator = 'numeric';
                     break;
                 case ($type & DB_DATAOBJECT_DATE): // TODO
-                    $this->debug("DATE CONVERSION using callback for element $key ({$this->_do->$key})!", "FormBuilder");
+                    $this->debug('DATE CONVERSION using callback for element '.$key.' ('.$this->_do->$key.')!', 'FormBuilder');
                     $formValues[$key] = call_user_func($this->dateFromDatabaseCallback, $this->_do->$key);
                     if (!isset($element)) {
                         $element =& $this->_createDateElement($key);
@@ -931,13 +964,18 @@ class DB_DataObject_FormBuilder
                     }
                     break;  
                 case ($type & DB_DATAOBJECT_TIME):
-                    $this->debug("TIME CONVERSION using callback for element $key ({$this->_do->$key})!", "FormBuilder");
+                    $this->debug('TIME CONVERSION using callback for element '.$key.' ('.$this->_do->$key.')!', 'FormBuilder');
                     $formValues[$key] = call_user_func($this->dateFromDatabaseCallback, $this->_do->$key);
                     if (!isset($element)) {
                         $element =& $this->_createTimeElement($key);
                     }
                     break;
-                case ($type & DB_DATAOBJECT_BOOL): // TODO  
+                case ($type & DB_DATAOBJECT_BOOL):
+                    $formValues[$key] = $this->_do->$key;
+                    if (!isset($element)) {
+                        $element =& $this->_createCheckbox($key, null, null, $this->getFieldLabel($key));
+                    }
+                    break;
                 case ($type & DB_DATAOBJECT_TXT):
                     if (!isset($element)) {
                         $element =& $this->_createTextArea($key);
@@ -946,7 +984,7 @@ class DB_DataObject_FormBuilder
                 case ($type & DB_DATAOBJECT_STR):
                     if (!isset($element)) {
                         // If field content contains linebreaks, make textarea - otherwise, standard textbox
-                        if (!empty($this->_do->$key) && strstr($this->_do->$key, "\n")) {
+                        if (isset($this->_do->$key) && strlen($this->_do->$key) && strstr($this->_do->$key, "\n")) {
                             $element =& $this->_createTextArea($key);
                         } else {
                             $element =& $this->_createTextField($key);
@@ -955,26 +993,12 @@ class DB_DataObject_FormBuilder
                     break;
                 case ($type & DB_DATAOBJECT_FORMBUILDER_CROSSLINK):
                     unset($element);
-                    //$this->_createGroup($form, $key);
                     // generate crossLink stuff
-                    // be sure to use the latest DB_DataObject version from CVS (there's a bug in the latest DBO release 1.5.3)
-                    /*if (isset($this->crossLinks) && is_array($this->crossLinks)) {
-                    // primary key detection taken from getSelectOptions() so it doesn't allow
-                    // the use of multiple keys... this should be improved in the future if possible imho..
-                    if (isset($this->_do->_primary_key)) {
-                        $pk = $this->_do->_primary_key;
-                    } else {
-                        $k = $this->_do->keys();
-                        $pk = $k[0];
-                    }*/
-                    if (empty($pk)) {
+                    if ($pk === false) {
                         return PEAR::raiseError('A primary key must exist in the base table when using crossLinks.');
                     }
-                    //foreach ($this->crossLinks as $crossLink) { //TODO
                     $crossLink = $this->crossLinks[$key];
                     $groupName  = '__crossLink_' . $crossLink['table'];
-                    //if ($form->elementExists($groupName)) {
-                    //$linkGroup =& $form->getElement($groupName);
                     $crossLinksDo = DB_DataObject::factory($crossLink['table']);
                     if (PEAR::isError($crossLinksDo)) {
                         die($crossLinksDo->getMessage());
@@ -985,66 +1009,92 @@ class DB_DataObject_FormBuilder
                     list($linkedtable, $linkedfield) = explode(':', $crossLinksLinks[$crossLink['toField']]);
                     $all_options      = $this->_getSelectOptions($linkedtable);
                     $selected_options = array();
-                    if (!empty($this->_do->$pk)) {
+                    if (isset($this->_do->$pk) && strlen($this->_do->$pk)) {
                         $crossLinksDo->{$crossLink['fromField']} = $this->_do->$pk;
                         if ($crossLinksDo->find() > 0) {
                             while ($crossLinksDo->fetch()) {
-                                $selected_options[] = $crossLinksDo->{$crossLink['toField']};
+                                $selected_options[$crossLinksDo->{$crossLink['toField']}] = clone($crossLinksDo);
                             }
                         }
                     }
 
-                    /*if (isset($crossLink['type']) && $crossLink['type'] == 'select') {
-                        // ***X*** generate a <select>
-                        $caption = $this->getFieldLabel($groupName);
-                        $element =& HTML_QuickForm::createElement('select', $groupName, $caption, $all_options, array('multiple' => 'multiple'));
-                        $form->addElement($element);
-                        $formValues['__crossLink_' . $crossLink['table']] = $selected_options; // set defaults later
-                    
+                    if (isset($crossLink['type']) && $crossLink['type'] == 'select') {
+                        unset($element);
+                        $element =& $this->_createSelectBox($groupName, $all_options, true);
+                        $formValues[$groupName] = array_keys($selected_options); // set defaults later
+                        
                     // ***X*** generate checkboxes
-                    } else {*/
-                    $element = array();
-                    foreach ($all_options as $key=>$value) {
-                        /*$crossLinksElement = HTML_QuickForm::createElement('checkbox', $groupName.'[]', null, $value);
-                        $crossLinksElement->updateAttributes(array('value' => $key));
-                        if (in_array($key, $selected_options)) {
-                            $crossLinksElement->setChecked(true);
-                        }*/
-                        $crossLinksElement = $this->_createCheckbox($groupName.'[]', $value, $key, in_array($key, $selected_options));
-                        $element[] = $crossLinksElement;
+                    } else {
+                        $element = array();
+                        $rowNames = array();
+                        $colNames = array('');
+                        foreach ($all_options as $optionKey => $value) {
+                            $crossLinksElement = $this->_createCheckbox($groupName.'['.$optionKey.']', $value, $optionKey);
+                            $elementNamePrefix = $this->elementNamePrefix.$groupName.'__extraFields'.$this->elementNamePostfix.'['.$optionKey.'][';
+                            $elementNamePostfix = ']';
+                            if (isset($selected_options[$optionKey])) {
+                                if (!isset($formValues[$groupName])) {
+                                    $formValues[$groupName] = array();
+                                }
+                                $formValues[$groupName][$optionKey] = $optionKey;
+                            }
+                            if (isset($crossLinksDo->fb_crossLinkExtraFields)) {
+                                $row = array(&$crossLinksElement);
+                                if (isset($selected_options[$optionKey])) {
+                                    $extraFieldDo = $selected_options[$optionKey];
+                                } else {
+                                    $extraFieldDo = DB_DataObject::factory($crossLink['table']);
+                                }
+                                $tempFb =& DB_DataObject_FormBuilder::create($extraFieldDo);
+                                $extraFieldDo->fb_fieldsToRender = $crossLinksDo->fb_crossLinkExtraFields;
+                                $extraFieldDo->fb_elementNamePrefix = $elementNamePrefix;
+                                $extraFieldDo->fb_elementNamePostfix = $elementNamePostfix;
+                                $tempForm = $tempFb->getForm();
+                                foreach ($crossLinksDo->fb_crossLinkExtraFields as $extraField) {
+                                    if ($tempForm->elementExists($elementNamePrefix.$extraField.$elementNamePostfix)) {
+                                        $tempEl =& $tempForm->getElement($elementNamePrefix.$extraField.$elementNamePostfix);
+                                        $colNames[$extraField] = $tempEl->getLabel();
+                                    } else {
+                                        $tempEl =& $this->_createStaticField($elementNamePrefix.$extraField.$elementNamePostfix,
+                                                                             'Error - element not found for extra field '.$extraField);
+                                    }
+                                    $row[] =& $tempEl;
+                                    if (!isset($formValues[$groupName.'__extraFields'])) {
+                                        $formValues[$groupName.'__extraFields'] = array();
+                                    }
+                                    if (!isset($formValues[$groupName.'__extraFields'][$optionKey])) {
+                                        $formValues[$groupName.'__extraFields'][$optionKey] = array();
+                                    }
+                                    $formValues[$groupName.'__extraFields'][$optionKey][$extraField] = $tempEl->getValue();
+                                    unset($tempEl);
+                                }
+                                $element[] = $row;
+                                unset($tempFb, $tempForm, $extraFieldDo, $row);
+                                $rowNames[] = '<label for="'.$crossLinksElement->getAttribute('id').'">'.$value.'</label>';
+                                $crossLinksElement->setText('');
+                            } else {
+                                $element[] = $crossLinksElement;
+                            }
+                            unset($crossLinksElement);
+                        }
+                        if (isset($crossLinksDo->fb_crossLinkExtraFields)) {
+                            $this->_addElementTableToForm($form, $groupName, array_values($colNames), $rowNames, $element);
+                        } else {
+                            $this->_addElementGroupToForm($form, $element, $groupName, $this->crossLinkSeparator);
+                        }
+                        unset($element);
+                        unset($rowNames);
+                        unset($colNames);
                     }
-                    $this->_addElementGroupToForm($form, $element, $groupName, $this->crossLinkSeparator);
-                    unset($element);
-                    //$groupLabel = $this->getFieldLabel($groupName);
-                    //$linkGroup->setLabel($groupLabel);
-                    //$linkGroup->setElements($grp);
-                    //}
-                    //}
-                    //}
-                    //}
                     break;
                 case ($type & DB_DATAOBJECT_FORMBUILDER_TRIPLELINK):
                     unset($element);
-                    //$element =& $this->_createStaticField($key);
-                    // generate tripleLink stuff
-                    // be sure to use the latest DB_DataObject version from CVS (there's a bug in the latest DBO release 1.5.3)
-                    //if (isset($this->tripleLinks) && is_array($this->tripleLinks)) {
-                    // primary key detection taken from getSelectOptions() so it doesn't allow
-                    // the use of multiple keys... this should be improved in the future if possible imho..
-                    /*if (isset($this->_do->_primary_key)) {
-                $pk = $this->_do->_primary_key;
-            } else {
-                $k = $this->_do->keys();
-                $pk = $k[0];
-            }*/
-                    if (empty($pk)) {
+                    if ($pk === false) {
                         return PEAR::raiseError('A primary key must exist in the base table when using tripleLinks.');
                     }
-                    //foreach ($this->tripleLinks as $tripleLink) { //TODO
                     $tripleLink = $this->tripleLinks[$key];
                     $elName  = '__tripleLink_' . $tripleLink['table'];
-                    //if ($form->elementExists($elName)) {
-                    $freeze = array_search('__tripleLink_' . $tripleLink['table'], $elements_to_freeze);
+                    $freeze = array_search($elName, $elements_to_freeze);
                     $tripleLinkDo = DB_DataObject::factory($tripleLink['table']);
                     if (PEAR::isError($tripleLinkDo)) {
                         die($tripleLinkDo->getMessage());
@@ -1062,7 +1112,7 @@ class DB_DataObject_FormBuilder
                     $all_options1 = $this->_getSelectOptions($linkedtable1);
                     $all_options2 = $this->_getSelectOptions($linkedtable2);
                     $selected_options = array();
-                    if (!empty($this->_do->$pk)) {
+                    if (isset($this->_do->$pk) && strlen($this->_do->$pk)) {
                         $tripleLinkDo->$fromField = $this->_do->$pk;
                         if ($tripleLinkDo->find() > 0) {
                             while ($tripleLinkDo->fetch()) {
@@ -1071,55 +1121,39 @@ class DB_DataObject_FormBuilder
                         }
                     }
                     
-                    // THIS IS PROBLEMATIC WHEN USED WITH CUSTOM RENDERERS THAT DO NOT OUTPUT HTML
-                    include_once ('HTML/Table.php');
-                    $tripleLinkTable = new HTML_Table();
-                    $tripleLinkTable->setAutoGrow(true);
-                    $tripleLinkTable->setAutoFill('');
-                    $row = 0;
-                    $col = 0;
-                    foreach ($all_options2 as $key2=>$value2) {
-                        $col++;
-                        $tripleLinkTable->setCellContents($row, $col, $value2);
-                        $tripleLinkTable->setCellAttributes($row, $col, array('style' => 'text-align: center'));
+                    $columnNames = array();
+                    foreach ($all_options2 as $key2 => $value2) {
+                        $columnNames[] = $value2;
                     }
-                    foreach ($all_options1 as $key1=>$value1) {
-                        $row++;
-                        $col = 0;
-                        $tripleLinkTable->setCellContents($row, $col, $value1);
-                        foreach ($all_options2 as $key2=>$value2) {
-                            $col++;
-                            $tripleLinksElement = $this->_createCheckbox('__tripleLink_' . $tripleLink['table'] . '[' . $key1 . '][]',
+                    $rows = array();
+                    $rowNames = array();
+                    $formValues[$key] = array();
+                    foreach ($all_options1 as $key1 => $value1) {
+                        $rowNames[] = $value1;
+                        $row = array();
+                        foreach ($all_options2 as $key2 => $value2) {
+                            unset($tripleLinksElement);
+                            $tripleLinksElement = $this->_createCheckbox($elName.'['.$key1.']['.$key2.']',
                                                                          '',
-                                                                         $key2,
-                                                                         isset($selected_options[$key1]) && is_array($selected_options[$key1]) && in_array($key2, $selected_options[$key1]),
-                                                                         $freeze);
-                            /*$element = HTML_QuickForm::createElement('checkbox', '__tripleLink_' . $tripleLink['table'] . '[' . $key1 . '][]', null, null);
-                            $element->updateAttributes(array('value' => $key2));
-                            if ($freeze) {
-                                $element->freeze();
-                            }
-                            if (is_array($selected_options[$key1])) {
+                                                                         $key2
+                                                                         //false,
+                                                                         //$freeze
+                                                                         );
+                            if (isset($selected_options[$key1])) {
                                 if (in_array($key2, $selected_options[$key1])) {
-                                    $element->setChecked(true);
+                                    if (!isset($formValues['__tripleLink_'.$tripleLink['table']][$key1])) {
+                                        $formValues['__tripleLink_'.$tripleLink['table']][$key1] = array();
+                                    }
+                                    $formValues['__tripleLink_'.$tripleLink['table']][$key1][$key2] = $key2;
                                 }
-                            }*/
-                            $tripleLinkTable->setCellContents($row, $col, $tripleLinksElement->toHTML());
-                            $tripleLinkTable->setCellAttributes($row, $col, array('style' => 'text-align: center'));
+                            }
+                            $row[] =& $tripleLinksElement;
                         }
+                        $rows[] =& $row;
+                        unset($row);
                     }
-                    $hrAttrs = array('bgcolor' => 'lightgrey');
-
-                    $tripleLinkTable->setRowAttributes(0, $hrAttrs, true);
-                    $tripleLinkTable->setColAttributes(0, $hrAttrs);
-                    //$elLabel = $this->getFieldLabel($elName);
-                    //$linkElement =& $form->getElement($elName);
-                    //$linkElement->setLabel($elLabel);
-                    //$linkElement->setValue($tripleLinkTable->toHTML());
-                    $element =& $this->_createStaticField($elName, $tripleLinkTable->toHTML());
-                    //}
-                    //}
-                    //}
+                    $this->_addElementTableToForm($form, $elName, $columnNames, $rowNames, $rows);
+                    unset($columnNames, $rowNames, $rows);
                     break;
                 case ($type & DB_DATAOBJECT_FORMBUILDER_ENUM):
                     if (!isset($element)) {
@@ -1128,8 +1162,11 @@ class DB_DataObject_FormBuilder
                         } else {
                             $options = call_user_func($this->enumOptionsCallback, $this->_do->__table, $key);
                         }
+                        if (in_array($key, $this->selectAddEmpty) || !$notNull) {
+                            array_unshift($options, '');
+                        }
                         if (!$options) {
-                            return PEAR::raiseError('There are no options defined for the enum field "'.$key.'". You may need to use enumOptionsCallback.');
+                            return PEAR::raiseError('There are no options defined for the enum field "'.$key.'". You may need to set the options in the enumOptions option or use your own enumOptionsCallback.');
                         }
                         $element = array();
                         if (isset($this->linkElementTypes[$key]) && $this->linkElementTypes[$key] == 'radio') {
@@ -1141,6 +1178,37 @@ class DB_DataObject_FormBuilder
                         }
                         unset($options);
                     }
+                    break;
+                case ($type & DB_DATAOBJECT_FORMBUILDER_REVERSELINK):
+                    unset($element);
+                    $element = array();
+                    $elName = '__reverseLink_'.$this->reverseLinks[$key]['table'].'_'.$this->reverseLinks[$key]['field'];
+                    $do = DB_DataObject::factory($this->reverseLinks[$key]['table']);
+                    if (method_exists($this->_do, 'preparelinkeddataobject')) {
+                        if ($this->useCallTimePassByReference) {
+                            $this->_do->prepareLinkedDataObject(&$do, $key);
+                        } else {
+                            $this->_do->prepareLinkedDataObject($do, $key);
+                        }
+                    }
+                    $rLinks = $do->links();
+                    $rPk = $this->_getPrimaryKey($do);
+                    //$rFields = $do->table();
+                    list($lTable, $lField) = explode(':', $rLinks[$this->reverseLinks[$key]['field']]);
+                    $formValues[$elName] = array();
+                    if ($do->find()) {
+                        while ($do->fetch()) {
+                            $label = $this->getDataObjectString($do);
+                            if ($do->{$this->reverseLinks[$key]['field']} == $this->_do->$lField) {
+                                $formValues[$elName][$do->$rPk] = $do->$rPk;
+                            } elseif ($rLinked =& $do->getLink($this->reverseLinks[$key]['field'])) {
+                                $label .= '<b>'.$this->reverseLinks[$key]['linkText'].$this->getDataObjectString($rLinked).'</b>';
+                            }
+                            $element[] =& $this->_createCheckbox($elName.'['.$do->$rPk.']', $label, $do->$rPk);
+                        }
+                    }
+                    $this->_addElementGroupToForm($form, $element, $elName, $this->crossLinkSeparator);
+                    unset($element);
                     break;
                 default:
                     if (!isset($element)) {
@@ -1160,7 +1228,7 @@ class DB_DataObject_FormBuilder
             } // End else
                     
             //GROUP OR ELEMENT ADDITION
-            if (in_array($key, $groupelements)) {
+            if (isset($this->preDefGroups[$key])) {
                 $group = $this->preDefGroups[$key];
                 $groups[$group][] = $element;
             } elseif (isset($element)) {
@@ -1173,8 +1241,8 @@ class DB_DataObject_FormBuilder
             
             
             //ADD REQURED RULE FOR NOT_NULL FIELDS
-            if ((!in_array($key, $keys) || $this->hidePrimaryKey === false)
-                && ($type & DB_DATAOBJECT_NOTNULL)
+            if ((!in_array($key, $keys) || $this->hidePrimaryKey == false)
+                && ($notNull)
                 && !in_array($key, $elements_to_freeze)) {
                 $this->_setFormElementRequired($form, $key);
             }
@@ -1190,10 +1258,10 @@ class DB_DataObject_FormBuilder
         
         //GROUP SUBMIT
         $flag = true;
-        if (in_array('__submit__', $groupelements)) {
+        if (isset($this->preDefGroups['__submit__'])) {
             $group = $this->preDefGroups['__submit__'];
             if (count($groups[$group]) > 1) {
-                $groups[$group][] =& $this->_createSubmitButton();
+                $groups[$group][] =& $this->_createSubmitButton('__submit__', $this->submitText);
                 $flag = false;
             } else {
                 $flag = true;
@@ -1202,18 +1270,19 @@ class DB_DataObject_FormBuilder
         
         //GROUPING  
         if (isset($groups) && is_array($groups)) { //apply grouping
+            reset($groups);
             while (list($grp, $elements) = each($groups)) {
                 if (count($elements) == 1) {  
-                    $form->addElement($elements);
+                    $this->_addElementToForm($form, $elements[0]);
                 } elseif (count($elements) > 1) {
-                    $form->addGroup($elements, $grp, $grp, '&nbsp;');
+                    $this->_addElementGroupToForm($form, $elements, $grp, '&nbsp;');
                 }
             }       
         }
 
         //ELEMENT SUBMIT
         if ($flag == true && $this->createSubmit == true) {
-            $form->addElement('submit', '__submit__', $this->submitText);
+            $this->_addSubmitButtonToForm($form, '__submit__', $this->submitText);
         }
         
         //APPEND EXISTING FORM ELEMENTS
@@ -1224,7 +1293,7 @@ class DB_DataObject_FormBuilder
             // new encapsulation features.
             reset($this->_form->_elements);
             while (list($elNum, $element) = each($this->_form->_elements)) {
-                $form->addElement($element);
+                $this->_addElementToForm($form, $element);
             }
         }
 
@@ -1233,7 +1302,7 @@ class DB_DataObject_FormBuilder
         foreach ($formValues as $key => $value) {
             $fixedFormValues[$this->getFieldName($key)] = $value;
         }
-        $form->setDefaults($fixedFormValues);        
+        $this->_setFormDefaults($form, $fixedFormValues);        
         return $form;
     }
 
@@ -1245,12 +1314,17 @@ class DB_DataObject_FormBuilder
      * @return string field name to use with form
      */
     function getFieldName($fieldName) {
-        return $this->elementNamePrefix.$fieldName.$this->elementNamePostfix;
+        if (($pos = strpos($fieldName, '[')) !== false) {
+            $fieldName = substr($fieldName, 0, $pos).$this->elementNamePostfix.substr($fieldName, $pos);
+        } else {
+            $fieldName .= $this->elementNamePostfix;
+        }
+        return $this->elementNamePrefix.$fieldName;
     }
 
     
     /**
-     * DB_DataObject_FormBuilder::_exlplodeArrString()
+     * DB_DataObject_FormBuilder::_explodeArrString()
      *
      * Internal method, will convert string representations of arrays as used in .ini files
      * to real arrays. String format example:
@@ -1291,10 +1365,10 @@ class DB_DataObject_FormBuilder
      */
     function _reorderElements() {
         if ($this->preDefOrder) {
-            $this->debug("<br/>...reordering elements...<br/>");
+            $this->debug('<br/>...reordering elements...<br/>');
             $elements = $this->_getFieldsToRender();
             $table = $this->_do->table();
-            $crossLinks = $this->_getCrossLinkElementNames();
+            $crossLinks = $this->_getSpecialElementNames();
 
             foreach ($this->preDefOrder as $elem) {
                 if (isset($elements[$elem])) {
@@ -1318,13 +1392,16 @@ class DB_DataObject_FormBuilder
      * @return array the key is the name of the cross/triplelink element, the value
      *  is the type
      */
-    function _getCrossLinkElementNames() {
+    function _getSpecialElementNames() {
         $ret = array();
         foreach ($this->tripleLinks as $tripleLink) {
             $ret['__tripleLink_'.$tripleLink['table']] = DB_DATAOBJECT_FORMBUILDER_TRIPLELINK;
         }
         foreach ($this->crossLinks as $crossLink) {
             $ret['__crossLink_'.$crossLink['table']] = DB_DATAOBJECT_FORMBUILDER_CROSSLINK;
+        }
+        foreach ($this->reverseLinks as $reverseLink) {
+            $ret['__reverseLink_'.$reverseLink['table'].'_'.$reverseLink['field']] = DB_DATAOBJECT_FORMBUILDER_REVERSELINK;
         }
         return $ret;
     }
@@ -1376,36 +1453,46 @@ class DB_DataObject_FormBuilder
     }
 
     /**
-     * DB_DataObject_FormBuilder::getDataObjectSelectDisplayValue()
+     * DB_DataObject_FormBuilder::getDataObjectString()
      *
      * Returns a string which identitfies this dataobject.
      * If multiple display fields are given, will display them all seperated by ", ".
      * If a display field is a foreign key (link) the display value for the record it
-     * points to will be used. (Its display value will be surrounded by parenthesis
-     * as it may have multiple display fields of its own.)
+     * points to will be used as long as the linkDisplayLevel has not been reached.
+     * Its display value will be surrounded by parenthesis as it may have multiple
+     * display fields of its own.
      *
-     * Will use display field configurations from these locations, in this order:<br/>
-     * 1) $displayFields parameter<br/>
-     * 2) databaseName.formBuilder.ini file, section [tableName__linkDisplayFields]<br/>
-     * 3) the fb_linkDisplayFields member variable of the dataobject<br/>
-     * 4) global 'linkDisplayFields' setting for DB_DataObject_FormBuilder
+     * May be called statically.
      *
+     * Will use display field configurations from these locations, in this order:
+     * 1) $displayFields parameter
+     * 2) the fb_linkDisplayFields member variable of the dataobject
+     * 3) the linkDisplayFields member variable of this class (if not called statically)
+     * 4) all fields returned by the DO's table() function
      *
      * @param DB_DataObject the dataobject to get the display value for, must be populated
-     * @param mixed field to use to display, may be an array with field names or a single field
+     * @param mixed   field to use to display, may be an array with field names or a single field.
+     *    Will only be used for this DO, not linked DOs. If you wish to set the display fields
+     *    all DOs the same, set the option in the FormBuilder class instance.
+     * @param int     the maximum link display level. If null, $this->linkDisplayLebel will be used
+     *   if it exists, otherwise 3 will be used. {@see DB_DataObject_FormBuilder::linkDisplayLevel}
+     * @param int     the current recursion level. For internal use only.
      * @return string select display value for this field
      * @access public
      */
-    function getDataObjectSelectDisplayValue(&$do, $displayFields = false, $level = 1) {
+    function getDataObjectString(&$do, $displayFields = false, $linkDisplayLevel = null, $level = 1) {
+        if ($linkDisplayLevel === null) {
+            $linkDisplayLevel = (isset($this) && isset($this->linkDisplayLevel)) ? $this->linkDisplayLevel : 3;
+        }
         $links = $do->links();
         if ($displayFields === false) {
             if (isset($do->fb_linkDisplayFields)) {
                 $displayFields = $do->fb_linkDisplayFields;
-            } elseif ($this->linkDisplayFields) {
+            } elseif (isset($this) && isset($this->linkDisplayFields) && $this->linkDisplayFields) {
                 $displayFields = $this->linkDisplayFields;
             }
-            if ($displayFields === null) {
-                $displayFields = array($pk);
+            if (!$displayFields) {
+                $displayFields = array_keys($do->table());
             }
         }
         $ret = '';
@@ -1417,9 +1504,13 @@ class DB_DataObject_FormBuilder
                 $ret .= ', ';
             }
             if (isset($do->$field)) {
-                if ($this->linkDisplayLevel > $level && isset($links[$field])
+                if ($linkDisplayLevel > $level && isset($links[$field])
                    && ($subDo = $do->getLink($field))) {
-                    $ret .= '('.$this->getDataObjectSelectDisplayValue($subDo, false, $level + 1).')';
+                    if (isset($this) && is_a($this, 'DB_DataObject_FormBuilder')) {
+                        $ret .= '('.$this->getDataObjectString($subDo, false, $linkDisplayLevel, $level + 1).')';
+                    } else {
+                        $ret .= '('.DB_DataObject_FormBuilder::getDataObjectString($subDo, false, $linkDisplayLevel, $level + 1).')';
+                    }
                 } else {
                     $ret .= $do->$field;
                 }
@@ -1446,10 +1537,12 @@ class DB_DataObject_FormBuilder
      *
      * @param string $field         The field to fetch the links from. You should make sure the field actually *has* links before calling this function (see: DB_DataObject::links())
      * @param string $displayFields  (Optional) The name of the field used for the display text of the options
+     * @param bool   $selectAddEmpty (Optional) If true, an empty option will be added to the list of options
+     *                                          If false, the selectAddEmpty member var will be checked
      * @return array strings representing all of the records in the table $field links to.
      * @access public
      */
-    function getSelectOptions($field, $displayFields = false)
+    function getSelectOptions($field, $displayFields = false, $selectAddEmpty = false)
     {
         if (empty($this->_do->_database)) {
             // TEMPORARY WORKAROUND !!! Guarantees that DataObject config has
@@ -1461,7 +1554,8 @@ class DB_DataObject_FormBuilder
 
         $res = $this->_getSelectOptions($link[0],
                                         $displayFields,
-                                        in_array($field, $this->selectAddEmpty));
+                                        $selectAddEmpty || in_array($field, $this->selectAddEmpty),
+                                        $field);
 
         if ($res !== false) {
             return $res;
@@ -1477,19 +1571,15 @@ class DB_DataObject_FormBuilder
      * @param string $table The table to get the select display strings for.
      * @param array $displayFields array of diaply fields to use. Will default to the FB or DO options.
      * @param bool $selectAddEmpty If set to true, there will be an empty option in the returned array.
+     * @param string $field the field in the current table which we're getting options for
      *
      * @return array strings representing all of the records in $table.
      * @access protected
      */
-    function _getSelectOptions($table, $displayFields = false, $selectAddEmpty = false) {
+    function _getSelectOptions($table, $displayFields = false, $selectAddEmpty = false, $field = false) {
         $opts = DB_DataObject::factory($table);
         if (is_a($opts, 'db_dataobject')) {
-            if (isset($opts->_primary_key)) {
-                $pk = $opts->_primary_key;
-            } else {
-                $k = $opts->keys();
-                $pk = $k[0];
-            }
+            $pk = $this->_getPrimaryKey($opts);
             if ($displayFields === false) {
                 if (isset($opts->fb_linkDisplayFields)) {
                     $displayFields = $opts->fb_linkDisplayFields;
@@ -1526,11 +1616,17 @@ class DB_DataObject_FormBuilder
             if ($selectAddEmpty) {
                 $list[''] = '';
             }
-            
+            if (method_exists($this->_do, 'preparelinkeddataobject')) {
+                if ($this->useCallTimePassByReference) {
+                    $this->_do->prepareLinkedDataObject(&$opts, $field);
+                } else {
+                    $this->_do->prepareLinkedDataObject($opts, $field);
+                }
+            }
             // FINALLY, let's see if there are any results
             if ($opts->find() > 0) {
                 while ($opts->fetch()) {
-                    $list[$opts->$pk] = $this->getDataObjectSelectDisplayValue($opts, $displayFields);
+                    $list[$opts->$pk] = $this->getDataObjectString($opts, $displayFields);
                 }
             }
 
@@ -1578,7 +1674,8 @@ class DB_DataObject_FormBuilder
      *
      * @param string $action   The form action. Optional. If set to false (default), $_SERVER['PHP_SELF'] is used.
      * @param string $target   The window target of the form. Optional. Defaults to '_self'.
-     * @param string $formName The name of the form, will be used in "id" and "name" attributes. If set to false (default), the class name is used, prefixed with "frm"
+     * @param string $formName The name of the form, will be used in "id" and "name" attributes.
+     *                         If set to false (default), the class name is used, prefixed with "frm"
      * @param string $method   The submit method. Defaults to 'post'.
      * @return object
      * @access public
@@ -1586,7 +1683,11 @@ class DB_DataObject_FormBuilder
     function &getForm($action = false, $target = '_self', $formName = false, $method = 'post')
     {
         if (method_exists($this->_do, 'pregenerateform')) {
-            $this->_do->preGenerateForm($this);
+            if ($this->useCallTimePassByReference) {
+                $this->_do->preGenerateForm(&$this);
+            } else {
+                $this->_do->preGenerateForm($this);
+            }
         }
         $this->populateOptions();
         foreach ($this->crossLinks as $key => $crossLink) {
@@ -1613,7 +1714,7 @@ class DB_DataObject_FormBuilder
                     list($linkTable, $linkField) = explode(':', $link);
                     if (!isset($fromField) && $linkTable == $this->_do->__table) {
                         $fromField = $field;
-                    } elseif (!isset($toField) && $linkField != $fromField) {
+                    } elseif (!isset($toField) && (!isset($fromField) || $linkField != $fromField)) {
                         $toField = $field;
                     }
                 }
@@ -1622,7 +1723,6 @@ class DB_DataObject_FormBuilder
             $this->crossLinks[$groupName] = array_merge($crossLink,
                                                         array('fromField' => $fromField,
                                                               'toField' => $toField));
-            //}
         }
         foreach ($this->tripleLinks as $key => $tripleLink) {
             $elName  = '__tripleLink_' . $tripleLink['table'];
@@ -1667,6 +1767,25 @@ class DB_DataObject_FormBuilder
                                                             'toField1' => $toField1,
                                                             'toField2' => $toField2));
         }
+        foreach ($this->reverseLinks as $key => $reverseLink) {
+            $elName  = '__reverseLink_'.$reverseLink['table'].'_'.$reverseLink['field'];
+            if (!isset($reverseLink['field'])) {
+                $do = DB_DataObject::factory($reverseLink['table']);
+                $links = $do->links();
+                foreach ($do->links() as $field => $link) {
+                    list($linkTable, $linkField) = explode(':', $link);
+                    if ($linkTable == $this->_do->__table) {
+                        $reverseLink['field'] = $field;
+                        break;
+                    }
+                }
+            }
+            if (!isset($reverseLink['linkText'])) {
+                $reverseLink['linkText'] = ' - currently linked to - ';
+            }
+            unset($this->reverseLinks[$key]);
+            $this->reverseLinks[$elName] = $reverseLink;
+        }
         
         if (method_exists($this->_do, 'getform')) {
             $obj = $this->_do->getForm($action, $target, $formName, $method);
@@ -1674,8 +1793,11 @@ class DB_DataObject_FormBuilder
             $obj = &$this->_generateForm($action, $target, $formName, $method);
         }
         if (method_exists($this->_do, 'postgenerateform')) {
-            
-            $this->_do->postGenerateForm(&$obj, &$this);
+            if ($this->useCallTimePassByReference) {
+                $this->_do->postGenerateForm(&$obj, &$this);
+            } else {
+                $this->_do->postGenerateForm($obj, $this);
+            }
         }
         return($obj);   
     }
@@ -1705,12 +1827,23 @@ class DB_DataObject_FormBuilder
             include_once('Date.php');
             $dObj = new Date($date);
             $da['d'] = $dObj->getDay();
-            $da['m'] = $dObj->getMonth();
-            $da['M'] = $dObj->getMonth();
-            $da['Y'] = $dObj->getYear();
+            $da['l'] = $da['D'] = $dObj->getDayOfWeek();
+            $da['m'] = $da['M'] = $da['F'] = $dObj->getMonth();
+            $da['Y'] = $da['y'] = $dObj->getYear();
             $da['H'] = $dObj->getHour();
+            $da['h'] = $da['H'] % 12;
+            if ($da['h'] == 0) {
+                $da['h'] = 12;
+            }
             $da['i'] = $dObj->getMinute();
             $da['s'] = $dObj->getSecond();
+            if ($da['H'] >= 12) {
+                $da['a'] = 'pm';
+                $da['A'] = 'PM';
+            } else {
+                $da['a'] = 'am';
+                $da['A'] = 'AM';
+            }
             unset($dObj);
         } else {
             if (is_int($date)) {
@@ -1719,14 +1852,17 @@ class DB_DataObject_FormBuilder
                 $time = time();
             }
             $da['d'] = date('d', $time);
-            $da['m'] = date('m', $time);
-            $da['M'] = date('m', $time);
-            $da['Y'] = date('Y', $time);
+            $da['l'] = $da['D'] = date('w', $time);
+            $da['m'] = $da['M'] = $da['F'] = date('m', $time);
+            $da['Y'] = $da['y'] = date('Y', $time);
             $da['H'] = date('H', $time);
+            $da['h'] = date('h', $time);
             $da['i'] = date('i', $time);
             $da['s'] = date('s', $time);
+            $da['a'] = date('a', $time);
+            $da['A'] = date('A', $time);
         }
-        $this->debug("<i>_date2array():</i> from $date ...");
+        $this->debug('<i>_date2array():</i> from '.$date.' ...');
         return $da;
     }
 
@@ -1754,18 +1890,38 @@ class DB_DataObject_FormBuilder
             $month = $dateInput['M'];
         } elseif (isset($dateInput['m'])) {
             $month = $dateInput['m'];   
+        } elseif (isset($dateInput['F'])) {
+            $month = $dateInput['F'];
         }
-        $strDate = "";
-        if (isset($dateInput['Y']) && isset($month) && isset($dateInput['d'])) {
-            $strDate .= sprintf('%s-%s-%s', $dateInput['Y'], $month, $dateInput['d']);
+        if (isset($dateInput['Y'])) {
+            $year = $dateInput['Y'];
+        } elseif (isset($dateInput['y'])) {
+            $year = $dateInput['y'];
         }
-        if (isset($dateInput['H']) && isset($dateInput['i']) && isset($dateInput['s'])) {
+        $strDate = '';
+        if (isset($year) && isset($month) && isset($dateInput['d'])) {
+            $strDate .= $year.'-'.$month.'-'.$dateInput['d'];
+        }
+        if (isset($dateInput['H'])) {
+            $hour = $dateInput['H'];
+        } elseif (isset($dateInput['h'])) {
+            $hour = $dateInput['h'];
+        }
+        if (isset($dateInput['a'])) {
+            $ampm = $dateInput['a'];
+        } elseif (isset($dateInput['A'])) {
+            $ampm = isset($dateInput['A']);
+        }
+        if (isset($hour) && isset($dateInput['i']) && isset($dateInput['s'])) {
             if (!empty($strDate)) {
-                $strDate .= " ";
+                $strDate .= ' ';
             }
-            $strDate .= sprintf('%s:%s:%s', $dateInput['H'], $dateInput['i'], $dateInput['s']);
+            $strDate .= $hour.':'.$dateInput['i'].':'.$dateInput['s'];
+            if (isset($ampm)) {
+                $strDate .= ' '.$ampm;
+            }
         }
-        $this->debug("<i>_array2date():</i> to $strDate ...");
+        $this->debug('<i>_array2date():</i> to '.$strDate.' ...');
         return $strDate;
     }
 
@@ -1845,29 +2001,34 @@ class DB_DataObject_FormBuilder
         if ($this->elementNamePrefix !== '' || $this->elementNamePostfix !== '') {
             $values = $this->_getMyValues($values);
         }
-        $this->debug("<br>...processing form data...<br>");
+        $this->debug('<br>...processing form data...<br>');
         if (method_exists($this->_do, 'preprocessform')) {
-            $this->_do->preProcessForm($values);
+            if ($this->useCallTimePassByReference) {
+                $this->_do->preProcessForm(&$values);
+            } else {
+                $this->_do->preProcessForm($values);
+            }
         }
         
         $editableFields = $this->_getUserEditableFields();
         $tableFields = $this->_do->table();
+        $links = $this->_do->links();
 
         foreach ($values as $field => $value) {
-            $this->debug("Field $field ");
+            $this->debug('Field '.$field.' ');
             // Double-check if the field may be edited by the user... if not, don't
             // set the submitted value, it could have been faked!
             if (in_array($field, $editableFields)) {
                 if (isset($tableFields[$field])) {
                     if (($tableFields[$field] & DB_DATAOBJECT_DATE) || in_array($field, $this->dateFields)) {
-                        $this->debug("DATE CONVERSION for using callback from $value ...");
+                        $this->debug('DATE CONVERSION for using callback from '.$value.' ...');
                         $value = call_user_func($this->dateToDatabaseCallback, $value);
                     } elseif (($tableFields[$field] & DB_DATAOBJECT_TIME) || in_array($field, $this->timeFields)) {
-                        $this->debug("TIME CONVERSION for using callback from $value ...");
+                        $this->debug('TIME CONVERSION for using callback from '.$value.' ...');
                         $value = call_user_func($this->dateToDatabaseCallback, $value);
                     } elseif (is_array($value)) {
                         if (isset($value['tmp_name'])) {
-                            $this->debug(" (converting file array) ");
+                            $this->debug(' (converting file array) ');
                             $value = $value['name'];
                         //JUSTIN
                         //This is not really a valid assumption IMHO. This should only be done if the type is
@@ -1877,7 +2038,15 @@ class DB_DataObject_FormBuilder
                             $value = call_user_func($this->dateToDatabaseCallback, $value);*/
                         }
                     }
-                    $this->debug('is substituted with "'.print_r($value, true)."\".\n");
+                    if (is_array($links) && isset($links[$field])) {
+                        if ($value === '') {
+                            $this->debug('Casting to NULL');
+                            require_once('DB/DataObject/Cast.php');
+                            $value = DB_DataObject_Cast::sql('NULL');
+                        }
+                    }
+                    $this->debug('is substituted with "'.print_r($value, true).'".<br/>');
+
                     // See if a setter method exists in the DataObject - if so, use that one
                     if (method_exists($this->_do, 'set' . $field)) {
                         $this->_do->{'set'.$field}($value);
@@ -1886,10 +2055,15 @@ class DB_DataObject_FormBuilder
                         $this->_do->$field = $value;
                     }
                 } else {
-                    $this->debug("is not a valid field.\n");
+                    $this->debug('is not a valid field.<br/>');
                 }
             } else {
-                $this->debug('is defined not to be editable by the user!');   
+                $this->debug('is defined not to be editable by the user!<br/>');
+            }
+        }
+        foreach ($this->booleanFields as $boolField) {
+            if (!isset($values[$boolField])) {
+                $this->_do->$boolField = 0;
             }
         }
 
@@ -1901,21 +2075,14 @@ class DB_DataObject_FormBuilder
             }
         }
 
-        if (isset($this->_do->primary_key)) {
-            $pk = $this->_do->primary_key;
-        } else {
-            $keys = $this->_do->keys();
-            if (is_array($keys) && isset($keys[0])) {
-                $pk = $keys[0];
-            }
-        }
+        $pk = $this->_getPrimaryKey($this->_do);
             
         // Data is valid, let's store it!
         if ($dbOperations) {
             $action = $this->_queryType;
             if ($this->_queryType == DB_DATAOBJECT_FORMBUILDER_QUERY_AUTODETECT) {
                 // Could the primary key be detected?
-                if (!isset($pk)) {
+                if ($pk === false) {
                     // Nope, so let's exit and return false. Sorry, you can't store data using
                     // processForm with this DataObject unless you do some tweaking :-(
                     $this->debug('Primary key not detected - storing data not possible.');
@@ -1923,7 +2090,7 @@ class DB_DataObject_FormBuilder
                 }
                 
                 $action = DB_DATAOBJECT_FORMBUILDER_QUERY_FORCEUPDATE;
-                if (empty($this->_do->$pk) || is_null($this->_do->$pk)) {
+                if (!isset($this->_do->$pk) || !strlen($this->_do->$pk)) {
                     $action = DB_DATAOBJECT_FORMBUILDER_QUERY_FORCEINSERT;
                 }
             }
@@ -1931,104 +2098,166 @@ class DB_DataObject_FormBuilder
             switch ($action) {
                 case DB_DATAOBJECT_FORMBUILDER_QUERY_FORCEINSERT:
                     $id = $this->_do->insert();
-                    $this->debug("ID ($pk) of the new object: $id\n");
+                    $this->debug('ID ('.$pk.') of the new object: '.$id.'<br/>');
                     break;
                 case DB_DATAOBJECT_FORMBUILDER_QUERY_FORCEUPDATE:
                     $this->_do->update();
-                    $this->debug("Object updated.\n");
+                    $this->debug('Object updated.<br/>');
                     break;
             }
 
-            // process tripleLink stuff
-            if ($pk && !empty($this->_do->$pk)) { // has only sense if we have a valid primary key
+            //triple/crossLinks only work when a primark key is set
+            if ($pk && isset($this->_do->$pk) && strlen($this->_do->$pk)) {
+                // process tripleLinks
                 foreach ($this->tripleLinks as $tripleLink) {
                     $do = DB_DataObject::factory($tripleLink['table']);
 
                     $links = $do->links();
 
-                    if (isset($tripleLink['fromField'])) {
-                        $fromField = $tripleLink['fromField'];
+                    $fromField = $tripleLink['fromField'];
+                    $toField1 = $tripleLink['toField1'];
+                    $toField2 = $tripleLink['toField2'];
+
+                    if (isset($values['__tripleLink_'.$tripleLink['table']])) {
+                        $rows = $values['__tripleLink_'.$tripleLink['table']];
                     } else {
-                        unset($fromField);
+                        $rows = array();
                     }
-                    if (isset($tripleLink['toField1'])) {
-                        $toField1 = $tripleLink['toField1'];
-                    } else {
-                        unset($toField1);
-                    }
-                    if (isset($tripleLink['toField2'])) {
-                        $toField2 = $tripleLink['toField2'];
-                    } else {
-                        unset($toField2);
-                    }
-                    if (!isset($toField2) || !isset($toField1) || !isset($fromField)) {
-                        foreach ($links as $field => $link) {
-                            list($linkTable, $linkField) = explode(':', $link);
-                            if (!isset($fromField) && $linkTable == $this->_do->__table) {
-                                $fromField = $field;
-                            } elseif (!isset($toField1) && $linkField != $fromField) {
-                                $toField1 = $field;
-                            } elseif (!isset($toField2) && $linkField != $fromField && $linkField != $toField1) {
-                                $toField2 = $field;
-                            }
+                    $do->$fromField = $this->_do->$pk;
+                    $do->selectAdd();
+                    $do->selectAdd($toField1);
+                    $do->selectAdd($toField2);
+                    $do->find();
+
+                    $oldFieldValues = array();
+                    while ($do->fetch()) {
+                        if (isset($rows[$do->$toField1]) && in_array($do->$toField2, $rows[$do->$toField1])) {
+                            $oldFieldValues[$do->$toField1][$do->$toField2] = true;
+                        } else {
+                            $do->delete();
                         }
                     }
 
-
-                    $do->$fromField = $this->_do->$pk;
-                    $do->delete();
-            
-                    $rows = $values['__tripleLink_' . $tripleLink['table']];
                     if (count($rows) > 0) {
-                        foreach ($rows as $rowid=>$row) {
+                        foreach ($rows as $rowid => $row) {
                             if (count($row) > 0) {
                                 foreach ($row as $fieldvalue) {
-                                    $do = DB_DataObject::factory($tripleLink['table']);
-                                    $do->$fromField = $this->_do->$pk;
-                                    $do->$toField1 = $rowid;
-                                    $do->$toField2 = $fieldvalue;
-                                    $do->insert();
+                                    if (!isset($oldFieldValues[$rowid]) || !isset($oldFieldValues[$rowid][$fieldvalue])) {
+                                        $do = DB_DataObject::factory($tripleLink['table']);
+                                        $do->$fromField = $this->_do->$pk;
+                                        $do->$toField1 = $rowid;
+                                        $do->$toField2 = $fieldvalue;
+                                        $do->insert();
+                                    }
                                 }
                             }
                         }
                     }
                 }
             
+                //process crossLinks
                 foreach ($this->crossLinks as $crossLink) {
                     $do = DB_DataObject::factory($crossLink['table']);
                     $links = $do->links();
 
-                    //after $links = $do->links(); in the crossLinks code
-                    if (isset($crossLink['fromField'])) {
-                        $fromField = $crossLink['fromField'];
+                    $fromField = $crossLink['fromField'];
+                    $toField = $crossLink['toField'];
+
+                    if (isset($values['__crossLink_'.$crossLink['table']])) {
+                        $fieldvalues = $values['__crossLink_'.$crossLink['table']];
                     } else {
-                        unset($fromField);
+                        $fieldvalues = array();
                     }
-                    if (isset($crossLink['toField'])) {
-                        $toField = $crossLink['toField'];
+                    if (isset($values['__crossLink_'.$crossLink['table'].'__extraFields'])) {
+                        $extraFieldValues = $values['__crossLink_'.$crossLink['table'].'__extraFields'];
                     } else {
-                        unset($toField);
+                        $extraFieldValues = array();
                     }
-                    if (!isset($toField) || !isset($fromField)) {
-                        foreach ($links as $field => $link) {
-                            list($linkTable, $linkField) = explode(':', $link);
-                            if (!isset($fromField) && $linkTable == $this->_do->__table) {
-                                $fromField = $field;
-                            } elseif (!isset($toField) && $linkField != $fromField) {
-                                $toField = $field;
+                    $do->$fromField = $this->_do->$pk;
+                    $do->selectAdd();
+                    $do->selectAdd($toField);
+                    $do->selectAdd($fromField);
+                    if ($doKeys = $do->sequenceKey()) {
+                        $do->selectAdd($doKeys[0]);
+                    }
+                    $do->find();
+
+                    $oldFieldValues = array();
+                    while ($do->fetch()) {
+                        if (isset($fieldvalues[$do->$toField])) {
+                            $oldFieldValues[$do->$toField] = clone($do);
+                        } else {
+                            $do->delete();
+                        }
+                    }
+                    if (count($fieldvalues) > 0) {
+                        foreach ($fieldvalues as $fieldvalue) {
+                            if (isset($oldFieldValues[$fieldvalue])) {
+                                if (isset($do->fb_crossLinkExtraFields)) {
+                                    $do = $oldFieldValues[$fieldvalue];
+                                    $update = false;
+                                    foreach ($do->fb_crossLinkExtraFields as $extraField) {
+                                        if ($do->$extraField !== $extraFieldValues[$fieldvalue][$extraField]) {
+                                            $update = true;
+                                            $do->$extraField = $extraFieldValues[$fieldvalue][$extraField];
+                                        }
+                                    }
+                                    if ($update) {
+                                        $do->update();
+                                    }
+                                }
+                            } else {
+                                $do = DB_DataObject::factory($crossLink['table']);
+                                $do->$fromField = $this->_do->$pk;
+                                $do->$toField = $fieldvalue;
+                                if (isset($do->fb_crossLinkExtraFields)) {
+                                    foreach ($do->fb_crossLinkExtraFields as $extraField) {
+                                        $do->$extraField = $extraFieldValues[$do->$toField][$extraField];
+                                    }
+                                }
+                                $do->insert();
                             }
                         }
                     }
+                }
 
-                    $do->$fromField = $this->_do->$pk;
-                    $do->delete();
-                    $fieldvalues = $values['__crossLink_' . $crossLink['table']];
-                    if (count($fieldvalues) > 0) {
-                        foreach ($fieldvalues as $fieldvalue) {
-                            $do = DB_DataObject::factory($crossLink['table']);
-                            $do->$fromField = $this->_do->$pk;
-                            $do->$toField = $fieldvalue;
-                            $do->insert();
+                foreach ($this->reverseLinks as $reverseLink) {
+                    $elName = '__reverseLink_'.$reverseLink['table'].'_'.$reverseLink['field'];
+                    $do = DB_DataObject::factory($reverseLink['table']);
+                    if (method_exists($this->_do, 'preparelinkeddataobject')) {
+                        if ($this->useCallTimePassByReference) {
+                            $this->_do->prepareLinkedDataObject(&$do, $key);
+                        } else {
+                            $this->_do->prepareLinkedDataObject($do, $key);
+                        }
+                    }
+                    $rLinks = $do->links();
+                    $rPk = $this->_getPrimaryKey($do);
+                    $rFields = $do->table();
+                    list($lTable, $lField) = explode(':', $rLinks[$reverseLink['field']]);
+                    if ($do->find()) {
+                        while ($do->fetch()) {
+                            unset($newVal);
+                            if (isset($values[$elName][$do->$rPk])) {
+                                if ($do->{$reverseLink['field']} != $this->_do->$lField) {
+                                    $do->{$reverseLink['field']} = $this->_do->$lField;
+                                    $do->update();
+                                }
+                            } elseif ($do->{$reverseLink['field']} == $this->_do->$lField) {
+                                if (isset($reverseLink['defaultLinkValue'])) {
+                                    $do->{$reverseLink['field']} = $reverseLink['defaultLinkValue'];
+                                    $do->update();
+                                } else {
+                                    if ($rFields[$reverseLink['field']] & DB_DATAOBJECT_NOTNULL) {
+                                        //ERROR!!
+                                        $this->debug('Checkbox in reverseLinks unset when link field may not be null');
+                                    } else {
+                                        require_once('DB/DataObject/Cast.php');
+                                        $do->{$reverseLink['field']} = DB_DataObject_Cast::sql('NULL');
+                                        $do->update();
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -2036,7 +2265,11 @@ class DB_DataObject_FormBuilder
         }
 
         if (method_exists($this->_do, 'postprocessform')) {
-            $this->_do->postProcessForm($values);
+            if ($this->useCallTimePassByReference) {
+                $this->_do->postProcessForm(&$values);
+            } else {
+                $this->_do->postProcessForm($values);
+            }
         }
 
         return $dbOperations;
@@ -2062,7 +2295,7 @@ class DB_DataObject_FormBuilder
      * @param  array the array to convert
      * @return array the flattened array
      */
-    function _multiArrayToSingleArray($arr) {
+    /*function _multiArrayToSingleArray($arr) {
         do {
             $arrayFound = false;
             foreach ($arr as $key => $val) {
@@ -2076,37 +2309,42 @@ class DB_DataObject_FormBuilder
             }
         } while ($arrayFound);
         return $arr;
-    }
+    }*/
 
 
     /**
      * Takes a full request array and extracts the values for this formBuilder instance.
      * Removes the element name prefix and postfix
+     * Will only return values whose key is prefixed with the prefix and postfixed by the postfix
      *
      * @param  array array from $_REQUEST
      * @return array array indexed by real field name
      */
-    function _getMyValues($arr) {
-        $arr = $this->_multiArrayToSingleArray($arr);
-        if ($this->elementNamePrefix !== '') {
-            $prefixLen = strlen($this->elementNamePrefix);
-            foreach ($arr as $key => $val) {
+    function _getMyValues(&$arr) {
+        //$arr = $this->_multiArrayToSingleArray($arr);
+        $retArr = $arr;
+        $prefixLen = strlen($this->elementNamePrefix);
+        $postfixLen = strlen($this->elementNamePostfix);
+        foreach ($arr as $key => $val) {
+            if ($prefixLen) {
                 if (substr($key, 0, $prefixLen) == $this->elementNamePrefix) {
-                    unset($arr[$key]);
-                    $arr[substr($key, $prefixLen)] = $val;
+                    $key = substr($key, $prefixLen);
+                } else {
+                    $key = false;
                 }
             }
-        }
-        if ($this->elementNamePostfix !== '') {
-            $postfixLen = strlen($this->elementNamePostfix);
-            foreach ($arr as $key => $val) {
+            if ($key !== false && $postfixLen) {
                 if (substr($key, -$postfixLen) == $this->elementNamePostfix) {
-                    unset($arr[$key]);
-                    $arr[substr($key, 0, -$postfixLen)] = $val;
+                    $key = substr($key, 0, -$postfixLen);
+                } else {
+                    $key = false;
                 }
             }
+            if ($key !== false) {
+                $retArr[$key] = $val;
+            }
         }
-        return $arr;
+        return $retArr;
     }
 
     
@@ -2162,7 +2400,7 @@ class DB_DataObject_FormBuilder
     function debug($message)
     {
         if (DB_DataObject::debugLevel() > 0) {
-            echo "<pre><b>FormBuilder:</b> $message</pre>\n";
+            echo '<pre><b>FormBuilder:</b> '.$message."</pre>\n";
         }
     }
     
@@ -2180,7 +2418,7 @@ class DB_DataObject_FormBuilder
      */
     function _getFieldsToRender()
     {
-        $all_fields = array_merge($this->_do->table(), $this->_getCrossLinkElementNames());
+        $all_fields = array_merge($this->_do->table(), $this->_getSpecialElementNames());
         if ($this->fieldsToRender) {
             // a little workaround to get an array like [FIELD_NAME] => FIELD_TYPE (for use in _generateForm)
             // maybe there's some better way to do this:

@@ -21,13 +21,52 @@
  *
  * @package  DB_DataObject_FormBuilder
  * @author   Markus Wolff <mw21st@php.net>
- * @version  $Id: QuickForm.php,v 1.16 2004/11/08 19:10:36 justinpatrin Exp $
+ * @version  $Id: QuickForm.php,v 1.26 2005/01/08 01:39:26 justinpatrin Exp $
  */
 
 require_once ('HTML/QuickForm.php');
 
 class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
 {
+    /**
+     * Array to determine what QuickForm element types are being used for which
+     * general field types. If you configure FormBuilder using arrays, the format is:
+     * array('nameOfFieldType' => 'QuickForm_Element_name', ...);
+     * If configured via .ini file, the format looks like this:
+     * elementTypeMap = shorttext:text,date:date,...
+     *
+     * Allowed field types:
+     * <ul><li>shorttext</li>
+     * <li>longtext</<li>
+     * <li>date</li>
+     * <li>integer</li>
+     * <li>float</li></ul>
+     */
+    var $elementTypeMap = array('shorttext' => 'text',
+                                'longtext'  => 'textarea',
+                                'date'      => 'date',
+                                'time'      => 'date',
+                                'integer'   => 'text',
+                                'float'     => 'text',
+                                'elementTable' => 'elementTable');
+
+    /**
+     * Array of attributes for each element type. See the keys of elementTypeMap
+     * for the allowed element types.
+     *
+     * The key is the element type. The value can be a valid attribute string or
+     * an associative array of attributes.
+     */
+    var $elementTypeAttributes = array();
+
+    /**
+     * Array of attributes for each specific field.
+     *
+     * The key is the field name. The value can be a valid attribute string or
+     * an associative array of attributes.
+     */
+    var $fieldAttributes = array();
+
     /**
      * DB_DataObject_FormBuilder_QuickForm::DB_DataObject_FormBuilder_QuickForm()
      *
@@ -42,7 +81,55 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
         // Call parent class constructor.
         parent::DB_DataObject_FormBuilder($do,$options);
     }
+    
+    /**
+     * DB_DataObject_FormBuilder_QuickForm::_getQFType()
+     *
+     * Returns the QuickForm element type associated with the given field type,
+     * as defined in the elementTypeMap property. If an unknown field type is given,
+     * the returned type name will default to 'text'.
+     *
+     * @access protected
+     * @param  string $fieldType   The internal field type
+     * @return string              The QuickForm element type name
+     */
+    function _getQFType($fieldType)
+    {
+        if (isset($this->elementTypeMap[$fieldType])) {
+            return $this->elementTypeMap[$fieldType];
+        }
+        return 'text';
+    }
 
+    /**
+     * DB_DataObject_FormBuilder_QuickForm::_getAttributes()
+     *
+     * Returns the attributes to apply to a field based on the field name and
+     * element type. The field's attributes take precedence over the element type's.
+     *
+     * @param string $elementType the internal type of the element
+     * @param string $fieldName the name of the field
+     * @return array an array of attributes to apply to the element
+     */
+    function _getAttributes($elementType, $fieldName) {
+        if (isset($this->elementTypeAttributes[$elementType])) {
+            if (is_string($this->elementTypeAttributes[$elementType])) {
+                $this->elementTypeAttributes[$elementType] =
+                    HTML_Common::_parseAttributes($this->elementTypeAttributes[$elementType]);
+            }
+            $attr = $this->elementTypeAttributes[$elementType];
+        } else {
+            $attr = array();
+        }
+        if (isset($this->fieldAttributes[$fieldName])) {
+            if (is_string($this->fieldAttributes[$fieldName])) {
+                $this->fieldAttributes[$fieldName] =
+                    HTML_Common::_parseAttributes($this->fieldAttributes[$fieldName]);
+            }
+            $attr = array_merge($attr, $this->fieldAttributes[$fieldName]);
+        }
+        return $attr;
+    }
     
     /**
      * DB_DataObject_FormBuilder_QuickForm::_createFormObject()
@@ -69,7 +156,6 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
         return $form;
     }
     
-    
     /**
      * DB_DataObject_FormBuilder_QuickForm::_addFormHeader()
      *
@@ -92,7 +178,6 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
         }    
     }
     
-    
     /**
      * DB_DataObject_FormBuilder_QuickForm::_createHiddenField()
      *
@@ -108,10 +193,10 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
         $element =& HTML_QuickForm::createElement('hidden',
                                                   $this->getFieldName($fieldName),
                                                   $this->getFieldLabel($fieldName));   
+        $attr = $this->_getAttributes('hidden', $fieldName);
+        $element->updateAttributes($attr);
         return $element;
     }
-    
-    
     
     /**
      * DB_DataObject_FormBuilder_QuickForm::_createRadioButtons()
@@ -128,17 +213,19 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
     function &_createRadioButtons($fieldName, $options)
     {
         $element = array();
+        $attr = $this->_getAttributes('radio', $fieldName);
         foreach($options as $value => $display) {
-            $element[] =& HTML_QuickForm::createElement('radio',
-                                                        $this->getFieldName($fieldName),
-                                                        null, 
-                                                        $display,
-                                                        $value);
+            unset($radio);
+            $radio =& HTML_QuickForm::createElement('radio',
+                                                    $this->getFieldName($fieldName),
+                                                    null, 
+                                                    $display,
+                                                    $value);
+            $radio->updateAttributes($attr);
+            $element[] =& $radio;
         }
         return $element;
     }
-
-    
     
     /**
      * DB_DataObject_FormBuilder_QuickForm::_createCheckbox()
@@ -155,23 +242,25 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
      * @access protected
      * @see DB_DataObject_FormBuilder::_generateForm()
      */
-    function &_createCheckbox($fieldName, $text, $value, $checked = false, $freeze = false)
+    function &_createCheckbox($fieldName, $text = null, $value = null, $label = null, $checked = false, $freeze = false)
     {
         $element =& HTML_QuickForm::createElement('checkbox',
                                                   $this->getFieldName($fieldName),
-                                                  null,
+                                                  $label,
                                                   $text);
-        $element->updateAttributes(array('value' => $value));
+        if ($value !== null) {
+            $element->updateAttributes(array('value' => $value));
+        }
         if ($checked) {
             $element->setChecked(true);
         }
         if ($freeze) {
             $element->freeze();
         }
+        $attr = $this->_getAttributes('checkbox', $fieldName);
+        $element->updateAttributes($attr);
         return $element;
     }
-    
-    
     
     /**
      * DB_DataObject_FormBuilder_QuickForm::_createTextField()
@@ -189,10 +278,10 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
         $element =& HTML_QuickForm::createElement($this->_getQFType('shorttext'),
                                                   $this->getFieldName($fieldName),
                                                   $this->getFieldLabel($fieldName));
+        $attr = $this->_getAttributes('shorttext', $fieldName);
+        $element->updateAttributes($attr);
         return $element;
     }
-    
-    
     
     /**
      * DB_DataObject_FormBuilder_QuickForm::_createIntegerField()
@@ -210,10 +299,10 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
         $element =& HTML_QuickForm::createElement($this->_getQFType('integer'),
                                                   $this->getFieldName($fieldName),
                                                   $this->getFieldLabel($fieldName));
+        $attr = $this->_getAttributes('integer', $fieldName);
+        $element->updateAttributes($attr);
         return $element;
     }
-    
-    
     
     /**
      * DB_DataObject_FormBuilder_QuickForm::_createTextArea()
@@ -231,10 +320,10 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
         $element =& HTML_QuickForm::createElement($this->_getQFType('longtext'),
                                                   $this->getFieldName($fieldName),
                                                   $this->getFieldLabel($fieldName));
+        $attr = $this->_getAttributes('longtext', $fieldName);
+        $element->updateAttributes($attr);
         return $element;
     }
-    
-    
     
     /**
      * DB_DataObject_FormBuilder_QuickForm::_createSelectBox()
@@ -242,43 +331,31 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
      * Returns a QuickForm element for a selectbox/combobox.
      * Used in _generateForm().
      *
-     * @param string $fieldName    The field name to use for the QuickForm element
-     * @param array  $options      List of options for populating the selectbox
+     * @param string  $fieldName   The field name to use for the QuickForm element
+     * @param array   $options     List of options for populating the selectbox
+     * @param boolean $multiple    If set to true, the select box will be a multi-select
      * @return object              The HTML_QuickForm_element object.
      * @access protected
      * @see DB_DataObject_FormBuilder::_generateForm()
      */
-    function &_createSelectBox($fieldName, $options)
+    function &_createSelectBox($fieldName, $options, $multiple = false)
     {
-        $element =& HTML_QuickForm::createElement('select',
-                                                  $this->getFieldName($fieldName),
-                                                  $this->getFieldLabel($fieldName),
-                                                  $options);
+        if ($multiple) {
+            $element =& HTML_QuickForm::createElement('select',
+                                                      $this->getFieldName($fieldName),
+                                                      $this->getFieldLabel($fieldName),
+                                                      $options,
+                                                      array('multiple' => 'multiple'));
+        } else {
+            $element =& HTML_QuickForm::createElement('select',
+                                                      $this->getFieldName($fieldName),
+                                                      $this->getFieldLabel($fieldName),
+                                                      $options);
+        }
+        $attr = $this->_getAttributes('select', $fieldName);
+        $element->updateAttributes($attr);
         return $element;
     }
-    
-    
-    
-    /**
-     * DB_DataObject_FormBuilder_QuickForm::_createGroup()
-     *
-     * Takes a form object and a field name and adds an element group to the form.
-     * Used in _generateForm().
-     *
-     * @param object $form         The QuickForm object to add the group to
-     * @param string $fieldName    The field name to use for the QuickForm element group
-     * @access protected
-     * @see DB_DataObject_FormBuilder::_generateForm()
-     */
-    function _createGroup(&$form, $fieldName)
-    {
-        $form->addGroup(array(),
-                        $this->getFieldName($fieldName),
-                        $fieldName,
-                        '<br/>');   
-    }
-    
-    
     
     /**
      * DB_DataObject_FormBuilder_QuickForm::_createStaticField()
@@ -298,9 +375,10 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
                                                   $this->getFieldName($fieldName),
                                                   $this->getFieldLabel($fieldName),
                                                   $text);
+        $attr = $this->_getAttributes('static', $fieldName);
+        $element->updateAttributes($attr);
         return $element;
     }
-    
     
     /**
      * DB_DataObject_FormBuilder_QuickForm::_addElementGroupToForm()
@@ -324,8 +402,6 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
                         false);
     }
     
-    
-    
     /**
      * DB_DataObject_FormBuilder_QuickForm::_addElementToForm()
      *
@@ -341,9 +417,134 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
     {
         $form->addElement($element);   
     }
+
+    /**
+     * DB_DataObject_FormBuilder_QuickForm::_addSubmitButtonToForm()
+     *
+     * @param HTML_QuickForm the form to add the submit button to
+     * @param string the name of the submit element to be created
+     * @param string the text to be put on the submit button
+     */
+    function _addSubmitButtonToForm(&$form, $fieldName, $text)
+    {
+        $element =& $this->_createSubmitButton($fieldName, $text);
+        $this->_addElementToForm($form, $element);
+    }
     
+    /**
+     * DB_DataObject_FormBuilder_QuickForm::_createSubmitButton()
+     *
+     * Returns a QuickForm element for a submit button.
+     * Used in _generateForm().
+     *
+     * @param  string      the name of the submit button
+     * @param  string      the text to put in the button
+     * @return object      The HTML_QuickForm_element object.
+     * @access protected
+     * @see DB_DataObject_FormBuilder::_generateForm()
+     */
+    function &_createSubmitButton($fieldName, $text)
+    {
+        $element =& HTML_QuickForm::createElement('submit', $fieldName, $text);
+        $attr = $this->_getAttributes('submit', $fieldName);
+        $element->updateAttributes($attr);
+        return $element;
+    }
     
+    /**
+     * DB_DataObject_FormBuilder_QuickForm::_createDateElement()
+     *
+     * Returns a QuickForm element for entering date values.
+     * Used in _generateForm().
+     *
+     * @param string $fieldName  The field name to use for the element
+     * @return object       The HTML_QuickForm_element object.
+     * @access protected
+     * @see DB_DataObject_FormBuilder::_generateForm()
+     */
+    function &_createDateElement($fieldName) {
+        $dateOptions = array('format' => $this->dateElementFormat, 'language' => $this->dateFieldLanguage);
+        if (method_exists($this->_do, 'dateoptions')) {
+            $dateOptions = array_merge($dateOptions, $this->_do->dateOptions($fieldName));
+        }
+        if (!isset($dateOptions['addEmptyOption']) && in_array($fieldName, $this->selectAddEmpty)) {
+            $dateOptions['addEmptyOption'] = true;
+        }
+        $element =& HTML_QuickForm::createElement($this->_getQFType('date'),
+                                                  $this->getFieldName($fieldName),
+                                                  $this->getFieldLabel($fieldName),
+                                                  $dateOptions);
+        $attr = $this->_getAttributes('date', $fieldName);
+        $element->updateAttributes($attr);
+        return $element;  
+    }
     
+    /**
+     * DB_DataObject_FormBuilder_QuickForm::_createTimeElement()
+     *
+     * Returns a QuickForm element for entering time values.
+     * Used in _generateForm().
+     * Note by Frank: The only reason for this is the difference in timeoptions so it 
+     * probably would be better integrated with _createDateElement
+     *
+     * @param string $fieldName The field name to use for the element
+     * @return object      The HTML_QuickForm_element object.
+     * @access protected
+     * @see DB_DataObject_FormBuilder::_generateForm()
+     */
+    function &_createTimeElement($fieldName) {
+        $timeOptions = array('format' => $this->timeElementFormat);
+        if (method_exists($this->_do, 'timeoptions')) { // Frank: I'm trying to trace this but am unsure of it //
+            $timeOptions = array_merge($timeOptions, $this->_do->timeOptions($fieldName));
+        }
+        $element =& HTML_QuickForm::createElement($this->_getQFType('time'),
+                                                  $this->getFieldName($fieldName),
+                                                  $this->getFieldLabel($fieldName),
+                                                  $timeOptions);
+        $attr = $this->_getAttributes('time', $fieldName);
+        $element->updateAttributes($attr);
+        return $element;  
+    }
+
+    /**
+     * DB_DataObject_FormBuilder_QuickForm::_addElementTableToForm
+     *
+     * Adds an elementTable to the form
+     *
+     * @param HTML_QuickForm $form        the form to add the element to
+     * @param string         $fieldName        the name of the element to be added
+     * @param array          $columnNames an array of the column names
+     * @param array          $rowNames    an array of the row names
+     * @param array          $rows        an array of rows, each row being an array of HTML_QuickForm elements
+     */
+    function _addElementTableToForm(&$form, $fieldName, $columnNames, $rowNames, &$rows) {
+        if (!HTML_QuickForm::isTypeRegistered('elementTable')) {
+            HTML_QuickForm::registerElementType('elementTable',
+                                                'DB/DataObject/FormBuilder/QuickForm/ElementTable.php',
+                                                'DB_DataObject_FormBuilder_QuickForm_ElementTable');
+        }
+        $element =& HTML_QuickForm::createElement($this->_getQFType('elementTable'),
+                                                  $this->getFieldName($fieldName),
+                                                  $this->getFieldLabel($fieldName));
+        $element->setColumnNames($columnNames);
+        $element->setRowNames($rowNames);
+        $element->setRows($rows);
+        $attr = $this->_getAttributes('elementTable', $fieldName);
+        $element->updateAttributes($attr);
+        $this->_addElementToForm($form, $element);
+    }
+    
+    /**
+     * DB_DataObject_FormBuilder_QuickForm::_setFormDefaults()
+     *
+     * @param HTML_QuickForm the form to set the defaults on
+     * @param array Assoc array of default values (@see HTML_QuickForm::setDefaults)
+     */    
+    function _setFormDefaults(&$form, $defaults)
+    {
+        $form->setDefaults($defaults);
+    }
+
     /**
      * DB_DataObject_FormBuilder_QuickForm::_setFormElementRequired()
      *
@@ -363,8 +564,6 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
                                                 'message' => $this->requiredRuleMessage)),
                                     $this->getFieldName($fieldName));
     }
-    
-    
     
     /**
      * DB_DataObject_FormBuilder_QuickForm::_addFieldRulesToForm()
@@ -399,8 +598,6 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
         } // End while
     }
     
-    
-    
     /**
      * DB_DataObject_FormBuilder_QuickForm::_freezeFormElements()
      *
@@ -421,101 +618,6 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
                 $el->freeze();
             }
         }   
-    }
-    
-    
-    
-    /**
-     * DB_DataObject_FormBuilder_QuickForm::_createSubmitButton()
-     *
-     * Returns a QuickForm element for a submit button.
-     * Used in _generateForm().
-     *
-     * @return object      The HTML_QuickForm_element object.
-     * @access protected
-     * @see DB_DataObject_FormBuilder::_generateForm()
-     */
-    function &_createSubmitButton()
-    {
-        $submit =& HTML_QuickForm::createElement('submit', '__submit__', $this->submitText);
-        return $submit;
-    }
-    
-    
-    
-    /**
-     * DB_DataObject_FormBuilder_QuickForm::_createDateElement()
-     *
-     * Returns a QuickForm element for entering date values.
-     * Used in _generateForm().
-     *
-     * @param string $name  The field name to use for the element
-     * @return object       The HTML_QuickForm_element object.
-     * @access protected
-     * @see DB_DataObject_FormBuilder::_generateForm()
-     */
-    function &_createDateElement($name) {
-        $dateOptions = array('format' => $this->dateElementFormat);
-        if (in_array($name, $this->selectAddEmpty)) {
-            $dateOptions['addEmptyOption'] = true;
-        }
-        if (method_exists($this->_do, 'dateoptions')) {
-            $dateOptions = array_merge($dateOptions, $this->_do->dateOptions($name));
-        }
-        $element =& HTML_QuickForm::createElement($this->_getQFType('date'),
-                                                  $this->getFieldName($name),
-                                                  $this->getFieldLabel($name),
-                                                  $dateOptions);
-        
-        return $element;  
-    }
-
-    
-    
-    /**
-     * DB_DataObject_FormBuilder_QuickForm::_createTimeElement()
-     *
-     * Returns a QuickForm element for entering time values.
-     * Used in _generateForm().
-     * Note by Frank: The only reason for this is the difference in timeoptions so it 
-     * probably would be better integrated with _createDateElement
-     *
-     * @param string $name The field name to use for the element
-     * @return object      The HTML_QuickForm_element object.
-     * @access protected
-     * @see DB_DataObject_FormBuilder::_generateForm()
-     */
-    function &_createTimeElement($name) {
-        $timeOptions = array('format' => $this->timeElementFormat);
-        if (method_exists($this->_do, 'timeoptions')) { // Frank: I'm trying to trace this but am unsure of it //
-            $timeOptions = array_merge($timeOptions, $this->_do->timeOptions($name));
-        }
-        $element =& HTML_QuickForm::createElement($this->_getQFType('date'),
-                                                  $this->getFieldName($name),
-                                                  $this->getFieldLabel($name),
-                                                  $timeOptions);
-        
-        return $element;  
-    }
-
-      
-    /**
-     * DB_DataObject_FormBuilder::_getQFType()
-     *
-     * Returns the QuickForm element type associated with the given field type,
-     * as defined in the elementTypeMap property. If an unknown field type is given,
-     * the returned type name will default to 'text'.
-     *
-     * @access protected
-     * @param  string $fieldType   The internal field type
-     * @return string              The QuickForm element type name
-     */
-    function _getQFType($fieldType)
-    {
-        if (isset($this->elementTypeMap[$fieldType])) {
-            return $this->elementTypeMap[$fieldType];
-        }
-        return 'text';
     }
 }
 
