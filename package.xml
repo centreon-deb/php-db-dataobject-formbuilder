@@ -26,12 +26,13 @@
   </maintainer>
   </maintainers>
  <release>
-  <version>0.12.0</version>
-  <date>2005-03-04</date>
+  <version>0.12.1</version>
+  <date>2005-03-05</date>
   <license>PHP License</license>
   <state>beta</state>
-  <notes>Added a new feature, linkNewValue. This is on by default for now. When a link select box is created the bottom entry is &quot;--New Value--&quot;. When selected, this un-hides a form below the select box for creation of a new linked record. If you're not sure what this is, try it, it's a very neat feature. Note: this requires JavaScript.
-Added error return when enum options are not found
+  <notes>-Added a new feature, linkNewValue. This is on by default for now. When a link select box is created the bottom entry is &quot;--New Value--&quot;. When selected, this un-hides a form below the select box for creation of a new linked record. If you're not sure what this is, try it, it's a very neat feature. Note: this requires JavaScript.
+-Added error return when enum options are not found
+-0.12.1 adds the missing file PopupSelect.php
   </notes>
   <deps>
    <dep type="php" rel="ge" version="4.3.0"/>
@@ -44,9 +45,18 @@ Added error return when enum options are not found
    <file role="php" baseinstalldir="/DB/DataObject" name="FormBuilder.php"/>
    <file role="php" baseinstalldir="/DB/DataObject" name="FormBuilder/QuickForm.php"/>
    <file role="php" baseinstalldir="/DB/DataObject" name="FormBuilder/QuickForm/ElementTable.php"/>
+   <file role="php" baseinstalldir="/DB/DataObject" name="FormBuilder/QuickForm/PopupSelect.php"/>
   </filelist>
  </release>
  <changelog>
+   <release>
+    <version>0.12.0</version>
+    <date>2005-03-04</date>
+    <state>beta</state>
+    <notes>Added a new feature, linkNewValue. This is on by default for now. When a link select box is created the bottom entry is &quot;--New Value--&quot;. When selected, this un-hides a form below the select box for creation of a new linked record. If you're not sure what this is, try it, it's a very neat feature. Note: this requires JavaScript.
+Added error return when enum options are not found
+    </notes>
+   </release>
    <release>
     <version>0.11.5</version>
     <date>2005-03-03</date>
