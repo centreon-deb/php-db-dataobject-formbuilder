@@ -97,7 +97,7 @@
  *
  * @package  DB_DataObject_FormBuilder
  * @author   Markus Wolff <mw21st@php.net>
- * @version  $Id: FormBuilder.php,v 1.120 2005/02/02 19:25:21 justinpatrin Exp $
+ * @version  $Id: FormBuilder.php,v 1.122 2005/02/25 00:25:38 justinpatrin Exp $
  */
 
 // Import requirements
@@ -1193,7 +1193,10 @@ class DB_DataObject_FormBuilder
                     $formValues[$key] = $this->_do->$key;
                     if (!isset($element)) {
                         if (isset($this->enumOptions[$key])) {
-                            $options = $this->enumOptions[$key];
+                            $options = array();
+                            foreach ($this->enumOptions[$key] as $value) {
+                                $options[$value] = $value;
+                            }
                         } else {
                             $options = call_user_func($this->enumOptionsCallback, $this->_do->__table, $key);
                         }
@@ -1808,7 +1811,6 @@ class DB_DataObject_FormBuilder
                                                             'toField2' => $toField2));
         }
         foreach ($this->reverseLinks as $key => $reverseLink) {
-            $elName  = '__reverseLink_'.$reverseLink['table'].'_'.$reverseLink['field'];
             if (!isset($reverseLink['field'])) {
                 $do = DB_DataObject::factory($reverseLink['table']);
                 $links = $do->links();
@@ -1820,6 +1822,7 @@ class DB_DataObject_FormBuilder
                     }
                 }
             }
+            $elName  = '__reverseLink_'.$reverseLink['table'].'_'.$reverseLink['field'];
             if (!isset($reverseLink['linkText'])) {
                 $reverseLink['linkText'] = ' - currently linked to - ';
             }

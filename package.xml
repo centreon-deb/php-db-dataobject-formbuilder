@@ -3,7 +3,7 @@
 <package version="1.0">
   <name>DB_DataObject_FormBuilder</name>
   <summary>Class to automatically build HTML_QuickForm objects from a DB_DataObject-derived class</summary>
-  <description>DB_DataObject_FormBuilder will aid you in rapid application development using the packages DB_DataObject and HTML_QuickForm. For having a quick but working prototype of your application, simply model the database, run DataObject´s createTable script over it and write a script that passes one of the resulting objects to the FormBuilder class. The FormBuilder will automatically generate a simple but working HTML_QuickForm object that you can use to test your application. It also provides a processing method that will automatically detect if an insert() or update() command has to be executed after the form has been submitted. If you have set up DataObject´s links.ini file correctly, it will also automatically detect if a table field is a foreign key and will populate a selectbox with the linked table's entries. There are many optional parameters that you can place in your DataObjects.ini or in the properties of your derived classes, that you can use to fine-tune the form-generation, gradually turning the prototypes into fully-featured forms, and you can take control at any stage of the process.</description>
+  <description>DB_DataObject_FormBuilder will aid you in rapid application development using the packages DB_DataObject and HTML_QuickForm. For having a quick but working prototype of your application, simply model the database, run DataObject's createTable script over it and write a script that passes one of the resulting objects to the FormBuilder class. The FormBuilder will automatically generate a simple but working HTML_QuickForm object that you can use to test your application. It also provides a processing method that will automatically detect if an insert() or update() command has to be executed after the form has been submitted. If you have set up DataObject's links.ini file correctly, it will also automatically detect if a table field is a foreign key and will populate a selectbox with the linked table's entries. There are many optional parameters that you can place in your DataObjects.ini or in the properties of your derived classes, that you can use to fine-tune the form-generation, gradually turning the prototypes into fully-featured forms, and you can take control at any stage of the process.</description>
   <maintainers>
     <maintainer>
       <user>mw21st</user>
@@ -25,11 +25,32 @@
     </maintainer>
   </maintainers>
   <release>
-    <version>0.11.2</version>
-    <date>2005-01-10</date>
+    <version>0.11.3</version>
+    <date>2005-02-26</date>
     <license>PHP License</license>
     <state>beta</state>
-    <notes>-If DB_DATAOBJECT_BOOL is set in the type by the DataObject generator, it will take effect before the INT rules. (bug #3154)
+    <notes>-Remove special chars from package.xml
+-Fixed enumOptions option (bug #3469)
+-Fixed bug where if field is not set in reverseLink initial setup, reverseLinks fail to work</notes>
+    <deps>
+      <dep type="php" rel="ge" version="4.3.0"/>
+      <dep type="pkg" rel="has" optional="no">DB_DataObject</dep>
+      <dep type="pkg" rel="has" optional="no">HTML_QuickForm</dep>
+      <dep type="pkg" rel="has" optional="yes">Date</dep>
+      <dep type="pkg" rel="has" optional="yes">HTML_Table</dep>
+    </deps>
+    <filelist>
+      <file role="php" baseinstalldir="/DB/DataObject" md5sum="57a66c219fc0ed25f48671ef7442d28d" name="FormBuilder.php"/>
+      <file role="php" baseinstalldir="/DB/DataObject" md5sum="12396146b464e34eac1987f990402e28" name="FormBuilder/QuickForm.php"/>
+      <file role="php" baseinstalldir="/DB/DataObject" md5sum="0502b93978537701e19c9a677064e232" name="FormBuilder/QuickForm/ElementTable.php"/>
+    </filelist>
+  </release>
+  <changelog>
+    <release>
+      <version>0.11.2</version>
+      <date>2005-01-10</date>
+      <state>beta</state>
+      <notes>-If DB_DATAOBJECT_BOOL is set in the type by the DataObject generator, it will take effect before the INT rules. (bug #3154)
 -Return only values whose keys start with the prefix and end with the postfix (bug #3163)
 -Fix processing of boolean fields not in booleanFields (bug #3167)
 -Enum fields display when frozen (bug #3124)
@@ -56,21 +77,9 @@
 --- For example, f only a day is specified, it will put 0000 for year and 00 for month
 --- The same applies to times *except* that seconds will only be output of they are specified
 ---- If only an hour and minute are specified (or only one of the 2) you will get H:i with no s
----- If only seconds are specified you would get 0 for hour and minute</notes>
-    <deps>
-      <dep type="php" rel="ge" version="4.1.0"/>
-      <dep type="pkg" rel="has" optional="no">DB_DataObject</dep>
-      <dep type="pkg" rel="has" optional="no">HTML_QuickForm</dep>
-      <dep type="pkg" rel="has" optional="yes">Date</dep>
-      <dep type="pkg" rel="has" optional="yes">HTML_Table</dep>
-    </deps>
-    <filelist>
-      <file role="php" baseinstalldir="/DB/DataObject" md5sum="bbb48129604643b110f1510a0a252031" name="FormBuilder.php"/>
-      <file role="php" baseinstalldir="/DB/DataObject" md5sum="12396146b464e34eac1987f990402e28" name="FormBuilder/QuickForm.php"/>
-      <file role="php" baseinstalldir="/DB/DataObject" md5sum="0502b93978537701e19c9a677064e232" name="FormBuilder/QuickForm/ElementTable.php"/>
-    </filelist>
-  </release>
-  <changelog>
+---- If only seconds are specified you would get 0 for hour and minute
+</notes>
+    </release>
     <release>
       <version>0.11.1</version>
       <date>2005-01-08</date>
