@@ -18,7 +18,7 @@
 /**
  * @package  DB_DataObject_FormBuilder
  * @author   Justin Patrin <justinpatrin@php.net>
- * @version  $Id: ElementTable.php,v 1.4 2005/01/01 23:20:03 justinpatrin Exp $
+ * @version  $Id: ElementTable.php,v 1.5 2005/03/15 18:38:52 justinpatrin Exp $
  */
 
 require_once('HTML/QuickForm/element.php');
@@ -50,17 +50,42 @@ class DB_DataObject_FormBuilder_QuickForm_ElementTable extends HTML_QuickForm_el
     var $_rowNames = array();
 
     /**
+     * Holds this element's name
+     *
+     * @var string
+     */
+    var $_name;
+
+    /**
      * Constructor
      *
      * @param string name for the element
      * @param string label for the element
      */
     function DB_DataObject_FormBuilder_QuickForm_ElementTable($name = null, $label = null/*, $columnNames = null,
-                                                               $rowNames = null, $rows = null, $attributes = null*/) {
+                                                              $rowNames = null, $rows = null, $attributes = null*/) {
         parent::HTML_QuickForm_element($name, $label);
         //$this->setRows($rows);
         //$this->setColumnNames($columnNames);
         //$this->setRowNames($rowNames);
+    }
+
+    /**
+     * Sets this element's name
+     *
+     * @param string name
+     */
+    function setName($name) {
+        $this->_name = $name;
+    }
+
+    /**
+     * Gets this element's name
+     *
+     * @return string name
+     */
+    function getName() {
+        return $this->_name;
     }
 
     /**

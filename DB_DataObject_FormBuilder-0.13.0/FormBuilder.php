@@ -97,7 +97,7 @@
  *
  * @package  DB_DataObject_FormBuilder
  * @author   Markus Wolff <mw21st@php.net>
- * @version  $Id: FormBuilder.php,v 1.130 2005/03/05 00:54:26 justinpatrin Exp $
+ * @version  $Id: FormBuilder.php,v 1.141 2005/03/24 19:15:45 justinpatrin Exp $
  */
 
 // Import requirements
@@ -110,10 +110,11 @@ define ('DB_DATAOBJECT_FORMBUILDER_QUERY_FORCEUPDATE',   2);
 define ('DB_DATAOBJECT_FORMBUILDER_QUERY_FORCENOACTION', 3);
 
 // Constants used for cross/triple links
-define ('DB_DATAOBJECT_FORMBUILDER_CROSSLINK',  1048576);
-define ('DB_DATAOBJECT_FORMBUILDER_TRIPLELINK', 2097152);
-define ('DB_DATAOBJECT_FORMBUILDER_ENUM',       4194304);
-define ('DB_DATAOBJECT_FORMBUILDER_REVERSELINK',8388608);
+define ('DB_DATAOBJECT_FORMBUILDER_CROSSLINK',   1048576);
+define ('DB_DATAOBJECT_FORMBUILDER_TRIPLELINK',  2097152);
+define ('DB_DATAOBJECT_FORMBUILDER_ENUM',        4194304);
+define ('DB_DATAOBJECT_FORMBUILDER_REVERSELINK', 8388608);
+define ('DB_DATAOBJECT_FORMBUILDER_GROUP',      16777216);
 
 // Error code constants
 define ('DB_DATAOBJECT_FORMBUILDER_ERROR_UNKNOWNDRIVER', 4711);
@@ -353,7 +354,7 @@ class DB_DataObject_FormBuilder
      * You may also set this to be an array with the names of the link fields to create
      *   New Value entries for.
      */
-    var $linkNewValue = true;
+    var $linkNewValue = array();
 
     /**
      * The caption of the submit button, if created.
@@ -386,6 +387,12 @@ class DB_DataObject_FormBuilder
      * specified in this array, it will be frozen. Ignored if not given.
      */
     var $userEditableFields = array();
+    
+    /**
+     * Array of fields for which no auto-rules may be generated.
+     * If set to string "__ALL__", no rules are generated for any field.
+     */
+    var $excludeFromAutoRules = array();
 
     /**
      * Array of groups to put certain elements in. The key is an element name, the
@@ -804,11 +811,27 @@ class DB_DataObject_FormBuilder
         }
         
         $defVars = get_class_vars(get_class($this));
-        foreach ($defVars as $member => $value) {
+        foreach($defVars as $member => $value) {
             if (is_array($value) && isset($this->$member) && is_string($this->$member)) {
                 $this->$member = $this->_explodeArrString($this->$member);
             }
         }
+        
+        // Check whether we now got valid callbacks for some callback properties,
+        // otherwise correct them
+        foreach(array('dateFromDatabaseCallback', 'dateToDatabaseCallback', 'enumOptionsCallback') as $callback) {
+            if (!is_callable($this->$callback)) {
+                if (is_array($this->$callback)
+                    && count($this->$callback) == 1
+                    && is_callable($this->{$callback}[0])) {
+                    // Probably got messed up by _explodeArrString()
+                    $this->$callback = $this->{$callback}[0];
+                } else {
+                    $this->$callback = $defVars[$callback];
+                }
+            }   
+        }
+        
         $this->_do = &$do;
     }
 
@@ -820,15 +843,16 @@ class DB_DataObject_FormBuilder
      * @return string the name of the primary key or false if none is found
      */
     function _getPrimaryKey(&$do) {
-        if (isset($do->_primary_key)) {
+        if (isset($do->_primary_key) && strlen($do->_primary_key)) {
             return $do->_primary_key;
-        } elseif (($seq = $do->sequenceKey()) && isset($seq[0])) {
+        } elseif (($seq = $do->sequenceKey()) && isset($seq[0]) && strlen($seq[0])) {
             return $seq[0];
         } else {
-            if (($keys = $do->keys()) && isset($keys[0])) {
+            if (($keys = $do->keys()) && isset($keys[0]) && strlen($keys[0])) {
                 return $keys[0];
             }
         }
+        $this->debug('Error: Primary Key not found for table '.$do->tableName());
         return false;
     }
 
@@ -915,11 +939,9 @@ class DB_DataObject_FormBuilder
         // Go through all table fields and create appropriate form elements
         $keys = $this->_do->keys();
 
-        // Reorder elements if requested
+        // Reorder elements if requested, will return _getFieldsToRender if no reordering is needed
         $elements = $this->_reorderElements();
-        if ($elements == false) { //no sorting necessary
-            $elements = $this->_getFieldsToRender();
-        }
+
         //get elements to freeze
         $user_editable_fields = $this->_getUserEditableFields();
         if (is_array($user_editable_fields)) {
@@ -928,7 +950,9 @@ class DB_DataObject_FormBuilder
             $elements_to_freeze = array();
         }
 
-        $links = $this->_do->links();
+        if (!is_array($links = $this->_do->links())) {
+            $links = array();
+        }
         $pk = $this->_getPrimaryKey($this->_do);
         $rules = array();
         foreach ($elements as $key => $type) {
@@ -955,7 +979,7 @@ class DB_DataObject_FormBuilder
                     && (is_object($this->preDefElements[$key]) || is_array($this->preDefElements[$key]))) {
                     // Use predefined form field, IMPORTANT: This may depend on the used renderer!!
                     $element =& $this->preDefElements[$key];
-                } elseif (is_array($links) && isset($links[$key])) {
+                } elseif (isset($links[$key])) {
                     // If this field links to another table, display selectbox or radiobuttons
                     $opt = $this->getSelectOptions($key, false, !$notNull);
                     if (isset($this->linkElementTypes[$key]) && $this->linkElementTypes[$key] == 'radio') {
@@ -1036,7 +1060,9 @@ class DB_DataObject_FormBuilder
                         die($crossLinksDo->getMessage());
                     }
                     
-                    $crossLinksLinks = $crossLinksDo->links();
+                    if (!is_array($crossLinksLinks = $crossLinksDo->links())) {
+                        $crossLinksLinks = array();
+                    }
                     
                     list($linkedtable, $linkedfield) = explode(':', $crossLinksLinks[$crossLink['toField']]);
                     $all_options      = $this->_getSelectOptions($linkedtable);
@@ -1142,7 +1168,9 @@ class DB_DataObject_FormBuilder
                         die($tripleLinkDo->getMessage());
                     }
                     
-                    $tripleLinksLinks = $tripleLinkDo->links();
+                    if (!is_array($tripleLinksLinks = $tripleLinkDo->links())) {
+                        $tripleLinksLinks = array();
+                    }
                     
                     $fromField = $tripleLink['fromField'];
                     $toField1 = $tripleLink['toField1'];
@@ -1247,7 +1275,9 @@ class DB_DataObject_FormBuilder
                             $this->_do->prepareLinkedDataObject($do, $key);
                         }
                     }
-                    $rLinks = $do->links();
+                    if (!is_array($rLinks = $do->links())) {
+                        $rLinks = array();
+                    }
                     $rPk = $this->_getPrimaryKey($do);
                     //$rFields = $do->table();
                     list($lTable, $lField) = explode(':', $rLinks[$this->reverseLinks[$key]['field']]);
@@ -1265,6 +1295,10 @@ class DB_DataObject_FormBuilder
                     }
                     $this->_addElementGroupToForm($form, $element, $elName, $this->crossLinkSeparator);
                     unset($element);
+                    break;
+                case ($type & DB_DATAOBJECT_FORMBUILDER_GROUP):
+                    unset($element);
+                    $element =& $this->_createHiddenField($key.'__placeholder');
                     break;
                 default:
                     $formValues[$key] = $this->_do->$key;
@@ -1285,7 +1319,7 @@ class DB_DataObject_FormBuilder
             } // End else
                     
             //GROUP OR ELEMENT ADDITION
-            if (isset($this->preDefGroups[$key])) {
+            if (isset($this->preDefGroups[$key]) && !($type & DB_DATAOBJECT_FORMBUILDER_GROUP)) {
                 $group = $this->preDefGroups[$key];
                 $groups[$group][] = $element;
             } elseif (isset($element)) {
@@ -1296,18 +1330,25 @@ class DB_DataObject_FormBuilder
                 }
             } // End if
             
-            
-            //ADD REQURED RULE FOR NOT_NULL FIELDS
-            if ((!in_array($key, $keys) || $this->hidePrimaryKey == false)
-                && ($notNull)
-                && !in_array($key, $elements_to_freeze)
-                && !($type & DB_DATAOBJECT_BOOL)) {
-                $this->_setFormElementRequired($form, $key);
-            }
-
-            // VALIDATION RULES
-            if (isset($rules[$key])) {
-                $this->_addFieldRulesToForm($form, $rules[$key], $key);
+           //SET AUTO-RULES IF NOT DEACTIVATED FOR THIS OR ALL ELEMENTS
+           if ($this->excludeFromAutoRules != '__ALL__' && !in_array($key, $this->excludeFromAutoRules)) {
+                //ADD REQURED RULE FOR NOT_NULL FIELDS
+                if ((!in_array($key, $keys) || $this->hidePrimaryKey == false)
+                    && ($notNull)
+                    && !in_array($key, $elements_to_freeze)
+                    && !($type & DB_DATAOBJECT_BOOL)) {
+                    
+                    $this->_setFormElementRequired($form, $key);
+                    $this->debug('Adding required rule for '.$key);
+                }
+    
+                // VALIDATION RULES
+                if (isset($rules[$key])) {
+                    $this->_addFieldRulesToForm($form, $rules[$key], $key);
+                    $this->debug("Adding rule '$rules[$key]' to $key");
+                }
+            } else {
+                $this->debug($key.' excluded from auto-rules');
             }
         } // End foreach
 
@@ -1336,8 +1377,10 @@ class DB_DataObject_FormBuilder
             while (list($grp, $elements) = each($groups)) {
                 if (count($elements) == 1) {  
                     $this->_addElementToForm($form, $elements[0]);
+                    $this->_moveElementBefore($form, $this->_getElementName($elements[0]), $grp.'__placeholder');
                 } elseif (count($elements) > 1) {
                     $this->_addElementGroupToForm($form, $elements, $grp, '&nbsp;');
+                    $this->_moveElementBefore($form, $grp, $grp.'__placeholder');
                 }
             }       
         }
@@ -1421,23 +1464,27 @@ class DB_DataObject_FormBuilder
      * Make a class property named "fb_preDefOrder" in your DataObject-derived classes
      * which contains an array with the correct element order to use this feature.
      *
-     * @return mixed  Array in correct order or FALSE if reordering was not possible
+     * @return array  Array in correct order or same as _getFieldsToRender if preDefOrder is not set
      * @access protected
      * @author Fabien Franzen <atelierfabien@home.nl>
      */
     function _reorderElements() {
+        $elements = $this->_getFieldsToRender();
         if ($this->preDefOrder) {
             $this->debug('<br/>...reordering elements...<br/>');
-            $elements = $this->_getFieldsToRender();
             $table = $this->_do->table();
-            $crossLinks = $this->_getSpecialElementNames();
 
             foreach ($this->preDefOrder as $elem) {
                 if (isset($elements[$elem])) {
                     $ordered[$elem] = $elements[$elem]; //key=>type
-                } elseif (!isset($table[$elem]) && !isset($crossLinks[$elem])) {
-                    $this->debug('<br/>...reorder not supported: invalid element(key) found "'.$elem.'"...<br/>');
-                    return false;
+                    if (isset($this->preDefGroups[$elem])
+                        && !in_array($this->preDefGroups[$elem], $ordered)
+                        && !in_array($this->preDefGroups[$elem], $this->preDefOrder)) {
+                        $ordered[$this->preDefGroups[$elem]] = DB_DATAOBJECT_FORMBUILDER_GROUP;
+                    }
+                } elseif (!isset($table[$elem])) {
+                    $this->debug('<br/>...reorder not supported for invalid element(key) "'.$elem.'"...<br/>');
+                    //return false;
                 }
             }
 
@@ -1445,8 +1492,8 @@ class DB_DataObject_FormBuilder
 
             return $ordered;
         } else {
-            $this->debug('<br/>...reorder not supported, fb_preDefOrder is not set or is not an array...<br/>');
-            return false;
+            $this->debug('<br/>...reorder not supported, fb_preDefOrder is not set or is not an array, returning _getFieldsToRender...<br/>');
+            return $elements;
         }
     }
 
@@ -1467,6 +1514,9 @@ class DB_DataObject_FormBuilder
         }
         foreach ($this->reverseLinks as $reverseLink) {
             $ret['__reverseLink_'.$reverseLink['table'].'_'.$reverseLink['field']] = DB_DATAOBJECT_FORMBUILDER_REVERSELINK;
+        }
+        foreach ($this->preDefGroups as $group) {
+            $ret[$group] = DB_DATAOBJECT_FORMBUILDER_GROUP;
         }
         return $ret;
     }
@@ -1549,7 +1599,9 @@ class DB_DataObject_FormBuilder
         if ($linkDisplayLevel === null) {
             $linkDisplayLevel = (isset($this) && isset($this->linkDisplayLevel)) ? $this->linkDisplayLevel : 3;
         }
-        $links = $do->links();
+        if (!is_array($links = $do->links())) {
+            $links = array();
+        }
         if ($displayFields === false) {
             if (isset($do->fb_linkDisplayFields)) {
                 $displayFields = $do->fb_linkDisplayFields;
@@ -1614,7 +1666,9 @@ class DB_DataObject_FormBuilder
             // been loaded and all link information is available.
             $this->_do->keys();   
         }
-        $links = $this->_do->links();
+        if (!is_array($links = $this->_do->links())) {
+            $links = array();
+        }
         $link = explode(':', $links[$field]);
 
         $res = $this->_getSelectOptions($link[0],
@@ -1645,57 +1699,61 @@ class DB_DataObject_FormBuilder
         $opts = DB_DataObject::factory($table);
         if (is_a($opts, 'db_dataobject')) {
             $pk = $this->_getPrimaryKey($opts);
-            if ($displayFields === false) {
-                if (isset($opts->fb_linkDisplayFields)) {
-                    $displayFields = $opts->fb_linkDisplayFields;
-                } elseif ($this->linkDisplayFields){
-                    $displayFields = $this->linkDisplayFields;
-                } else {
-                    $displayFields = array($pk);
+            if (strlen($pk)) {
+                if ($displayFields === false) {
+                    if (isset($opts->fb_linkDisplayFields)) {
+                        $displayFields = $opts->fb_linkDisplayFields;
+                    } elseif ($this->linkDisplayFields){
+                        $displayFields = $this->linkDisplayFields;
+                    } else {
+                        $displayFields = array($pk);
+                    }
                 }
-            }
 
-            if (isset($opts->fb_linkOrderFields)) {
-                $orderFields = $opts->fb_linkOrderFields;
-            } elseif ($this->linkOrderFields){
-                $orderFields = $this->linkOrderFields;
-            } else {
-                $orderFields = $displayFields;
-            }
-            $orderStr = '';
-            $first = true;
-            foreach ($orderFields as $col) {
-                if ($first) {
-                    $first = false;
+                if (isset($opts->fb_linkOrderFields)) {
+                    $orderFields = $opts->fb_linkOrderFields;
+                } elseif ($this->linkOrderFields){
+                    $orderFields = $this->linkOrderFields;
                 } else {
-                    $orderStr .= ', ';
+                    $orderFields = $displayFields;
                 }
-                $orderStr .= $col;
-            }
-            if ($orderStr) {
-                $opts->orderBy($orderStr);
-            }
-            $list = array();
+                $orderStr = '';
+                $first = true;
+                foreach ($orderFields as $col) {
+                    if ($first) {
+                        $first = false;
+                    } else {
+                        $orderStr .= ', ';
+                    }
+                    $orderStr .= $col;
+                }
+                if ($orderStr) {
+                    $opts->orderBy($orderStr);
+                }
+                $list = array();
                 
-            // FIXME!
-            if ($selectAddEmpty) {
-                $list[''] = $this->selectAddEmptyLabel;
-            }
-            if (method_exists($this->_do, 'preparelinkeddataobject')) {
-                if ($this->useCallTimePassByReference) {
-                    eval('$this->_do->prepareLinkedDataObject(&$opts, $field);');
-                } else {
-                    $this->_do->prepareLinkedDataObject($opts, $field);
+                // FIXME!
+                if ($selectAddEmpty) {
+                    $list[''] = $this->selectAddEmptyLabel;
                 }
-            }
-            // FINALLY, let's see if there are any results
-            if ($opts->find() > 0) {
-                while ($opts->fetch()) {
-                    $list[$opts->$pk] = $this->getDataObjectString($opts, $displayFields);
+                if (method_exists($this->_do, 'preparelinkeddataobject')) {
+                    if ($this->useCallTimePassByReference) {
+                        eval('$this->_do->prepareLinkedDataObject(&$opts, $field);');
+                    } else {
+                        $this->_do->prepareLinkedDataObject($opts, $field);
+                    }
                 }
-            }
+                // FINALLY, let's see if there are any results
+                if ($opts->find() > 0) {
+                    while ($opts->fetch()) {
+                        $list[$opts->$pk] = $this->getDataObjectString($opts, $displayFields);
+                    }
+                }
 
-            return $list;
+                return $list;
+            } else {
+                return array();
+            }
         }
         $this->debug('Error: '.get_class($opts).' does not inherit from DB_DataObject');
         return array();
@@ -1722,8 +1780,10 @@ class DB_DataObject_FormBuilder
         } else {
             if ($this->linkNewValue) {
                 $this->linkNewValue = array();
-                foreach ($this->_do->links() as $link => $to) {
-                    $this->linkNewValue[$link] = $link;
+                if (is_array($links = $this->_do->links())) {
+                    foreach ($links as $link => $to) {
+                        $this->linkNewValue[$link] = $link;
+                    }
                 }
             } else {
                 $this->linkNewValue = array();
@@ -1778,7 +1838,9 @@ class DB_DataObject_FormBuilder
                 return PEAR::raiseError('Cannot load dataobject for table '.$crossLink['table'].' - '.$do->getMessage());
             }
                 
-            $links = $do->links();
+            if (!is_array($links = $do->links())) {
+                $links = array();
+            }
                 
             if (isset($crossLink['fromField'])) {
                 $fromField = $crossLink['fromField'];
@@ -1813,7 +1875,9 @@ class DB_DataObject_FormBuilder
                 die($do->getMessage());
             }
                 
-            $links = $do->links();
+            if (!is_array($links = $do->links())) {
+                $links = array();
+            }
                 
             if (isset($tripleLink['fromField'])) {
                 $fromField = $tripleLink['fromField'];
@@ -1851,8 +1915,10 @@ class DB_DataObject_FormBuilder
         foreach ($this->reverseLinks as $key => $reverseLink) {
             if (!isset($reverseLink['field'])) {
                 $do = DB_DataObject::factory($reverseLink['table']);
-                $links = $do->links();
-                foreach ($do->links() as $field => $link) {
+                if (!is_array($links = $do->links())) {
+                    $links = array();
+                }
+                foreach ($links as $field => $link) {
                     list($linkTable, $linkField) = explode(':', $link);
                     if ($linkTable == $this->_do->__table) {
                         $reverseLink['field'] = $field;
@@ -2145,7 +2211,9 @@ class DB_DataObject_FormBuilder
         }
         $editableFields = $this->_getUserEditableFields();
         $tableFields = $this->_do->table();
-        $links = $this->_do->links();
+        if (!is_array($links = $this->_do->links())) {
+            $links = array();
+        }
 
         foreach ($values as $field => $value) {
             $this->debug('Field '.$field.' ');
@@ -2171,7 +2239,7 @@ class DB_DataObject_FormBuilder
                             $value = call_user_func($this->dateToDatabaseCallback, $value);*/
                         }
                     }
-                    if (is_array($links) && isset($links[$field])) {
+                    if (isset($links[$field])) {
                         if ($value === '') {
                             $this->debug('Casting to NULL');
                             require_once('DB/DataObject/Cast.php');
@@ -2263,8 +2331,6 @@ class DB_DataObject_FormBuilder
                 foreach ($this->tripleLinks as $tripleLink) {
                     $do = DB_DataObject::factory($tripleLink['table']);
 
-                    $links = $do->links();
-
                     $fromField = $tripleLink['fromField'];
                     $toField1 = $tripleLink['toField1'];
                     $toField2 = $tripleLink['toField2'];
@@ -2316,7 +2382,6 @@ class DB_DataObject_FormBuilder
                 //process crossLinks
                 foreach ($this->crossLinks as $crossLink) {
                     $do = DB_DataObject::factory($crossLink['table']);
-                    $links = $do->links();
 
                     $fromField = $crossLink['fromField'];
                     $toField = $crossLink['toField'];
@@ -2406,7 +2471,9 @@ class DB_DataObject_FormBuilder
                             $this->_do->prepareLinkedDataObject($do, $key);
                         }
                     }
-                    $rLinks = $do->links();
+                    if (!is_array($rLinks = $do->links())) {
+                        $rLinks = array();
+                    }
                     $rPk = $this->_getPrimaryKey($do);
                     $rFields = $do->table();
                     list($lTable, $lField) = explode(':', $rLinks[$reverseLink['field']]);
@@ -2593,30 +2660,39 @@ class DB_DataObject_FormBuilder
      */
     function _getFieldsToRender()
     {
-        $all_fields = array_merge($this->_do->table(), $this->_getSpecialElementNames());
+        $table = $this->_do->table();
+        if (!is_array($table) || !$table) {
+            $this->debug('ERROR: DataObject has no fields reported by table(), something is definately wrong');
+            $table = array();
+        }
+        $all_fields = array_merge($table, $this->_getSpecialElementNames());
         if ($this->fieldsToRender) {
-            // a little workaround to get an array like [FIELD_NAME] => FIELD_TYPE (for use in _generateForm)
-            // maybe there's some better way to do this:
-            $result = array();
+            $fieldsToRender =& $this->fieldsToRender;
+        }
+        // a little workaround to get an array like [FIELD_NAME] => FIELD_TYPE (for use in _generateForm)
+        // maybe there's some better way to do this:
+        $result = array();
 
-            $key_fields = $this->_do->keys();
-            if (!is_array($key_fields)) {
-                $key_fields = array();
-            }
-            $fields_to_render = $this->fieldsToRender;
+        $key_fields = $this->_do->keys();
+        if (!is_array($key_fields) || !$key_fields) {
+            $this->debug('WARNING: DataObject has no keys reported by keys()');            
+            $key_fields = array();
+        }
 
-            if (is_array($all_fields)) {
-                foreach ($all_fields as $key=>$value) {
-                    if ( (in_array($key, $key_fields)) || (in_array($key, $fields_to_render)) ) {
-                        $result[$key] = $all_fields[$key];
-                    }
+        foreach ($all_fields as $key => $value) {
+            if (!isset($fieldsToRender)
+                || in_array($key, $key_fields)
+                || in_array($key, $fieldsToRender)) {
+                $result[$key] = $all_fields[$key];
+                if (isset($this->preDefGroups[$key])
+                    && !in_array($this->preDefGroups[$key], $result)) {
+                    $result[$this->preDefGroups[$key]] = DB_DATAOBJECT_FORMBUILDER_GROUP;
                 }
             }
+        }
 
-            if (count($result) > 0) {
-                return $result;
-            }
-            return $all_fields;
+        if (count($result) > 0) {
+            return $result;
         }
         return $all_fields;
     }

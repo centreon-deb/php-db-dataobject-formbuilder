@@ -18,7 +18,7 @@
 /**
  * @package  DB_DataObject_FormBuilder
  * @author   Justin Patrin <justinpatrin@php.net>
- * @version  $Id: PopupSelect.php,v 1.1 2005/03/05 00:22:51 justinpatrin Exp $
+ * @version  $Id: PopupSelect.php,v 1.2 2005/03/09 17:48:20 justinpatrin Exp $
  */
 
 require_once('HTML/QuickForm/select.php');
@@ -100,7 +100,6 @@ class DB_DataObject_FormBuilder_QuickForm_PopupSelect extends HTML_QuickForm_sel
 function DB_DataObject_FormBuilder_QuickForm_PopupSelect_onchange_'.$this->getName().'_'.$table.'(sel) {
   if(sel.value == "--New Value--") {
     document.getElementById("'.$this->getName().'_'.$table.'").className = "";
-    //window.open("http'.(isset($_SERVER['HTTPS']) ? 's' : '').'://'.$_SERVER['HTTP_HOST'].$_SERVER['SCRIPT_NAME'].'?database='.$_REQUEST['database'].'&table='.$table.'&addRecord=1", "New Option");
   } else {
     document.getElementById("'.$this->getName().'_'.$table.'").className = "hidden";
   }

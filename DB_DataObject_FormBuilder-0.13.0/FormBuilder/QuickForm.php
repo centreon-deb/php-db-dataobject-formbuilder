@@ -21,7 +21,7 @@
  *
  * @package  DB_DataObject_FormBuilder
  * @author   Markus Wolff <mw21st@php.net>
- * @version  $Id: QuickForm.php,v 1.32 2005/03/05 00:22:51 justinpatrin Exp $
+ * @version  $Id: QuickForm.php,v 1.33 2005/03/15 18:38:52 justinpatrin Exp $
  */
 
 require_once ('HTML/QuickForm.php');
@@ -157,6 +157,16 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
             $form =& new HTML_QuickForm($formName, $method, $action, $target);
         }
         return $form;
+    }
+
+    /**
+     * Get the name of a form element
+     *
+     * @param HTML_QuickForm_element the element to get the name of
+     * @return string the name of the element
+     */
+    function _getElementName(&$element) {
+        return $element->getName();
     }
     
     /**
@@ -723,6 +733,21 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
                 $el->freeze();
             }
         }   
+    }
+
+    /**
+     * Moves an element before another
+     *
+     * @param HTML_QuickForm the form to move elements within
+     * @param string the name of the element to move
+     * @param string the name of the element to move the first before
+     */
+    function _moveElementBefore(&$form, $el, $beforeEl) {
+        $el = $this->getFieldName($el);
+        $beforeEl = $this->getFieldName($beforeEl);
+        if ($form->elementExists($beforeEl) && $form->elementExists($el)) {
+            $form->insertElementBefore($form->removeElement($el), $beforeEl);
+        }
     }
 }
 
