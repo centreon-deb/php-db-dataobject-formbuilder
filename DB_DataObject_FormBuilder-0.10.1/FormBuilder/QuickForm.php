@@ -21,7 +21,7 @@
  *
  * @package  DB_DataObject_FormBuilder
  * @author   Markus Wolff <mw21st@php.net>
- * @version  $Id: QuickForm.php,v 1.9 2004/08/27 23:21:25 justinpatrin Exp $
+ * @version  $Id: QuickForm.php,v 1.12 2004/10/13 17:40:39 justinpatrin Exp $
  */
 
 require_once ('HTML/QuickForm.php');
@@ -335,7 +335,7 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
      */
     function _setFormElementRequired(&$form, $fieldName)
     {
-        $form->addRule($fieldName, sprintf($this->requiredRuleMessage, $this->getFieldLabel($fieldName)), 'required');   
+        $this->_addFieldRulesToForm($form, array(array('validator' => 'required', 'rule' => false)), $fieldName);
     }
     
     
@@ -354,11 +354,13 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
      */
     function _addFieldRulesToForm(&$form, $rules, $fieldName)
     {
+        $fieldLabel = $this->getFieldLabel($fieldName);
+        $ruleSide = $this->clientRules ? 'client' : 'server';
         foreach ($rules as $rule) {
             if ($rule['rule'] === false) {
-                $form->addRule($fieldName, sprintf($this->ruleViolationMessage, $fieldName), $rule['validator']);
+                $form->addRule($fieldName, sprintf($this->ruleViolationMessage, $fieldLabel), $rule['validator'], '', $ruleSide);
             } else {
-                $form->addRule($fieldName, sprintf($this->ruleViolationMessage, $fieldName), $rule['validator'], $rule['rule']);
+                $form->addRule($fieldName, sprintf($this->ruleViolationMessage, $fieldLabel), $rule['validator'], $rule['rule'], $ruleSide);
             } // End if
         } // End while
     }

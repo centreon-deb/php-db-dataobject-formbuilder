@@ -25,11 +25,31 @@
     </maintainer>
   </maintainers>
   <release>
-    <version>0.10.0</version>
-    <date>2004-08-27</date>
+    <version>0.10.1</version>
+    <date>2004-10-26</date>
     <license>PHP License</license>
     <state>beta</state>
-    <notes>This version introduces major BC breaks, mostly dealing with the names and locations of configuration variables most of which can be corrected by using a provided fix script(s). If you have already used FormBuilder in your current projects, please read all of this very carefully!
+    <notes>Allow arrays in preDefElements (creates a group)
+
+If you are upgrading from a pre-0.10.0 version, read the 0.10.0 release notes!</notes>
+    <deps>
+      <dep type="php" rel="ge" version="4.1.0"/>
+      <dep type="pkg" rel="has" optional="no">HTML_QuickForm</dep>
+      <dep type="pkg" rel="has" optional="no">DB_DataObject</dep>
+      <dep type="pkg" rel="has" optional="yes">Date</dep>
+      <dep type="pkg" rel="has" optional="yes">HTML_Table</dep>
+    </deps>
+    <filelist>
+      <file role="php" baseinstalldir="/DB/DataObject" md5sum="953b7a681d5fb407f647a660198ed452" name="FormBuilder.php"/>
+      <file role="php" baseinstalldir="/DB/DataObject" md5sum="2108c3298b2d7e0c2c89811841f844ac" name="FormBuilder/QuickForm.php"/>
+    </filelist>
+  </release>
+  <changelog>
+    <release>
+      <version>0.10.0</version>
+      <date>2004-08-27</date>
+      <state>beta</state>
+      <notes>This version introduces major BC breaks, mostly dealing with the names and locations of configuration variables most of which can be corrected by using a provided fix script(s). If you have already used FormBuilder in your current projects, please read all of this very carefully!
 
 MAJOR BC BREAKS -- Please read all comments below before trying to use this version!
 This checkin is the result of an attempt at unifying the various parts of the FormBuilder API, unifying the coding styles, and conforming to PEAR CS. This *will* break your application.
@@ -87,20 +107,10 @@ FURTHER IMPROVEMENTS AND MODIFICATIONS:
 - Small change to getDataObjectSelectDisplayValue() making use of getLink() instead of links().
 
 The FormBuilder Wiki has up-to-date documentation:
-http://opensource.21st.de/tiki-index.php?page=DB_DataObject_FormBuilder</notes>
-    <deps>
-      <dep type="php" rel="ge" version="4.1.0"/>
-      <dep type="pkg" rel="has" optional="no">HTML_QuickForm</dep>
-      <dep type="pkg" rel="has" optional="no">DB_DataObject</dep>
-      <dep type="pkg" rel="has" optional="yes">Date</dep>
-      <dep type="pkg" rel="has" optional="yes">HTML_Table</dep>
-    </deps>
-    <filelist>
-      <file role="php" baseinstalldir="/DB/DataObject" md5sum="1c8485ce0f116ce68eb3d4d4ff728718" name="FormBuilder.php"/>
-      <file role="php" baseinstalldir="/DB/DataObject" md5sum="eaef2eaf440226e9e41889f0f83ab752" name="FormBuilder/QuickForm.php"/>
-    </filelist>
-  </release>
-  <changelog>
+http://opensource.21st.de/tiki-index.php?page=DB_DataObject_FormBuilder
+      
+</notes>
+    </release>
     <release>
       <version>0.9.0</version>
       <date>2004-05-16</date>

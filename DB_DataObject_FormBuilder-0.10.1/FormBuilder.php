@@ -252,7 +252,7 @@
  *
  * @package  DB_DataObject_FormBuilder
  * @author   Markus Wolff <mw21st@php.net>
- * @version  $Id: FormBuilder.php,v 1.60 2004/08/27 23:54:09 justinpatrin Exp $
+ * @version  $Id: FormBuilder.php,v 1.66 2004/10/26 22:24:28 justinpatrin Exp $
  */
 
 // Import requirements
@@ -596,6 +596,11 @@ class DB_DataObject_FormBuilder
     var $tripleLinks;
 
     /**
+     * If set to true, validation rules will also be client side.
+     */
+    var $clientRules;
+
+    /**
      * DB_DataObject_FormBuilder::create()
      *
      * Factory method. As this is meant as an abstract class, it is the only supported
@@ -659,19 +664,21 @@ class DB_DataObject_FormBuilder
         $this->enumOptionsCallback = array(&$this, '_getEnumOptions');
         
         // Read in config
-        if (is_array($options)) {
-            $vars = get_object_vars($this);
-            reset($options);
-            while (list($key, $value) = each($options)) {
+        $vars = get_object_vars($this);
+        if (isset($GLOBALS['_DB_DATAOBJECT_FORMBUILDER']['CONFIG'])) {
+            //read all config options into member vars
+            foreach ($GLOBALS['_DB_DATAOBJECT_FORMBUILDER']['CONFIG'] as $key => $value) {
                 if (in_array($key, $vars) && $key[0] != '_') {
                     $this->$key = $value;
                 }
             }
         }
-        if (isset($GLOBALS['_DB_DATAOBJECT_FORMBUILDER']['CONFIG'])) {
-            //read all config options into member vars
-            foreach ($GLOBALS['_DB_DATAOBJECT_FORMBUILDER']['CONFIG'] as $var => $value) {
-                $this->$var = $value;
+        if (is_array($options)) {
+            reset($options);
+            while (list($key, $value) = each($options)) {
+                if (in_array($key, $vars) && $key[0] != '_') {
+                    $this->$key = $value;
+                }
             }
         }
         
@@ -823,7 +830,8 @@ class DB_DataObject_FormBuilder
                 } elseif (in_array($key, $this->enumFields)) {
                     $type = DB_DATAOBJECT_FORMBUILDER_ENUM;
                 }
-                if (isset($this->preDefElements[$key]) && is_object($this->preDefElements[$key])) {
+                if (isset($this->preDefElements[$key]) 
+                    && (is_object($this->preDefElements[$key]) || is_array($this->preDefElements[$key]))) {
                     // Use predefined form field, IMPORTANT: This may depend on the used renderer!!
                     $element =& $this->preDefElements[$key];
                 } elseif (is_array($links) && isset($links[$key])) {
@@ -856,7 +864,7 @@ class DB_DataObject_FormBuilder
                         $element =& $this->_createDateElement($key);
                     }
                     break;
-                case ($type & DB_DATAOBJECT_DATE & DB_DATAOBJECT_TIME):
+                case ($type & (DB_DATAOBJECT_DATE | DB_DATAOBJECT_TIME)):
                     $this->debug('DATE & TIME CONVERSION using callback for element '.$key.' ('.$this->_do->$key.')!', 'FormBuilder');
                     $formValues[$key] = call_user_func($this->dateFromDatabaseCallback, $this->_do->$key);
                     if (!isset($element)) {
@@ -877,11 +885,13 @@ class DB_DataObject_FormBuilder
                     }
                     break;
                 case ($type & DB_DATAOBJECT_STR):
-                    // If field content contains linebreaks, make textarea - otherwise, standard textbox
-                    if (!empty($this->_do->$key) && strstr($this->_do->$key, "\n")) {
-                        $element =& $this->_createTextArea($key);
-                    } elseif (!isset($element)) {
-                        $element =& $this->_createTextField($key);
+                    if (!isset($element)) {
+                        // If field content contains linebreaks, make textarea - otherwise, standard textbox
+                        if (!empty($this->_do->$key) && strstr($this->_do->$key, "\n")) {
+                            $element =& $this->_createTextArea($key);
+                        } else {
+                            $element =& $this->_createTextField($key);
+                        }
                     }
                     break;
                 case ($type & DB_DATAOBJECT_FORMBUILDER_CROSSLINK):
@@ -1458,6 +1468,19 @@ class DB_DataObject_FormBuilder
         return array();
     }
 
+    /**
+     * DB_DataObject_FormBuilder::populateOptions()
+     *
+     * Populates public member vars with fb_ equivalents in the DataObject.
+     */
+    function populateOptions() {
+        $badVars = array('linkDisplayFields', 'linkOrderFields');
+        foreach (get_object_vars($this) as $var => $value) {
+            if ($var[0] != '_' && !in_array($var, $badVars) && isset($this->_do->{'fb_'.$var})) {
+                $this->$var = $this->_do->{'fb_'.$var};
+            }
+        }
+    }
 
     /**
      * DB_DataObject_FormBuilder::getForm()
@@ -1493,12 +1516,7 @@ class DB_DataObject_FormBuilder
         if (method_exists($this->_do, 'pregenerateform')) {
             $this->_do->preGenerateForm($this);
         }
-        $badVars = array('linkDisplayFields', 'linkOrderFields');
-        foreach (get_object_vars($this) as $var => $value) {
-            if ($var[0] != '_' && !in_array($var, $badVars) && isset($this->_do->{'fb_'.$var})) {
-                $this->$var = $this->_do->{'fb_'.$var};
-            }
-        }
+        $this->populateOptions();
         if (isset($this->crossLinks) && is_array($this->crossLinks)) {
             foreach ($this->crossLinks as $key => $crossLink) {
                 $groupName  = '__crossLink_' . $crossLink['table'];
