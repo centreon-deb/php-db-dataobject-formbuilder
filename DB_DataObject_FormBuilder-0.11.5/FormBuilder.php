@@ -97,7 +97,7 @@
  *
  * @package  DB_DataObject_FormBuilder
  * @author   Markus Wolff <mw21st@php.net>
- * @version  $Id: FormBuilder.php,v 1.124 2005/02/28 05:21:39 justinpatrin Exp $
+ * @version  $Id: FormBuilder.php,v 1.127 2005/03/03 21:19:46 justinpatrin Exp $
  */
 
 // Import requirements
@@ -1831,7 +1831,11 @@ class DB_DataObject_FormBuilder
         }
         
         if (method_exists($this->_do, 'getform')) {
-            $obj = $this->_do->getForm($action, $target, $formName, $method, &$this);
+            if ($this->useCallTimePassByReference) {
+                eval('$obj = $this->_do->getForm($action, $target, $formName, $method, &$this);');
+            } else {
+                $obj = $this->_do->getForm($action, $target, $formName, $method, $this);
+            }
         } else {
             $obj = &$this->_generateForm($action, $target, $formName, $method);
         }
@@ -1956,36 +1960,36 @@ class DB_DataObject_FormBuilder
         if (isset($dateInput['a'])) {
             $ampm = $dateInput['a'];
         } elseif (isset($dateInput['A'])) {
-            $ampm = isset($dateInput['A']);
+            $ampm = $dateInput['A'];
         }
         $strDate = '';
         if (isset($year) || isset($month) || isset($dateInput['d'])) {
-            if (!isset($year)) {
+            if (!isset($year) || strlen($year) == 0) {
                 $year = '0000';
             }
-            if(!isset($month)) {
+            if(!isset($month) || strlen($month) == 0) {
                 $month = '00';
             }
-            if (!isset($dateInput['d'])) {
+            if (!isset($dateInput['d']) || strlen($dateInput['d']) == 0) {
                 $dateInput['d'] = '00';
             }
             $strDate .= $year.'-'.$month.'-'.$dateInput['d'];
         }
         if (isset($hour) || isset($dateInput['i']) || isset($dateInput['s'])) {
-            if (!isset($hour)) {
+            if (!isset($hour) || strlen($hour) == 0) {
                 $hour = '00';
             }
-            if (!isset($dateInput['i'])) {
+            if (!isset($dateInput['i']) || strlen($dateInput['i']) == 0) {
                 $dateInput['i'] = '00';
             }
             if (!empty($strDate)) {
                 $strDate .= ' ';
             }
             $strDate .= $hour.':'.$dateInput['i'];
-            if (isset($dateInput['s'])) {
+            if (isset($dateInput['s']) && strlen($dateInput['s']) > 0) {
                 $strDate .= ':'.$dateInput['s'];
             }
-            if (isset($ampm)) {
+            if (isset($ampm) && strlen($ampm) > 0) {
                 $strDate .= ' '.$ampm;
             }
         }
