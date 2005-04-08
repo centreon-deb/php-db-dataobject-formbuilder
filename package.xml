@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
-<package version="1.0" packagerversion="1.4.0a8">
+<package version="1.0" packagerversion="1.4.0a9">
  <name>DB_DataObject_FormBuilder</name>
  <summary>Class to automatically build HTML_QuickForm objects from a DB_DataObject-derived class</summary>
  <description>DB_DataObject_FormBuilder will aid you in rapid application development using the packages DB_DataObject and HTML_QuickForm. For having a quick but working prototype of your application, simply model the database, run DataObject's createTable script over it and write a script that passes one of the resulting objects to the FormBuilder class. The FormBuilder will automatically generate a simple but working HTML_QuickForm object that you can use to test your application. It also provides a processing method that will automatically detect if an insert() or update() command has to be executed after the form has been submitted. If you have set up DataObject's links.ini file correctly, it will also automatically detect if a table field is a foreign key and will populate a selectbox with the linked table's entries. There are many optional parameters that you can place in your DataObjects.ini or in the properties of your derived classes, that you can use to fine-tune the form-generation, gradually turning the prototypes into fully-featured forms, and you can take control at any stage of the process.
@@ -26,19 +26,18 @@
   </maintainer>
   </maintainers>
  <release>
-  <version>0.13.0</version>
-  <date>2005-03-25</date>
+  <version>0.13.1</version>
+  <date>2005-04-08</date>
   <license>PHP License</license>
   <state>beta</state>
-  <notes>-BC Break! linkNewValue is now off by default
--Added support for specifying the location of preDefGroups in preDefOrder (use the group name) (request #3796)
---If no entry is in preDefOrder for a preDefGroup it will be placed where the first element it contains would be placed
--excludeFromAutoRules option added. Allows excluding of some or all element from automatic rule generation
--Fixed notice in PopupSelect.php due to old commented JavaScript
--Possible fix for some Primary Key problems
--Fixed issues with using global functions as callbacks
--Fixed further problems with ElementTable (crossLinks with extraFields / tripleLinks)
--Fixed warnings when no links are defined (bug #3941)
+  <notes>-Fix Bug #3877 extra fields in crosslink table lost on update to parent table when crossLink type is select
+-Fix fatal errors when crossLinkExtraFields is set and the crossLink is of type 'select'
+-Removed all direct use of Primary Key from crossLink and tripleLink code as it was technically incorrect. It now uses the value from the links.ini
+-Fixed issue with populateOptions being called in DataObject callbacks other than preGenerateForm
+-Fixed issue with crossLink tables with no primary key
+-Fixed possible issue with tripleLinks regarding primary key
+-Fixed possible problem with crossLinks and tripleLinks when no values are found
+-Fixed possible problem with copies of DataObjects using factory
   </notes>
   <deps>
    <dep type="php" rel="ge" version="4.3.0"/>
@@ -55,6 +54,21 @@
   </filelist>
  </release>
  <changelog>
+   <release>
+    <version>0.13.0</version>
+    <date>2005-03-25</date>
+    <state>beta</state>
+    <notes>-BC Break! linkNewValue is now off by default
+-Added support for specifying the location of preDefGroups in preDefOrder (use the group name) (request #3796)
+--If no entry is in preDefOrder for a preDefGroup it will be placed where the first element it contains would be placed
+-excludeFromAutoRules option added. Allows excluding of some or all element from automatic rule generation
+-Fixed notice in PopupSelect.php due to old commented JavaScript
+-Possible fix for some Primary Key problems
+-Fixed issues with using global functions as callbacks
+-Fixed further problems with ElementTable (crossLinks with extraFields / tripleLinks)
+-Fixed warnings when no links are defined (bug #3941)
+    </notes>
+   </release>
    <release>
     <version>0.12.1</version>
     <date>2005-03-05</date>
