@@ -22,31 +22,27 @@
   <email>norbert@php.net</email>
   <active>yes</active>
  </developer>
- <date>2005-04-08</date>
- <time>19:48:29</time>
+ <date>2005-04-12</date>
+ <time>00:50:05</time>
  <version>
-  <release>0.13.1</release>
-  <api>0.13.1</api>
+  <release>0.13.2</release>
+  <api>0.13.2</api>
  </version>
  <stability>
   <release>beta</release>
   <api>beta</api>
  </stability>
  <license uri="http://www.php.net/license">PHP License</license>
- <notes>-Fix Bug #3877 extra fields in crosslink table lost on update to parent table when crossLink type is select
--Fix fatal errors when crossLinkExtraFields is set and the crossLink is of type &apos;select&apos;
--Removed all direct use of Primary Key from crossLink and tripleLink code as it was technically incorrect. It now uses the value from the links.ini
--Fixed issue with populateOptions being called in DataObject callbacks other than preGenerateForm
--Fixed issue with crossLink tables with no primary key
--Fixed possible issue with tripleLinks regarding primary key
--Fixed possible problem with crossLinks and tripleLinks when no values are found
--Fixed possible problem with copies of DataObjects using factory</notes>
+ <notes>-It is now possible to use something other than the primary key for a link. This field must be unique, though, or you will have an inconsistent database. FormBuilder will *not* warn you if the field is not unique.
+-tripleLinks and crossLinks will now always use the field values from the links.ini instead of primary keys
+-Added a &apos;multiselect&apos; option to the elementTypeMap. You may now set a different QF element type for multiselects.
+-Fixed a bug where tripleLinks and crossLinks were filled out in a new record (non-fetched DO)</notes>
  <contents>
   <dir name="/">
    <file baseinstalldir="/DB/DataObject" md5sum="17af1fb51cd085612c82b55554194e17" name="FormBuilder/QuickForm/ElementTable.php" role="php" />
    <file baseinstalldir="/DB/DataObject" md5sum="af5b6b30b1ca8acc0384b5cc358dde96" name="FormBuilder/QuickForm/PopupSelect.php" role="php" />
-   <file baseinstalldir="/DB/DataObject" md5sum="a3f89762c3fe4411b0927c62ed9f4fba" name="FormBuilder/QuickForm.php" role="php" />
-   <file baseinstalldir="/DB/DataObject" md5sum="ef986e5e43e16766149b4fad4f9de81f" name="FormBuilder.php" role="php" />
+   <file baseinstalldir="/DB/DataObject" md5sum="063ca349fdfd240e4cc833835b265735" name="FormBuilder/QuickForm.php" role="php" />
+   <file baseinstalldir="/DB/DataObject" md5sum="d8cc9a903bff1e82214601b4182ca620" name="FormBuilder.php" role="php" />
   </dir>
  </contents>
  <dependencies>
@@ -81,6 +77,26 @@
  </dependencies>
  <phprelease />
  <changelog>
+  <release>
+   <version>
+    <release>0.13.1</release>
+    <api>0.13.1</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <date>2005-04-08</date>
+   <license uri="http://www.php.net/license">PHP License</license>
+   <notes>-Fix Bug #3877 extra fields in crosslink table lost on update to parent table when crossLink type is select
+-Fix fatal errors when crossLinkExtraFields is set and the crossLink is of type &apos;select&apos;
+-Removed all direct use of Primary Key from crossLink and tripleLink code as it was technically incorrect. It now uses the value from the links.ini
+-Fixed issue with populateOptions being called in DataObject callbacks other than preGenerateForm
+-Fixed issue with crossLink tables with no primary key
+-Fixed possible issue with tripleLinks regarding primary key
+-Fixed possible problem with crossLinks and tripleLinks when no values are found
+-Fixed possible problem with copies of DataObjects using factory</notes>
+  </release>
   <release>
    <version>
     <release>0.13.0</release>

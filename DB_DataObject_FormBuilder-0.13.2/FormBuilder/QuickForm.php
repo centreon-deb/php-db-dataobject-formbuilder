@@ -11,7 +11,7 @@
  * @license    http://www.php.net/license/3_0.txt  PHP License 3.0
  * @author   Markus Wolff <mw21st@php.net>
  * @author   Justin Patrin <papercrane@reversefold.com>
- * @version  $Id: QuickForm.php,v 1.34 2005/03/30 18:39:30 justinpatrin Exp $
+ * @version  $Id: QuickForm.php,v 1.35 2005/04/08 18:14:32 justinpatrin Exp $
  */
 
 require_once ('HTML/QuickForm.php');
@@ -44,6 +44,7 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
                                 'integer'   => 'text',
                                 'float'     => 'text',
                                 'select'    => 'select',
+                                'multiselect'    => 'select',
                                 'popupSelect' => 'popupSelect',
                                 'elementTable' => 'elementTable');
 
@@ -347,7 +348,7 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
     function &_createSelectBox($fieldName, $options, $multiple = false)
     {
         if ($multiple) {
-            $element =& HTML_QuickForm::createElement($this->_getQFType('select'),
+            $element =& HTML_QuickForm::createElement($this->_getQFType('multiselect'),
                                                       $this->getFieldName($fieldName),
                                                       $this->getFieldLabel($fieldName),
                                                       $options,

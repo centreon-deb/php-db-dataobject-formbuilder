@@ -26,18 +26,14 @@
   </maintainer>
   </maintainers>
  <release>
-  <version>0.13.1</version>
-  <date>2005-04-08</date>
+  <version>0.13.2</version>
+  <date>2005-04-12</date>
   <license>PHP License</license>
   <state>beta</state>
-  <notes>-Fix Bug #3877 extra fields in crosslink table lost on update to parent table when crossLink type is select
--Fix fatal errors when crossLinkExtraFields is set and the crossLink is of type 'select'
--Removed all direct use of Primary Key from crossLink and tripleLink code as it was technically incorrect. It now uses the value from the links.ini
--Fixed issue with populateOptions being called in DataObject callbacks other than preGenerateForm
--Fixed issue with crossLink tables with no primary key
--Fixed possible issue with tripleLinks regarding primary key
--Fixed possible problem with crossLinks and tripleLinks when no values are found
--Fixed possible problem with copies of DataObjects using factory
+  <notes>-It is now possible to use something other than the primary key for a link. This field must be unique, though, or you will have an inconsistent database. FormBuilder will *not* warn you if the field is not unique.
+-tripleLinks and crossLinks will now always use the field values from the links.ini instead of primary keys
+-Added a 'multiselect' option to the elementTypeMap. You may now set a different QF element type for multiselects.
+-Fixed a bug where tripleLinks and crossLinks were filled out in a new record (non-fetched DO)
   </notes>
   <deps>
    <dep type="php" rel="ge" version="4.3.0"/>
@@ -54,6 +50,20 @@
   </filelist>
  </release>
  <changelog>
+   <release>
+    <version>0.13.1</version>
+    <date>2005-04-08</date>
+    <state>beta</state>
+    <notes>-Fix Bug #3877 extra fields in crosslink table lost on update to parent table when crossLink type is select
+-Fix fatal errors when crossLinkExtraFields is set and the crossLink is of type 'select'
+-Removed all direct use of Primary Key from crossLink and tripleLink code as it was technically incorrect. It now uses the value from the links.ini
+-Fixed issue with populateOptions being called in DataObject callbacks other than preGenerateForm
+-Fixed issue with crossLink tables with no primary key
+-Fixed possible issue with tripleLinks regarding primary key
+-Fixed possible problem with crossLinks and tripleLinks when no values are found
+-Fixed possible problem with copies of DataObjects using factory
+    </notes>
+   </release>
    <release>
     <version>0.13.0</version>
     <date>2005-03-25</date>
