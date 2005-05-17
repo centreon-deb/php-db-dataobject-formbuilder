@@ -94,7 +94,7 @@
  * @author     Justin Patrin <papercrane@reversefold.com>
  * @copyright  1997-2005 The PHP Group
  * @license    http://www.php.net/license/3_0.txt  PHP License 3.0
- * @version    $Id: FormBuilder.php,v 1.157 2005/04/28 16:57:56 justinpatrin Exp $
+ * @version    $Id: FormBuilder.php,v 1.160 2005/05/17 16:14:59 justinpatrin Exp $
  * @link       http://pear.php.net/package/DB_DataObject_FormBuilder
  * @see        DB_DataObject, HTML_QuickForm
  */
@@ -376,6 +376,11 @@ class DB_DataObject_FormBuilder
      *   New Value entries for.
      */
     var $linkNewValue = array();
+
+    /**
+     * The text which will show up in the link new value select entry. Make sure that this is unique!
+     */
+    var $linkNewValueText = '--New Value--';
 
     /**
      * The caption of the submit button, if created.
@@ -1261,14 +1266,13 @@ class DB_DataObject_FormBuilder
                                 return $options;
                             }
                         }
-                        $keys = array_keys($options);
-                        if (is_int($keys[0])) {
+                        /*if (array_keys($options) === range(0, count($options)-1)) {
                             $newOptions = array();
                             foreach ($options as $value) {
                                 $newOptions[$value] = $value;
                             }
                             $options = $newOptions;
-                        }
+                        }*/
                         if (in_array($key, $this->selectAddEmpty) || !$notNull) {
                             $options = array_merge(array('' => $this->selectAddEmptyLabel), $options);
                         }
@@ -2333,7 +2337,7 @@ class DB_DataObject_FormBuilder
             //take care of linkNewValues
             if (isset($values['__DB_DataObject_FormBuilder_linkNewValue_'])) {
                 foreach ($values['__DB_DataObject_FormBuilder_linkNewValue_'] as $elName => $subTable) {
-                    if ($values[$elName] == '--New Value--') {
+                    if ($values[$elName] == $this->linkNewValueText) {
                         $this->_prepareForLinkNewValue($elName, $subTable);
                         $ret = $this->_linkNewValueForms[$elName]->process(array(&$this->_linkNewValueFBs[$elName], 'processForm'), false);
                         if (PEAR::isError($ret)) {
@@ -2377,7 +2381,7 @@ class DB_DataObject_FormBuilder
                 case DB_DATAOBJECT_FORMBUILDER_QUERY_FORCEUPDATE:
                     if (false === $this->_do->update()) {
                         $this->debug('Update of main record failed');
-                        return $this_raiseDoError('Update of main record failed', $this->_do);
+                        return $this->_raiseDoError('Update of main record failed', $this->_do);
                     }
                     $this->debug('Object updated.<br/>');
                     break;

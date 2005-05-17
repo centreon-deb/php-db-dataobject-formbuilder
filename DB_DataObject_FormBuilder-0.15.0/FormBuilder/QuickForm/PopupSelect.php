@@ -12,7 +12,7 @@
  * @copyright  1997-2005 The PHP Group
  * @license    http://www.php.net/license/3_0.txt  PHP License 3.0
  * @author   Justin Patrin <papercrane@reversefold.com>
- * @version  $Id: PopupSelect.php,v 1.3 2005/03/30 18:39:31 justinpatrin Exp $
+ * @version  $Id: PopupSelect.php,v 1.4 2005/05/16 18:04:59 justinpatrin Exp $
  */
 
 require_once('HTML/QuickForm/select.php');
@@ -67,7 +67,7 @@ class DB_DataObject_FormBuilder_QuickForm_PopupSelect extends HTML_QuickForm_sel
             $links = $this->_fb->_do->links();
             if (isset($links[$this->_fieldName])) {
                 list($table,) = explode(':', $links[$this->_fieldName]);
-                $this->addOption('--New Value--', '--New Value--');
+                $this->addOption($this->_fb->linkNewValueText, $this->_fb->linkNewValueText);
                 $this->updateAttributes(array('onchange' => 'DB_DataObject_FormBuilder_QuickForm_PopupSelect_onchange_'.$this->getName().'_'.$table.'(this)'));
                 $this->updateAttributes(array('id' => $this->getName()));
             }
@@ -92,7 +92,7 @@ class DB_DataObject_FormBuilder_QuickForm_PopupSelect extends HTML_QuickForm_sel
 </div>
 <script type="text/javascript">
 function DB_DataObject_FormBuilder_QuickForm_PopupSelect_onchange_'.$this->getName().'_'.$table.'(sel) {
-  if(sel.value == "--New Value--") {
+  if(sel.value == "'.$this->_fb->linkNewValueText.'") {
     document.getElementById("'.$this->getName().'_'.$table.'").className = "";
   } else {
     document.getElementById("'.$this->getName().'_'.$table.'").className = "hidden";
