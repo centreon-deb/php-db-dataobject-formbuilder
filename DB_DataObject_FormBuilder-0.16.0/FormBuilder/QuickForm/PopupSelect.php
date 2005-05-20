@@ -12,7 +12,7 @@
  * @copyright  1997-2005 The PHP Group
  * @license    http://www.php.net/license/3_0.txt  PHP License 3.0
  * @author   Justin Patrin <papercrane@reversefold.com>
- * @version  $Id: PopupSelect.php,v 1.4 2005/05/16 18:04:59 justinpatrin Exp $
+ * @version  $Id: PopupSelect.php,v 1.5 2005/05/20 16:51:46 justinpatrin Exp $
  */
 
 require_once('HTML/QuickForm/select.php');
@@ -75,10 +75,10 @@ class DB_DataObject_FormBuilder_QuickForm_PopupSelect extends HTML_QuickForm_sel
         $output = parent::toHtml();
         if (!$recLevel && isset($table)) {
             ++$recLevel;
-            $this->_fb->_prepareForLinkNewValue($this->_fieldName, $table);
+            $this->_fb->_form->_prepareForLinkNewValue($this->_fieldName, $table);
             require_once('HTML/QuickForm/Renderer/Default.php');
             $renderer = new HTML_QuickForm_Renderer_Default();
-            $this->_fb->_linkNewValueForms[$this->_fieldName]->accept($renderer);
+            $this->_fb->_form->_linkNewValueForms[$this->_fieldName]->accept($renderer);
             $output .= '
 <style>
 .hidden {
