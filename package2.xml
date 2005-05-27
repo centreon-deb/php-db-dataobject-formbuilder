@@ -22,47 +22,32 @@
   <email>norbert@php.net</email>
   <active>yes</active>
  </developer>
- <date>2005-05-21</date>
- <time>02:03:33</time>
+ <date>2005-05-27</date>
+ <time>20:11:36</time>
  <version>
-  <release>0.16.0</release>
-  <api>0.16.0</api>
+  <release>0.17.0</release>
+  <api>0.17.0</api>
  </version>
  <stability>
   <release>alpha</release>
   <api>alpha</api>
  </stability>
  <license uri="http://www.php.net/license">PHP License</license>
- <notes>Sorry to bring us back down to alpha, but I just changed the driver architecture. We should be back up to beta within a few releases.
-
-Changes
-* BC Break! The QuickForm driver no longer extends the FormBuilder main class
-** This means that extended versions of FormBuilder are no longer tied to a specific driver, however
-** If you have created your own FormBuilder extended class in the past you now need to alter it to
-** extend DB_DataObject_FormBuilder instead of DB_DataObject_FormBuilder_QuickForm
-
-** If you are instantiation your FormBuilder object with &quot;new&quot; you should switch to using DB_DataObject_FormBuilder::create()
-
-Fixes
-* validateOnProcess no longer fails when linkNewValue is used
-
-New Features
-* There are now callback options to allow custom functions to be set for:
-** preGenerateForm
-** postGenerateForm
-** preProcessForm
-** postProcessForm
-** prepareLinekdDataObject
-
-** Note: useCallTimePassByRef is now needed only if you use the FormBuilder parameter in the getForm callback
-
-* If you set the &apos;collapse&apos; key of a crossLink array to true, the unselected crossLink records will be hidden until you click the &quot;Show All&quot; link beneath them. This should help a lot for large amounts of records in crossLinks.</notes>
+ <notes>Fixed bug #4407, addFormHeader no longer works in 0.16.0
+Fixed notices in QuickForm.php related to member vars
+Fixed __ALL__ value in ini file for excludeFromAutoRules getting changed to __ALL__
+Fixed bug #4440, Appended forms does not contain rules and errors
+Added fieldsRequired option to set non NOT NULL fields as required automatically
+Added support for multiple crossLink and tripleLink elements to the same table in one form
+Changed linkNewValue to use a SubForm element and a group instead of PopupSelect
+Removed PopupSelect as it&apos;s no longer used</notes>
  <contents>
   <dir name="/">
    <file baseinstalldir="/DB/DataObject" md5sum="133a631e576d44c39db08ef49b1f5a9c" name="FormBuilder/QuickForm/ElementTable.php" role="php" />
-   <file baseinstalldir="/DB/DataObject" md5sum="41f1c702e233d0f27643ad36efe549f6" name="FormBuilder/QuickForm/PopupSelect.php" role="php" />
-   <file baseinstalldir="/DB/DataObject" md5sum="404f46de07faca5f59a6bbdbd61f8831" name="FormBuilder/QuickForm.php" role="php" />
-   <file baseinstalldir="/DB/DataObject" md5sum="a9d136ded6f50b875759cfab823a8f11" name="FormBuilder.php" role="php" />
+   <file baseinstalldir="/DB/DataObject" md5sum="1ae440fee967061e102d737f94fa27ac" name="FormBuilder/QuickForm/SubForm.php" role="php" />
+   <file baseinstalldir="/DB/DataObject" md5sum="2745b6267519597f76e1e9f965862b74" name="FormBuilder/QuickForm/SubFormFB.php" role="php" />
+   <file baseinstalldir="/DB/DataObject" md5sum="b3fcaf8d34d7ff4a59fd640656543045" name="FormBuilder/QuickForm.php" role="php" />
+   <file baseinstalldir="/DB/DataObject" md5sum="fc431b403f7633e1d9a086322df2a5ae" name="FormBuilder.php" role="php" />
   </dir>
  </contents>
  <dependencies>
@@ -96,6 +81,42 @@ New Features
  </dependencies>
  <phprelease />
  <changelog>
+  <release>
+   <version>
+    <release>0.16.0</release>
+    <api>0.16.0</api>
+   </version>
+   <stability>
+    <release>alpha</release>
+    <api>alpha</api>
+   </stability>
+   <date>2005-05-20</date>
+   <license uri="http://www.php.net/license">PHP License</license>
+   <notes>Sorry to bring us back down to alpha, but I just changed the driver architecture. We should be back up to beta within a few releases.
+
+Changes
+* BC Break! The QuickForm driver no longer extends the FormBuilder main class
+** This means that extended versions of FormBuilder are no longer tied to a specific driver, however
+** If you have created your own FormBuilder extended class in the past you now need to alter it to
+** extend DB_DataObject_FormBuilder instead of DB_DataObject_FormBuilder_QuickForm
+
+** If you are instantiation your FormBuilder object with &quot;new&quot; you should switch to using DB_DataObject_FormBuilder::create()
+
+Fixes
+* validateOnProcess no longer fails when linkNewValue is used
+
+New Features
+* There are now callback options to allow custom functions to be set for:
+** preGenerateForm
+** postGenerateForm
+** preProcessForm
+** postProcessForm
+** prepareLinekdDataObject
+
+** Note: useCallTimePassByRef is now needed only if you use the FormBuilder parameter in the getForm callback
+
+* If you set the &apos;collapse&apos; key of a crossLink array to true, the unselected crossLink records will be hidden until you click the &quot;Show All&quot; link beneath them. This should help a lot for large amounts of records in crossLinks.</notes>
+  </release>
   <release>
    <version>
     <release>0.15.0</release>

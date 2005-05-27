@@ -11,7 +11,7 @@
  * @license    http://www.php.net/license/3_0.txt  PHP License 3.0
  * @author   Markus Wolff <mw21st@php.net>
  * @author   Justin Patrin <papercrane@reversefold.com>
- * @version  $Id: QuickForm.php,v 1.43 2005/05/21 00:03:24 justinpatrin Exp $
+ * @version  $Id: QuickForm.php,v 1.49 2005/05/27 16:23:45 justinpatrin Exp $
  */
 
 require_once ('HTML/QuickForm.php');
@@ -70,6 +70,7 @@ class DB_DataObject_FormBuilder_QuickForm
      */
     var $formHeaderText;
     var $linkNewValue;
+    var $linkNewValueText;
     var $elementNamePrefix;
     var $elementNamePostfix;
     var $dateElementFormat;
@@ -78,6 +79,16 @@ class DB_DataObject_FormBuilder_QuickForm
     var $dateTimeElementFormat;
     var $requiredRuleMessage;
     var $clientRules;
+
+    /**
+     * Holds the QuickForm object
+     */
+    var $_form;
+
+    /**
+     * Holds a QuickForm object to append to the created form
+     */
+    var $_appendForm;
 
     /**
      * The FormBuilder object this driver is attached to
@@ -199,8 +210,6 @@ class DB_DataObject_FormBuilder_QuickForm
      */
     function &_createFormObject($formName, $method, $action, $target)
     {
-        // If there is an existing QuickForm object, and the form object should not just be
-        // appended, use that one. If not, make a new one.
         if (!is_a($this->_form, 'html_quickform')) {
             $this->_form =& new HTML_QuickForm($formName, $method, $action, $target);
         }
@@ -222,19 +231,14 @@ class DB_DataObject_FormBuilder_QuickForm
      * Adds a header to the given form. Will use the header defined in the "formHeaderText" property.
      * Used in _generateForm().
      *
+     * @param string $text THe text for the header
+     *
      * @access protected
      * @see DB_DataObject_FormBuilder::_generateForm()
      */
-    function _addFormHeader()
+    function _addFormHeader($text)
     {
-        // Add a header to the form - set addFormHeader property to false to prevent this
-        if ($this->addFormHeader == true) {
-            if (!is_null($this->formHeaderText)) {
-                $this->_form->addElement('header', '', $this->formHeaderText);
-            } else {
-                $this->_form->addElement('header', '', $this->_fb->_do->tableName());
-            }
-        }    
+        $this->_form->addElement('header', '', $text);
     }
     
     /**
@@ -405,27 +409,39 @@ class DB_DataObject_FormBuilder_QuickForm
                                                       $options,
                                                       array('multiple' => 'multiple'));
         } else {
-            if (isset($this->linkNewValue[$fieldName])) {
-                if (!HTML_QuickForm::isTypeRegistered('popupSelect')) {
-                    HTML_QuickForm::registerElementType('popupSelect',
-                                                        'DB/DataObject/FormBuilder/QuickForm/PopupSelect.php',
-                                                        'DB_DataObject_FormBuilder_QuickForm_PopupSelect');
-                }
-                $type = 'popupSelect';
-            } else {
-                $type = 'select';
-            }
-            $element =& HTML_QuickForm::createElement($this->_getQFType($type),
+            $element =& HTML_QuickForm::createElement($this->_getQFType('select'),
                                                       $this->_fb->getFieldName($fieldName),
                                                       $this->_fb->getFieldLabel($fieldName),
                                                       $options);
-            if ($type == 'popupSelect') {
-                $element->setFormBuilder($this->_fb);
-                $element->setFieldName($fieldName);
+            $attr = $this->_getAttributes('select', $fieldName);
+            $element->updateAttributes($attr);
+            if (isset($this->linkNewValue[$fieldName])) {
+                $links = $this->_fb->_do->links();
+                if (isset($links[$fieldName])) {
+                    list($table,) = explode(':', $links[$fieldName]);
+                    require_once('DB/DataObject/FormBuilder/QuickForm/SubFormFB.php');
+                    $element->addOption($this->linkNewValueText, $this->linkNewValueText);
+                    $element->updateAttributes(array('onchange' => 'db_do_fb_'.$this->_fb->getFieldName($fieldName).'__subForm_display(this)'));
+                    $element->updateAttributes(array('id' => $element->getName()));
+                    $this->_prepareForLinkNewValue($fieldName, $table);
+                    $subFormElement = HTML_QuickForm::createElement('subFormFB',
+                                                                    $this->_fb->getFieldName($fieldName).'__subForm',
+                                                                    '',
+                                                                    $this->_linkNewValueForms[$fieldName]);
+                    $subFormElement->setPreValidationCallback(array(&$subFormElement, 'preValidationCallback'));
+                    $subFormElement->linkNewValueText = $this->linkNewValueText;
+                    $subFormElement->selectName = $this->_fb->getFieldName($fieldName);
+                    $el =& $this->_form->addElement('hidden', $this->_fb->getFieldName($fieldName).'__subForm__displayed');
+                    $el->updateAttributes(array('id' => $el->getName()));
+                    $element = HTML_QuickForm::createElement('group',
+                                                             $this->_fb->getFieldName($fieldName),
+                                                             $this->_fb->getFieldLabel($fieldName),
+                                                             array($element, $subFormElement),
+                                                             '<br/>',
+                                                             false);
+                }
             }
         }
-        $attr = $this->_getAttributes('select', $fieldName);
-        $element->updateAttributes($attr);
         return $element;
     }
 
@@ -446,12 +462,17 @@ class DB_DataObject_FormBuilder_QuickForm
      */
     function validateLinkNewValues($values) {
         $valid = true;
-        if (isset($values[$this->elementNamePrefix.'__DB_DataObject_FormBuilder_linkNewValue_'.$this->elementNamePostfix])) {
-            foreach ($values[$this->elementNamePrefix.'__DB_DataObject_FormBuilder_linkNewValue_'.$this->elementNamePostfix] as $elName => $subTable) {
-                if ($values[$this->elementNamePrefix.$elName.$this->elementNamePostfix] == '--New Value--') {
-                    $this->_prepareForLinkNewValue($elName, $subTable);
-                    if (!$this->_linkNewValueForms[$elName]->validate()) {
-                        $valid = false;
+        /*if (isset($values[$this->elementNamePrefix.'__DB_DataObject_FormBuilder_linkNewValue_'.$this->elementNamePostfix])) {
+            foreach ($values[$this->elementNamePrefix.'__DB_DataObject_FormBuilder_linkNewValue_'.$this->elementNamePostfix] as $elName => $subTable) {*/
+        if (isset($this->_linkNewValueForms)) {
+            foreach (array_keys($this->_linkNewValueForms) as $elName) {
+                $subTable = $this->_linkNewValueDOs[$elName]->tableName();
+                if (isset($values[$this->elementNamePrefix.'__DB_DataObject_FormBuilder_linkNewValue_'.$this->elementNamePostfix.'__'.$elName])) {
+                    if ($values[$this->elementNamePrefix.$elName.$this->elementNamePostfix] == '--New Value--') {
+                        $this->_prepareForLinkNewValue($elName, $subTable);
+                        if (!$this->_linkNewValueForms[$elName]->validate()) {
+                            $valid = false;
+                        }
                     }
                 }
             }
@@ -480,7 +501,7 @@ class DB_DataObject_FormBuilder_QuickForm
             $this->_linkNewValueForms[$elName] =& $this->_linkNewValueFBs[$elName]->getForm();
             $this->_linkNewValueForms[$elName]->addElement('hidden',
                                                            $this->elementNamePrefix.'__DB_DataObject_FormBuilder_linkNewValue_'.
-                                                           $this->elementNamePostfix.'['.$elName.']', $subTable);
+                                                           $this->elementNamePostfix.'__'.$elName, $subTable);
         }
     }
     
@@ -804,6 +825,9 @@ class DB_DataObject_FormBuilder_QuickForm
             while (list($elNum, $element) = each($this->_appendForm->_elements)) {
                 $this->_addElement($element);
             }
+            $form->_errors = array_merge($form->_errors, $this->_appendForm->_errors);
+            $form->_rules = array_merge($form->_rules, $this->_appendForm->_rules);
+            $form->_required = array_merge($form->_required, $this->_appendForm->_required);
         }
     }
 
@@ -857,7 +881,7 @@ function hideCrossLinkRows(name) {
   if (hide) {
     linkText.innerHTML = "Show All";
   } else {
-    linkText.innerHTML = "Hide All";
+    linkText.innerHTML = "Hide Unselected";
   }
 }
 </script>
@@ -865,14 +889,17 @@ function hideCrossLinkRows(name) {
         } else {
             $js = '';
         }
-        $this->_form->addElement('static', $name.'__showAll', '', '
+        $el =& $this->_form->getElement($name);
+        $el->setLabel($el->getLabel().'<br/>
+<small>
 <a href="javascript:hideCrossLinkRows(\''.htmlentities($name, ENT_QUOTES).'\');">
   <span id="'.htmlentities($name, ENT_QUOTES).'__showLink">Show All</span>
-</a>'.$js.'
+</a>
+</small>'.$js);
+        $this->_form->addElement('html', '
 <script type="text/javascript" language="javascript">
 hideCrossLinkRows("'.htmlentities($name, ENT_QUOTES).'");
-</script>
-');
+</script>');
     }
 }
 
