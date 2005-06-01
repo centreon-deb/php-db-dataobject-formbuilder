@@ -94,7 +94,7 @@
  * @author     Justin Patrin <papercrane@reversefold.com>
  * @copyright  1997-2005 The PHP Group
  * @license    http://www.php.net/license/3_0.txt  PHP License 3.0
- * @version    $Id: FormBuilder.php,v 1.183 2005/05/27 16:20:09 justinpatrin Exp $
+ * @version    $Id: FormBuilder.php,v 1.184 2005/05/31 16:28:39 justinpatrin Exp $
  * @link       http://pear.php.net/package/DB_DataObject_FormBuilder
  * @see        DB_DataObject, HTML_QuickForm
  */
@@ -2541,7 +2541,7 @@ class DB_DataObject_FormBuilder
                 if ($do->find()) {
                     $oldFieldValues = array();
                     while ($do->fetch()) {
-                        if (isset($rows[$do->$toField1]) && in_array($do->$toField2, $rows[$do->$toField1])) {
+                        if (isset($rows[$do->$toField1]) && isset($rows[$do->$toField1][$do->$toField2])) {
                             $oldFieldValues[$do->$toField1][$do->$toField2] = true;
                         } else {
                             if (false === $do->delete()) {
@@ -2555,7 +2555,7 @@ class DB_DataObject_FormBuilder
                 if (count($rows) > 0) {
                     foreach ($rows as $rowid => $row) {
                         if (count($row) > 0) {
-                            foreach ($row as $fieldvalue) {
+                            foreach ($row as $fieldvalue => $on) {
                                 if (!isset($oldFieldValues[$rowid]) || !isset($oldFieldValues[$rowid][$fieldvalue])) {
                                     unset($do);
                                     $do =& DB_DataObject::factory($tripleLink['table']);
@@ -2630,7 +2630,7 @@ class DB_DataObject_FormBuilder
                     }
                 }
                 if (count($fieldvalues) > 0) {
-                    foreach ($fieldvalues as $fieldvalue) {
+                    foreach ($fieldvalues as $fieldvalue => $on) {
                         $crossLinkPrefix = $this->elementNamePrefix.$crossLinkName.'__'.$fieldvalue.'_';
                         $crossLinkPostfix = '_'.$this->elementNamePostfix;
                         if (isset($oldFieldValues[$fieldvalue])) {

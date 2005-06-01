@@ -22,32 +22,30 @@
   <email>norbert@php.net</email>
   <active>yes</active>
  </developer>
- <date>2005-05-27</date>
- <time>20:11:36</time>
+ <date>2005-06-01</date>
+ <time>19:43:29</time>
  <version>
-  <release>0.17.0</release>
-  <api>0.17.0</api>
+  <release>0.17.1</release>
+  <api>0.17.1</api>
  </version>
  <stability>
-  <release>alpha</release>
-  <api>alpha</api>
+  <release>beta</release>
+  <api>beta</api>
  </stability>
  <license uri="http://www.php.net/license">PHP License</license>
- <notes>Fixed bug #4407, addFormHeader no longer works in 0.16.0
-Fixed notices in QuickForm.php related to member vars
-Fixed __ALL__ value in ini file for excludeFromAutoRules getting changed to __ALL__
-Fixed bug #4440, Appended forms does not contain rules and errors
-Added fieldsRequired option to set non NOT NULL fields as required automatically
-Added support for multiple crossLink and tripleLink elements to the same table in one form
-Changed linkNewValue to use a SubForm element and a group instead of PopupSelect
-Removed PopupSelect as it&apos;s no longer used</notes>
+ <notes>* Moving back to Beta
+
+* Fixed issue with frozen crosslinks / triplelinks being processed incorrectly
+* trackSubmit is now set true for all forms
+* elementTypeMap arrays need not have all options, only the ones you wish to override need to be specified
+* Added elementTypeMap entry for subForm</notes>
  <contents>
   <dir name="/">
    <file baseinstalldir="/DB/DataObject" md5sum="133a631e576d44c39db08ef49b1f5a9c" name="FormBuilder/QuickForm/ElementTable.php" role="php" />
    <file baseinstalldir="/DB/DataObject" md5sum="1ae440fee967061e102d737f94fa27ac" name="FormBuilder/QuickForm/SubForm.php" role="php" />
    <file baseinstalldir="/DB/DataObject" md5sum="2745b6267519597f76e1e9f965862b74" name="FormBuilder/QuickForm/SubFormFB.php" role="php" />
-   <file baseinstalldir="/DB/DataObject" md5sum="b3fcaf8d34d7ff4a59fd640656543045" name="FormBuilder/QuickForm.php" role="php" />
-   <file baseinstalldir="/DB/DataObject" md5sum="fc431b403f7633e1d9a086322df2a5ae" name="FormBuilder.php" role="php" />
+   <file baseinstalldir="/DB/DataObject" md5sum="ee08fd4ab7a2a2841ad1b42a20ae2049" name="FormBuilder/QuickForm.php" role="php" />
+   <file baseinstalldir="/DB/DataObject" md5sum="8ddac913d8c9fa5916bd471e57387998" name="FormBuilder.php" role="php" />
   </dir>
  </contents>
  <dependencies>
@@ -81,6 +79,26 @@ Removed PopupSelect as it&apos;s no longer used</notes>
  </dependencies>
  <phprelease />
  <changelog>
+  <release>
+   <version>
+    <release>0.17.0</release>
+    <api>0.17.0</api>
+   </version>
+   <stability>
+    <release>alpha</release>
+    <api>alpha</api>
+   </stability>
+   <date>2005-05-27</date>
+   <license uri="http://www.php.net/license">PHP License</license>
+   <notes>Fixed bug #4407, addFormHeader no longer works in 0.16.0
+Fixed notices in QuickForm.php related to member vars
+Fixed __ALL__ value in ini file for excludeFromAutoRules getting changed to __ALL__
+Fixed bug #4440, Appended forms does not contain rules and errors
+Added fieldsRequired option to set non NOT NULL fields as required automatically
+Added support for multiple crossLink and tripleLink elements to the same table in one form
+Changed linkNewValue to use a SubForm element and a group instead of PopupSelect
+Removed PopupSelect as it&apos;s no longer used</notes>
+  </release>
   <release>
    <version>
     <release>0.16.0</release>

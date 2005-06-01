@@ -11,7 +11,7 @@
  * @license    http://www.php.net/license/3_0.txt  PHP License 3.0
  * @author   Markus Wolff <mw21st@php.net>
  * @author   Justin Patrin <papercrane@reversefold.com>
- * @version  $Id: QuickForm.php,v 1.49 2005/05/27 16:23:45 justinpatrin Exp $
+ * @version  $Id: QuickForm.php,v 1.52 2005/06/01 17:41:28 justinpatrin Exp $
  */
 
 require_once ('HTML/QuickForm.php');
@@ -44,8 +44,8 @@ class DB_DataObject_FormBuilder_QuickForm
                                 'integer'   => 'text',
                                 'float'     => 'text',
                                 'select'    => 'select',
-                                'multiselect'    => 'select',
-                                'popupSelect' => 'popupSelect',
+                                'multiselect'  => 'select',
+                                'subForm'      => 'subFormFB',
                                 'elementTable' => 'elementTable');
 
     /**
@@ -161,8 +161,13 @@ class DB_DataObject_FormBuilder_QuickForm
     {
         if (isset($this->elementTypeMap[$fieldType])) {
             return $this->elementTypeMap[$fieldType];
+        } else {
+            $default = get_class_vars(get_class($this));
+            if (isset($default['elementTypeMap'][$fieldType])) {
+                return $default['elementTypeMap'][$fieldType];
+            }
+            return 'text';
         }
-        return 'text';
     }
 
     /**
@@ -211,7 +216,7 @@ class DB_DataObject_FormBuilder_QuickForm
     function &_createFormObject($formName, $method, $action, $target)
     {
         if (!is_a($this->_form, 'html_quickform')) {
-            $this->_form =& new HTML_QuickForm($formName, $method, $action, $target);
+            $this->_form =& new HTML_QuickForm($formName, $method, $action, $target, null, true);
         }
     }
 
@@ -424,7 +429,7 @@ class DB_DataObject_FormBuilder_QuickForm
                     $element->updateAttributes(array('onchange' => 'db_do_fb_'.$this->_fb->getFieldName($fieldName).'__subForm_display(this)'));
                     $element->updateAttributes(array('id' => $element->getName()));
                     $this->_prepareForLinkNewValue($fieldName, $table);
-                    $subFormElement = HTML_QuickForm::createElement('subFormFB',
+                    $subFormElement = HTML_QuickForm::createElement($this->_getQFType('subForm'),
                                                                     $this->_fb->getFieldName($fieldName).'__subForm',
                                                                     '',
                                                                     $this->_linkNewValueForms[$fieldName]);
