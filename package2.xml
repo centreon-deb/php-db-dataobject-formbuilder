@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<package packagerversion="1.4.0a11" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0 http://pear.php.net/dtd/tasks-1.0.xsd http://pear.php.net/dtd/package-2.0 http://pear.php.net/dtd/package-2.0.xsd">
+<package packagerversion="1.4.0a12" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0 http://pear.php.net/dtd/tasks-1.0.xsd http://pear.php.net/dtd/package-2.0 http://pear.php.net/dtd/package-2.0.xsd">
  <name>DB_DataObject_FormBuilder</name>
  <channel>pear.php.net</channel>
  <summary>Class to automatically build HTML_QuickForm objects from a DB_DataObject-derived class</summary>
@@ -22,30 +22,31 @@
   <email>norbert@php.net</email>
   <active>yes</active>
  </developer>
- <date>2005-06-01</date>
- <time>19:43:29</time>
+ <date>2005-06-17</date>
+ <time>18:38:06</time>
  <version>
-  <release>0.17.1</release>
-  <api>0.17.1</api>
+  <release>0.17.2</release>
+  <api>0.17.2</api>
  </version>
  <stability>
   <release>beta</release>
   <api>beta</api>
  </stability>
  <license uri="http://www.php.net/license">PHP License</license>
- <notes>* Moving back to Beta
-
-* Fixed issue with frozen crosslinks / triplelinks being processed incorrectly
-* trackSubmit is now set true for all forms
-* elementTypeMap arrays need not have all options, only the ones you wish to override need to be specified
-* Added elementTypeMap entry for subForm</notes>
+ <notes>* Fixed issue with setStaticProperty
+** Basically you don&apos;t need this line any more:
+** $_DB_DATAOBJECT_FORMBUILDER[&apos;CONFIG&apos;] = $config[&apos;DB_DataObject_FormBuilder&apos;];
+* Fixed problems with not null / required fields and the type option arrays (enumFields, textFields, etc) (bug #4617)
+* Fixed call-time-pass-by-ref error with preGenerateForm
+* Fixed elementNamePrefix/Postfix when collapsing crossLinks
+* crossLink and tripleLink header cells now use &quot;elementTableColumnLabel&quot; and &quot;elementTableRowLabel&quot; classes instead of hard-coding &quot;lightgrey&quot; as a background color for easy styling</notes>
  <contents>
   <dir name="/">
-   <file baseinstalldir="/DB/DataObject" md5sum="133a631e576d44c39db08ef49b1f5a9c" name="FormBuilder/QuickForm/ElementTable.php" role="php" />
+   <file baseinstalldir="/DB/DataObject" md5sum="0f5a64aa240d24107ab607bd0b76d8f1" name="FormBuilder/QuickForm/ElementTable.php" role="php" />
    <file baseinstalldir="/DB/DataObject" md5sum="1ae440fee967061e102d737f94fa27ac" name="FormBuilder/QuickForm/SubForm.php" role="php" />
    <file baseinstalldir="/DB/DataObject" md5sum="2745b6267519597f76e1e9f965862b74" name="FormBuilder/QuickForm/SubFormFB.php" role="php" />
-   <file baseinstalldir="/DB/DataObject" md5sum="ee08fd4ab7a2a2841ad1b42a20ae2049" name="FormBuilder/QuickForm.php" role="php" />
-   <file baseinstalldir="/DB/DataObject" md5sum="8ddac913d8c9fa5916bd471e57387998" name="FormBuilder.php" role="php" />
+   <file baseinstalldir="/DB/DataObject" md5sum="40fac5db07e752b113c43e06bb2dc5d4" name="FormBuilder/QuickForm.php" role="php" />
+   <file baseinstalldir="/DB/DataObject" md5sum="d1a4a4af577145dcab95b966049ebd9f" name="FormBuilder.php" role="php" />
   </dir>
  </contents>
  <dependencies>
@@ -79,6 +80,24 @@
  </dependencies>
  <phprelease />
  <changelog>
+  <release>
+   <version>
+    <release>0.17.1</release>
+    <api>0.17.1</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <date>2005-06-01</date>
+   <license uri="http://www.php.net/license">PHP License</license>
+   <notes>* Moving back to Beta
+
+* Fixed issue with frozen crosslinks / triplelinks being processed incorrectly
+* trackSubmit is now set true for all forms
+* elementTypeMap arrays need not have all options, only the ones you wish to override need to be specified
+* Added elementTypeMap entry for subForm</notes>
+  </release>
   <release>
    <version>
     <release>0.17.0</release>

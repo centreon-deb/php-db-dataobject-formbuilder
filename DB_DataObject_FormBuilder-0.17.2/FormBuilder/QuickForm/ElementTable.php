@@ -9,7 +9,7 @@
  * @copyright  1997-2005 The PHP Group
  * @license    http://www.php.net/license/3_0.txt  PHP License 3.0
  * @author   Justin Patrin <papercrane@reversefold.com>
- * @version  $Id: ElementTable.php,v 1.7 2005/05/20 23:30:40 justinpatrin Exp $
+ * @version  $Id: ElementTable.php,v 1.8 2005/06/01 21:40:34 justinpatrin Exp $
  */
 
 require_once('HTML/QuickForm/element.php');
@@ -188,11 +188,10 @@ class DB_DataObject_FormBuilder_QuickForm_ElementTable extends HTML_QuickForm_el
             }
             ++$row;
         }
-        $hrAttrs = array('bgcolor' => 'lightgrey');
         if ($this->_columnNames) {
-            $tripleLinkTable->setRowAttributes(0, $hrAttrs, true);
+            $tripleLinkTable->setRowAttributes(0, array('class' => 'elementTableColumnLabel'), true);
         }
-        $tripleLinkTable->setColAttributes(0, $hrAttrs);
+        $tripleLinkTable->setColAttributes(0, array('class' => 'elementTableRowLabel'));
         return $tripleLinkTable->toHTML();
 
         /*include_once('HTML/QuickForm/Renderer/Default.php');

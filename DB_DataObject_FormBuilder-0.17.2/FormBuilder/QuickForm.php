@@ -11,7 +11,7 @@
  * @license    http://www.php.net/license/3_0.txt  PHP License 3.0
  * @author   Markus Wolff <mw21st@php.net>
  * @author   Justin Patrin <papercrane@reversefold.com>
- * @version  $Id: QuickForm.php,v 1.52 2005/06/01 17:41:28 justinpatrin Exp $
+ * @version  $Id: QuickForm.php,v 1.53 2005/06/11 00:54:57 justinpatrin Exp $
  */
 
 require_once ('HTML/QuickForm.php');
@@ -894,16 +894,16 @@ function hideCrossLinkRows(name) {
         } else {
             $js = '';
         }
-        $el =& $this->_form->getElement($name);
+        $el =& $this->_form->getElement($this->_fb->getFieldName($name));
         $el->setLabel($el->getLabel().'<br/>
 <small>
-<a href="javascript:hideCrossLinkRows(\''.htmlentities($name, ENT_QUOTES).'\');">
-  <span id="'.htmlentities($name, ENT_QUOTES).'__showLink">Show All</span>
+<a href="javascript:hideCrossLinkRows(\''.htmlentities($this->_fb->getFieldName($name), ENT_QUOTES).'\');">
+  <span id="'.htmlentities($this->_fb->getFieldName($name), ENT_QUOTES).'__showLink">Show All</span>
 </a>
 </small>'.$js);
         $this->_form->addElement('html', '
 <script type="text/javascript" language="javascript">
-hideCrossLinkRows("'.htmlentities($name, ENT_QUOTES).'");
+hideCrossLinkRows("'.htmlentities($this->_fb->getFieldName($name), ENT_QUOTES).'");
 </script>');
     }
 }

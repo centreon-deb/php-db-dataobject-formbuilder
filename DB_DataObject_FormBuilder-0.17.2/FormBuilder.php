@@ -15,11 +15,6 @@
  *      $options = $values;
  *  }
  * </code>
- * Unfortunately, DataObject will overwrite FormBuilder's settings when first instantiated,
- * so you'll have to add another line after that:
- * <code>
- *  $_DB_DATAOBJECT_FORMBUILDER['CONFIG'] = $config['DB_DataObject_FormBuilder'];
- * </code>
  * Now you're ready to go!
  *
  * You can also set any option through your DB_DataObject derived classes by
@@ -94,7 +89,7 @@
  * @author     Justin Patrin <papercrane@reversefold.com>
  * @copyright  1997-2005 The PHP Group
  * @license    http://www.php.net/license/3_0.txt  PHP License 3.0
- * @version    $Id: FormBuilder.php,v 1.184 2005/05/31 16:28:39 justinpatrin Exp $
+ * @version    $Id: FormBuilder.php,v 1.189 2005/06/17 16:32:41 justinpatrin Exp $
  * @link       http://pear.php.net/package/DB_DataObject_FormBuilder
  * @see        DB_DataObject, HTML_QuickForm
  */
@@ -893,17 +888,19 @@ class DB_DataObject_FormBuilder
         // Read in config
         $vars = get_object_vars($this);
         $defVars = get_class_vars(get_class($this));
-        if (isset($GLOBALS['_DB_DATAOBJECT_FORMBUILDER']['CONFIG'])) {
-            //read all config options into member vars
-            foreach ($GLOBALS['_DB_DATAOBJECT_FORMBUILDER']['CONFIG'] as $key => $value) {
-                if (in_array($key, $vars) && $key[0] != '_') {
-                    if ((!isset($defVars[$key])
-                         || is_array($defVars[$key]))
-                        && is_string($value)) {
-                        $value = $this->_explodeArrString($value);
-                    }
-                    $this->$key = $value;
+        $config =& PEAR::getStaticProperty('DB_DataObject_FormBuilder', 'options');
+        if (!isset($config) || !is_array($config)) {
+            $config = array();
+        }
+        //read all config options into member vars
+        foreach ($config as $key => $value) {
+            if (in_array($key, $vars) && $key[0] != '_') {
+                if (isset($defVars[$key])
+                    && is_array($defVars[$key])
+                    && is_string($value)) {
+                    $value = $this->_explodeArrString($value);
                 }
+                $this->$key = $value;
             }
         }
         if (is_array($options)) {
@@ -1067,6 +1064,7 @@ class DB_DataObject_FormBuilder
             } else {
                 unset($element);
                 // Try to determine field types depending on object properties
+                $notNull = $type & DB_DATAOBJECT_NOTNULL;
                 if (in_array($key, $this->dateFields)) {
                     $type = DB_DATAOBJECT_DATE;
                 } elseif (in_array($key, $this->timeFields)) {
@@ -1078,7 +1076,7 @@ class DB_DataObject_FormBuilder
                 } elseif (in_array($key, $this->booleanFields)) {
                     $type = DB_DATAOBJECT_BOOL;
                 }
-                if (in_array($key, $this->fieldsRequired)) {
+                if ($notNull || in_array($key, $this->fieldsRequired)) {
                     $type |= DB_DATAOBJECT_NOTNULL;
                 }
                 if (isset($this->preDefElements[$key]) 
@@ -2087,7 +2085,7 @@ class DB_DataObject_FormBuilder
     function &getForm($action = false, $target = '_self', $formName = false, $method = 'post')
     {
         if (is_callable($this->preGenerateFormCallback)) {
-            call_user_func($this->preGenerateFormCallback, &$this);
+            call_user_func_array($this->preGenerateFormCallback, array(&$this));
         }
         $this->populateOptions();
         if (method_exists($this->_do, 'getform')) {
