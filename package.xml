@@ -7,15 +7,15 @@
  </description>
  <maintainers>
   <maintainer>
-   <user>mw21st</user>
-   <name>Markus Wolff</name>
-   <email>mw21st@php.net</email>
-   <role>lead</role>
-  </maintainer>
-  <maintainer>
    <user>justinpatrin</user>
    <name>Justin Patrin</name>
    <email>justinpatrin@php.net</email>
+   <role>lead</role>
+  </maintainer>
+  <maintainer>
+   <user>mw21st</user>
+   <name>Markus Wolff</name>
+   <email>mw21st@php.net</email>
    <role>lead</role>
   </maintainer>
   <maintainer>
@@ -26,17 +26,26 @@
   </maintainer>
   </maintainers>
  <release>
-  <version>0.17.2</version>
-  <date>2005-06-17</date>
+  <version>0.18.0</version>
+  <date>2005-08-22</date>
   <license>PHP License</license>
   <state>beta</state>
-  <notes>* Fixed issue with setStaticProperty
-** Basically you don't need this line any more:
-** $_DB_DATAOBJECT_FORMBUILDER['CONFIG'] = $config['DB_DataObject_FormBuilder'];
-* Fixed problems with not null / required fields and the type option arrays (enumFields, textFields, etc) (bug #4617)
-* Fixed call-time-pass-by-ref error with preGenerateForm
-* Fixed elementNamePrefix/Postfix when collapsing crossLinks
-* crossLink and tripleLink header cells now use &quot;elementTableColumnLabel&quot; and &quot;elementTableRowLabel&quot; classes instead of hard-coding &quot;lightgrey&quot; as a background color for easy styling
+  <notes>* Fixed notice about $className in FormBuilder.php
+* Fig bug #4867 - enumOptions renumbered for NULL fields
+* Fixed bug where _array2Date added AM/PM to dates
+* Fixed bug where some callbacks set in PEAR::setStaticProperty or passed into the constructor would get overwritten with defaults
+* Fixed bug #5127 - cross/triple/reverseLinks don't work with pgsql
+* Fixed bug #4562 - date elements need to use addGroupRule
+
+* Altered create() to allow for any main class to be used
+* Altered create() to allow for inclusion of driver classes outside FormBuilder
+* The prepareLinkedDataObject callback may now affect displayFields and other link options
+* Added date/time option callback properties
+* Altered the default field labels to be much more useful
+
+* Changed SubForm elements to always use the default QuickForm renderer (used by linkNewValue)
+* Changed dataFromDatabaseCallback and dateToDatabaseCallback to allow for disabling of them
+** This is a slight BC break as a non-callable value was previously replaced with the defaults
   </notes>
   <deps>
    <dep type="php" rel="ge" version="4.3.0"/>
@@ -54,6 +63,19 @@
   </filelist>
  </release>
  <changelog>
+   <release>
+    <version>0.17.2</version>
+    <date>2005-06-17</date>
+    <state>beta</state>
+    <notes>* Fixed issue with setStaticProperty
+** Basically you don't need this line any more:
+** $_DB_DATAOBJECT_FORMBUILDER['CONFIG'] = $config['DB_DataObject_FormBuilder'];
+* Fixed problems with not null / required fields and the type option arrays (enumFields, textFields, etc) (bug #4617)
+* Fixed call-time-pass-by-ref error with preGenerateForm
+* Fixed elementNamePrefix/Postfix when collapsing crossLinks
+* crossLink and tripleLink header cells now use &quot;elementTableColumnLabel&quot; and &quot;elementTableRowLabel&quot; classes instead of hard-coding &quot;lightgrey&quot; as a background color for easy styling
+    </notes>
+   </release>
    <release>
     <version>0.17.1</version>
     <date>2005-06-01</date>

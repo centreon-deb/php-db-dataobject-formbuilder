@@ -11,7 +11,7 @@
  * @license    http://www.php.net/license/3_0.txt  PHP License 3.0
  * @author   Markus Wolff <mw21st@php.net>
  * @author   Justin Patrin <papercrane@reversefold.com>
- * @version  $Id: QuickForm.php,v 1.53 2005/06/11 00:54:57 justinpatrin Exp $
+ * @version  $Id: QuickForm.php,v 1.58 2005/08/22 04:26:47 justinpatrin Exp $
  */
 
 require_once ('HTML/QuickForm.php');
@@ -79,6 +79,9 @@ class DB_DataObject_FormBuilder_QuickForm
     var $dateTimeElementFormat;
     var $requiredRuleMessage;
     var $clientRules;
+    var $dateOptionsCallback;
+    var $timeOptionsCallback;
+    var $dateTimeOptionsCallback;
 
     /**
      * Holds the QuickForm object
@@ -213,7 +216,7 @@ class DB_DataObject_FormBuilder_QuickForm
      * @access protected
      * @see DB_DataObject_FormBuilder::_generateForm()
      */
-    function &_createFormObject($formName, $method, $action, $target)
+    function _createFormObject($formName, $method, $action, $target)
     {
         if (!is_a($this->_form, 'html_quickform')) {
             $this->_form =& new HTML_QuickForm($formName, $method, $action, $target, null, true);
@@ -429,21 +432,21 @@ class DB_DataObject_FormBuilder_QuickForm
                     $element->updateAttributes(array('onchange' => 'db_do_fb_'.$this->_fb->getFieldName($fieldName).'__subForm_display(this)'));
                     $element->updateAttributes(array('id' => $element->getName()));
                     $this->_prepareForLinkNewValue($fieldName, $table);
-                    $subFormElement = HTML_QuickForm::createElement($this->_getQFType('subForm'),
-                                                                    $this->_fb->getFieldName($fieldName).'__subForm',
-                                                                    '',
-                                                                    $this->_linkNewValueForms[$fieldName]);
+                    $subFormElement =& HTML_QuickForm::createElement($this->_getQFType('subForm'),
+                                                                     $this->_fb->getFieldName($fieldName).'__subForm',
+                                                                     '',
+                                                                     $this->_linkNewValueForms[$fieldName]);
                     $subFormElement->setPreValidationCallback(array(&$subFormElement, 'preValidationCallback'));
                     $subFormElement->linkNewValueText = $this->linkNewValueText;
                     $subFormElement->selectName = $this->_fb->getFieldName($fieldName);
                     $el =& $this->_form->addElement('hidden', $this->_fb->getFieldName($fieldName).'__subForm__displayed');
                     $el->updateAttributes(array('id' => $el->getName()));
-                    $element = HTML_QuickForm::createElement('group',
-                                                             $this->_fb->getFieldName($fieldName),
-                                                             $this->_fb->getFieldLabel($fieldName),
-                                                             array($element, $subFormElement),
-                                                             '<br/>',
-                                                             false);
+                    $element =& HTML_QuickForm::createElement('group',
+                                                              $this->_fb->getFieldName($fieldName),
+                                                              $this->_fb->getFieldLabel($fieldName),
+                                                              array($element, $subFormElement),
+                                                              '<br/>',
+                                                              false);
                 }
             }
         }
@@ -615,8 +618,10 @@ class DB_DataObject_FormBuilder_QuickForm
     function &_createDateElement($fieldName) {
         $dateOptions = array('format' => $this->dateElementFormat,
                              'language' => $this->dateFieldLanguage);
-        if (method_exists($this->_fb->_do, 'dateoptions')) {
-            $dateOptions = array_merge($dateOptions, $this->_fb->_do->dateOptions($fieldName));
+        if (is_callable($this->dateOptionsCallback)) {
+            $dateOptions = array_merge($dateOptions,
+                                       call_user_func_array($this->dateOptionsCallback,
+                                                            array($fieldName, &$fb)));
         }
         if (!isset($dateOptions['addEmptyOption']) && in_array($fieldName, $this->_fb->selectAddEmpty)) {
             $dateOptions['addEmptyOption'] = true;
@@ -647,8 +652,10 @@ class DB_DataObject_FormBuilder_QuickForm
     function &_createTimeElement($fieldName) {
         $timeOptions = array('format' => $this->timeElementFormat,
                              'language' => $this->dateFieldLanguage);
-        if (method_exists($this->_fb->_do, 'timeoptions')) { // Frank: I'm trying to trace this but am unsure of it //
-            $timeOptions = array_merge($timeOptions, $this->_fb->_do->timeOptions($fieldName));
+        if (is_callable($this->timeOptionsCallback)) {
+            $timeOptions = array_merge($timeOptions,
+                                       call_user_func_array($this->timeOptionsCallback,
+                                                            array($fieldName, &$fb)));
         }
         if (!isset($timeOptions['addEmptyOption']) && in_array($fieldName, $this->_fb->selectAddEmpty)) {
             $timeOptions['addEmptyOption'] = true;
@@ -677,8 +684,10 @@ class DB_DataObject_FormBuilder_QuickForm
     function &_createDateTimeElement($fieldName) {
         $dateOptions = array('format' => $this->dateTimeElementFormat,
                              'language' => $this->dateFieldLanguage);
-        if (method_exists($this->_fb->_do, 'datetimeoptions')) {
-            $dateOptions = array_merge($dateOptions, $this->_fb->_do->dateTimeOptions($fieldName));
+        if (is_callable($this->dateTimeOptionsCallback)) {
+            $dateOptions = array_merge($dateOptions,
+                                       call_user_func_array($this->dateTimeOptionsCallback,
+                                                            array($fieldName, &$fb)));
         }
         if (!isset($dateOptions['addEmptyOption']) && in_array($fieldName, $this->_fb->selectAddEmpty)) {
             $dateOptions['addEmptyOption'] = true;
@@ -765,18 +774,25 @@ class DB_DataObject_FormBuilder_QuickForm
         $fieldLabel = $this->_fb->getFieldLabel($fieldName);
         $ruleSide = $this->clientRules ? 'client' : 'server';
         foreach ($rules as $rule) {
-            if ($rule['rule'] === false) {
-                $this->_form->addRule($this->_fb->getFieldName($fieldName),
-                                      sprintf($rule['message'], $fieldLabel),
-                                      $rule['validator'],
-                                      '', 
-                                      $ruleSide);
+            $realFieldName = $this->_fb->getFieldName($fieldName);
+            $el =& $this->_form->getElement($realFieldName);
+            if (is_a($el, 'HTML_QuickForm_Date')) {
+                $ruleFunction = 'addGroupRule';
             } else {
-                $this->_form->addRule($this->_fb->getFieldName($fieldName),
-                                      sprintf($rule['message'], $fieldLabel),
-                                      $rule['validator'],
-                                      $rule['rule'],
-                                      $ruleSide);
+                $ruleFunction = 'addRule';
+            }
+            if ($rule['rule'] === false) {
+                $this->_form->$ruleFunction($realFieldName,
+                                            sprintf($rule['message'], $fieldLabel),
+                                            $rule['validator'],
+                                            '', 
+                                            $ruleSide);
+            } else {
+                $this->_form->$ruleFunction($realFieldName,
+                                            sprintf($rule['message'], $fieldLabel),
+                                            $rule['validator'],
+                                            $rule['rule'],
+                                            $ruleSide);
             } // End if
         } // End while
     }

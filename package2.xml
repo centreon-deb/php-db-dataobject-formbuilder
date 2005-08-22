@@ -5,15 +5,15 @@
  <summary>Class to automatically build HTML_QuickForm objects from a DB_DataObject-derived class</summary>
  <description>DB_DataObject_FormBuilder will aid you in rapid application development using the packages DB_DataObject and HTML_QuickForm. For having a quick but working prototype of your application, simply model the database, run DataObject&apos;s createTable script over it and write a script that passes one of the resulting objects to the FormBuilder class. The FormBuilder will automatically generate a simple but working HTML_QuickForm object that you can use to test your application. It also provides a processing method that will automatically detect if an insert() or update() command has to be executed after the form has been submitted. If you have set up DataObject&apos;s links.ini file correctly, it will also automatically detect if a table field is a foreign key and will populate a selectbox with the linked table&apos;s entries. There are many optional parameters that you can place in your DataObjects.ini or in the properties of your derived classes, that you can use to fine-tune the form-generation, gradually turning the prototypes into fully-featured forms, and you can take control at any stage of the process.</description>
  <lead>
-  <name>Markus Wolff</name>
-  <user>mw21st</user>
-  <email>mw21st@php.net</email>
-  <active>yes</active>
- </lead>
- <lead>
   <name>Justin Patrin</name>
   <user>justinpatrin</user>
   <email>justinpatrin@php.net</email>
+  <active>yes</active>
+ </lead>
+ <lead>
+  <name>Markus Wolff</name>
+  <user>mw21st</user>
+  <email>mw21st@php.net</email>
   <active>yes</active>
  </lead>
  <developer>
@@ -22,31 +22,40 @@
   <email>norbert@php.net</email>
   <active>yes</active>
  </developer>
- <date>2005-06-17</date>
- <time>18:38:06</time>
+ <date>2005-08-22</date>
+ <time>15:30:14</time>
  <version>
-  <release>0.17.2</release>
-  <api>0.17.2</api>
+  <release>0.18.0</release>
+  <api>0.18.0</api>
  </version>
  <stability>
   <release>beta</release>
   <api>beta</api>
  </stability>
  <license uri="http://www.php.net/license">PHP License</license>
- <notes>* Fixed issue with setStaticProperty
-** Basically you don&apos;t need this line any more:
-** $_DB_DATAOBJECT_FORMBUILDER[&apos;CONFIG&apos;] = $config[&apos;DB_DataObject_FormBuilder&apos;];
-* Fixed problems with not null / required fields and the type option arrays (enumFields, textFields, etc) (bug #4617)
-* Fixed call-time-pass-by-ref error with preGenerateForm
-* Fixed elementNamePrefix/Postfix when collapsing crossLinks
-* crossLink and tripleLink header cells now use &quot;elementTableColumnLabel&quot; and &quot;elementTableRowLabel&quot; classes instead of hard-coding &quot;lightgrey&quot; as a background color for easy styling</notes>
+ <notes>* Fixed notice about $className in FormBuilder.php
+* Fig bug #4867 - enumOptions renumbered for NULL fields
+* Fixed bug where _array2Date added AM/PM to dates
+* Fixed bug where some callbacks set in PEAR::setStaticProperty or passed into the constructor would get overwritten with defaults
+* Fixed bug #5127 - cross/triple/reverseLinks don&apos;t work with pgsql
+* Fixed bug #4562 - date elements need to use addGroupRule
+
+* Altered create() to allow for any main class to be used
+* Altered create() to allow for inclusion of driver classes outside FormBuilder
+* The prepareLinkedDataObject callback may now affect displayFields and other link options
+* Added date/time option callback properties
+* Altered the default field labels to be much more useful
+
+* Changed SubForm elements to always use the default QuickForm renderer (used by linkNewValue)
+* Changed dataFromDatabaseCallback and dateToDatabaseCallback to allow for disabling of them
+** This is a slight BC break as a non-callable value was previously replaced with the defaults</notes>
  <contents>
   <dir name="/">
    <file baseinstalldir="/DB/DataObject" md5sum="0f5a64aa240d24107ab607bd0b76d8f1" name="FormBuilder/QuickForm/ElementTable.php" role="php" />
-   <file baseinstalldir="/DB/DataObject" md5sum="1ae440fee967061e102d737f94fa27ac" name="FormBuilder/QuickForm/SubForm.php" role="php" />
+   <file baseinstalldir="/DB/DataObject" md5sum="db0b70777ac611da693eb99e5a06779e" name="FormBuilder/QuickForm/SubForm.php" role="php" />
    <file baseinstalldir="/DB/DataObject" md5sum="2745b6267519597f76e1e9f965862b74" name="FormBuilder/QuickForm/SubFormFB.php" role="php" />
-   <file baseinstalldir="/DB/DataObject" md5sum="40fac5db07e752b113c43e06bb2dc5d4" name="FormBuilder/QuickForm.php" role="php" />
-   <file baseinstalldir="/DB/DataObject" md5sum="d1a4a4af577145dcab95b966049ebd9f" name="FormBuilder.php" role="php" />
+   <file baseinstalldir="/DB/DataObject" md5sum="de6e1752abca4860a3d9dc8d52fc7e06" name="FormBuilder/QuickForm.php" role="php" />
+   <file baseinstalldir="/DB/DataObject" md5sum="d313cf7435ff6ce850d36e79325bd204" name="FormBuilder.php" role="php" />
   </dir>
  </contents>
  <dependencies>
@@ -80,6 +89,25 @@
  </dependencies>
  <phprelease />
  <changelog>
+  <release>
+   <version>
+    <release>0.17.2</release>
+    <api>0.17.2</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <date>2005-06-17</date>
+   <license uri="http://www.php.net/license">PHP License</license>
+   <notes>* Fixed issue with setStaticProperty
+** Basically you don&apos;t need this line any more:
+** $_DB_DATAOBJECT_FORMBUILDER[&apos;CONFIG&apos;] = $config[&apos;DB_DataObject_FormBuilder&apos;];
+* Fixed problems with not null / required fields and the type option arrays (enumFields, textFields, etc) (bug #4617)
+* Fixed call-time-pass-by-ref error with preGenerateForm
+* Fixed elementNamePrefix/Postfix when collapsing crossLinks
+* crossLink and tripleLink header cells now use &quot;elementTableColumnLabel&quot; and &quot;elementTableRowLabel&quot; classes instead of hard-coding &quot;lightgrey&quot; as a background color for easy styling</notes>
+  </release>
   <release>
    <version>
     <release>0.17.1</release>
