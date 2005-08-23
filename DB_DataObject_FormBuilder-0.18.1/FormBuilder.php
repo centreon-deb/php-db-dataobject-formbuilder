@@ -89,7 +89,7 @@
  * @author     Justin Patrin <papercrane@reversefold.com>
  * @copyright  1997-2005 The PHP Group
  * @license    http://www.php.net/license/3_0.txt  PHP License 3.0
- * @version    $Id: FormBuilder.php,v 1.202 2005/08/22 05:16:09 justinpatrin Exp $
+ * @version    $Id: FormBuilder.php,v 1.204 2005/08/23 20:54:18 justinpatrin Exp $
  * @link       http://pear.php.net/package/DB_DataObject_FormBuilder
  * @see        DB_DataObject, HTML_QuickForm
  */
@@ -900,15 +900,15 @@ class DB_DataObject_FormBuilder
      */
     function DB_DataObject_FormBuilder(&$do, $options = false)
     {
-        $this->_do = &$do;
+        $this->_do =& $do;
         $this->preGenerateFormCallback = array(&$this->_do, 'preGenerateForm');
         $this->postGenerateFormCallback = array(&$this->_do, 'postGenerateForm');
         $this->preProcessFormCallback = array(&$this->_do, 'preProcessForm');
         $this->postProcessFormCallback = array(&$this->_do, 'postProcessForm');
         $this->prepareLinkedDataObjectCallback = array(&$this->_do, 'prepareLinkedDataObject');
-        $this->dateOptionsCallback = array(&$this->_fb->_do, 'dateOptions');
-        $this->timeOptionsCallback = array(&$this->_fb->_do, 'timeOptions');
-        $this->dateTimeOptionsCallback = array(&$this->_fb->_do, 'dateTimeOptions');
+        $this->dateOptionsCallback = array(&$this->_do, 'dateOptions');
+        $this->timeOptionsCallback = array(&$this->_do, 'timeOptions');
+        $this->dateTimeOptionsCallback = array(&$this->_do, 'dateTimeOptions');
         $this->enumOptionsCallback = array(&$this, '_getEnumOptions');
         
         // Read in config
@@ -1233,7 +1233,6 @@ class DB_DataObject_FormBuilder
                     } else {
                         $element = array();
                         $rowNames = array();
-                        $colNames = array('');
                         foreach ($all_options as $optionKey => $value) {
                             if (isset($selected_options[$optionKey])) {
                                 if (!isset($formValues[$groupName])) {
@@ -1262,6 +1261,7 @@ class DB_DataObject_FormBuilder
                                 $extraFieldDo->fb_linkNewValue = false;
                                 $this->_extraFieldsFb[$elementNamePrefix.$elementNamePostfix] =& $tempFb;
                                 $tempForm = $tempFb->getForm();
+                                $colNames = array('');
                                 foreach ($crossLinkDo->fb_crossLinkExtraFields as $extraField) {
                                     if ($tempForm->elementExists($elementNamePrefix.$extraField.$elementNamePostfix)) {
                                         $tempEl =& $tempForm->getElement($elementNamePrefix.$extraField.$elementNamePostfix);
@@ -1300,7 +1300,7 @@ class DB_DataObject_FormBuilder
                             $this->_form->_addElementGroup($element, $groupName, $this->crossLinkSeparator);
                         }
                         if ($crossLink['collapse']) {
-                            $this->_form->_collapseCrossLink($groupName);
+                            $this->_form->_collapseRecordList($groupName);
                         }
                         unset($element);
                         unset($rowNames);
@@ -1438,6 +1438,9 @@ class DB_DataObject_FormBuilder
                     //$rFields = $do->table();
                     list($lTable, $lField) = explode(':', $rLinks[$this->reverseLinks[$key]['field']]);
                     $formValues[$elName] = array();
+                    if ($this->reverseLinks[$key]['collapse']) {
+                        $table = $rowNames = array();
+                    }
                     if ($do->find()) {
                         while ($do->fetch()) {
                             $label = $this->getDataObjectString($do);
@@ -1446,10 +1449,20 @@ class DB_DataObject_FormBuilder
                             } elseif ($rLinked =& $do->getLink($this->reverseLinks[$key]['field'])) {
                                 $label .= '<b>'.$this->reverseLinks[$key]['linkText'].$this->getDataObjectString($rLinked).'</b>';
                             }
-                            $element[] =& $this->_form->_createCheckbox($elName.'['.$do->$rPk.']', $label, $do->$rPk);
+                            if ($this->reverseLinks[$key]['collapse']) {
+                                $table[] = array($this->_form->_createCheckbox($elName.'['.$do->$rPk.']', '', $do->$rPk));
+                                $rowNames[] = $label;
+                            } else {
+                                $element[] =& $this->_form->_createCheckbox($elName.'['.$do->$rPk.']', $label, $do->$rPk);
+                            }
                         }
                     }
-                    $this->_form->_addElementGroup($element, $elName, $this->crossLinkSeparator);
+                    if ($this->reverseLinks[$key]['collapse']) {
+                        $this->_form->_addElementTable($elName, array(), $rowNames, $table);
+                        $this->_form->_collapseRecordList($elName);
+                    } else {
+                        $this->_form->_addElementGroup($element, $elName, $this->crossLinkSeparator);
+                    }
                     unset($element);
                     break;
                 case ($type & DB_DATAOBJECT_FORMBUILDER_GROUP):
@@ -2062,6 +2075,9 @@ class DB_DataObject_FormBuilder
             if (!isset($reverseLink['linkText'])) {
                 $reverseLink['linkText'] = ' - currently linked to - ';
             }
+            if (!isset($reverseLink['collapse'])) {
+                $reverseLink['collapse'] = false;
+            }
             unset($this->reverseLinks[$key]);
             $this->reverseLinks[$elName] = $reverseLink;
         }
@@ -2135,7 +2151,7 @@ class DB_DataObject_FormBuilder
                 $obj = $this->_do->getForm($action, $target, $formName, $method, $this);
             }
         } else {
-            $obj = &$this->_generateForm($action, $target, $formName, $method);
+            $obj =& $this->_generateForm($action, $target, $formName, $method);
         }
         if (is_callable($this->postGenerateFormCallback)) {
             call_user_func_array($this->postGenerateFormCallback, array(&$obj, &$this));

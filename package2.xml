@@ -22,40 +22,27 @@
   <email>norbert@php.net</email>
   <active>yes</active>
  </developer>
- <date>2005-08-22</date>
- <time>15:30:14</time>
+ <date>2005-08-23</date>
+ <time>14:06:16</time>
  <version>
-  <release>0.18.0</release>
-  <api>0.18.0</api>
+  <release>0.18.1</release>
+  <api>0.18.1</api>
  </version>
  <stability>
   <release>beta</release>
   <api>beta</api>
  </stability>
  <license uri="http://www.php.net/license">PHP License</license>
- <notes>* Fixed notice about $className in FormBuilder.php
-* Fig bug #4867 - enumOptions renumbered for NULL fields
-* Fixed bug where _array2Date added AM/PM to dates
-* Fixed bug where some callbacks set in PEAR::setStaticProperty or passed into the constructor would get overwritten with defaults
-* Fixed bug #5127 - cross/triple/reverseLinks don&apos;t work with pgsql
-* Fixed bug #4562 - date elements need to use addGroupRule
+ <notes>* Fix bug #5188 - date option callbacks default values do not work
 
-* Altered create() to allow for any main class to be used
-* Altered create() to allow for inclusion of driver classes outside FormBuilder
-* The prepareLinkedDataObject callback may now affect displayFields and other link options
-* Added date/time option callback properties
-* Altered the default field labels to be much more useful
-
-* Changed SubForm elements to always use the default QuickForm renderer (used by linkNewValue)
-* Changed dataFromDatabaseCallback and dateToDatabaseCallback to allow for disabling of them
-** This is a slight BC break as a non-callable value was previously replaced with the defaults</notes>
+* Implemented request #4647 - Added collapse support for reverseLinks</notes>
  <contents>
   <dir name="/">
    <file baseinstalldir="/DB/DataObject" md5sum="0f5a64aa240d24107ab607bd0b76d8f1" name="FormBuilder/QuickForm/ElementTable.php" role="php" />
    <file baseinstalldir="/DB/DataObject" md5sum="db0b70777ac611da693eb99e5a06779e" name="FormBuilder/QuickForm/SubForm.php" role="php" />
    <file baseinstalldir="/DB/DataObject" md5sum="2745b6267519597f76e1e9f965862b74" name="FormBuilder/QuickForm/SubFormFB.php" role="php" />
-   <file baseinstalldir="/DB/DataObject" md5sum="de6e1752abca4860a3d9dc8d52fc7e06" name="FormBuilder/QuickForm.php" role="php" />
-   <file baseinstalldir="/DB/DataObject" md5sum="d313cf7435ff6ce850d36e79325bd204" name="FormBuilder.php" role="php" />
+   <file baseinstalldir="/DB/DataObject" md5sum="099880ee2d14254e5b7005eb29fd7712" name="FormBuilder/QuickForm.php" role="php" />
+   <file baseinstalldir="/DB/DataObject" md5sum="e7602b9ef9cdc7f63d03bc1df806c0d2" name="FormBuilder.php" role="php" />
   </dir>
  </contents>
  <dependencies>
@@ -89,6 +76,34 @@
  </dependencies>
  <phprelease />
  <changelog>
+  <release>
+   <version>
+    <release>0.18.0</release>
+    <api>0.18.0</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <date>2005-08-22</date>
+   <license uri="http://www.php.net/license">PHP License</license>
+   <notes>* Fixed notice about $className in FormBuilder.php
+* Fig bug #4867 - enumOptions renumbered for NULL fields
+* Fixed bug where _array2Date added AM/PM to dates
+* Fixed bug where some callbacks set in PEAR::setStaticProperty or passed into the constructor would get overwritten with defaults
+* Fixed bug #5127 - cross/triple/reverseLinks don&apos;t work with pgsql
+* Fixed bug #4562 - date elements need to use addGroupRule
+
+* Altered create() to allow for any main class to be used
+* Altered create() to allow for inclusion of driver classes outside FormBuilder
+* The prepareLinkedDataObject callback may now affect displayFields and other link options
+* Added date/time option callback properties
+* Altered the default field labels to be much more useful
+
+* Changed SubForm elements to always use the default QuickForm renderer (used by linkNewValue)
+* Changed dataFromDatabaseCallback and dateToDatabaseCallback to allow for disabling of them
+** This is a slight BC break as a non-callable value was previously replaced with the defaults</notes>
+  </release>
   <release>
    <version>
     <release>0.17.2</release>
