@@ -89,7 +89,7 @@
  * @author     Justin Patrin <papercrane@reversefold.com>
  * @copyright  1997-2005 The PHP Group
  * @license    http://www.php.net/license/3_0.txt  PHP License 3.0
- * @version    $Id: FormBuilder.php,v 1.204 2005/08/23 20:54:18 justinpatrin Exp $
+ * @version    $Id: FormBuilder.php,v 1.208 2005/10/07 23:56:24 justinpatrin Exp $
  * @link       http://pear.php.net/package/DB_DataObject_FormBuilder
  * @see        DB_DataObject, HTML_QuickForm
  */
@@ -1171,7 +1171,7 @@ class DB_DataObject_FormBuilder
                         $element =& $this->_form->_createTimeElement($key);
                     }
                     break;
-                case ($type & DB_DATAOBJECT_TXT):
+                case ($type & DB_DATAOBJECT_TXT || $type & DB_DATAOBJECT_BLOB):
                     $formValues[$key] = $this->_do->$key;
                     if (!isset($element)) {
                         $element =& $this->_form->_createTextArea($key);
@@ -2439,7 +2439,7 @@ class DB_DataObject_FormBuilder
         if (!is_array($links = $this->_do->links())) {
             $links = array();
         }
-
+        $origDo = clone($this->_do);
         foreach ($values as $field => $value) {
             $this->debug('Field '.$field.' ');
             // Double-check if the field may be edited by the user... if not, don't
@@ -2503,7 +2503,9 @@ class DB_DataObject_FormBuilder
             }
         }
         foreach ($tableFields as $field => $type) {
-            if ($type & DB_DATAOBJECT_BOOL && !isset($values[$field])) {
+            if (($type & DB_DATAOBJECT_BOOL)
+                && in_array($field, $editableFields)
+                && !isset($values[$field])) {
                 $this->_do->$field = 0;
             }
         }
@@ -2527,7 +2529,7 @@ class DB_DataObject_FormBuilder
             if (isset($this->_form->_linkNewValueForms)) {
                 foreach (array_keys($this->_form->_linkNewValueForms) as $elName) {
                     $subTable = $this->_form->_linkNewValueDOs[$elName]->tableName();
-                    if (isset($values[$this->elementNamePrefix.'__DB_DataObject_FormBuilder_linkNewValue_'.$this->elementNamePostfix.'__'.$elName])) {
+                    if (isset($values['__DB_DataObject_FormBuilder_linkNewValue__'.$elName])) {
                         if ($values[$elName] == $this->linkNewValueText) {
                             //$this->_form->_prepareForLinkNewValue($elName, $subTable);
                             $ret = $this->_form->_linkNewValueForms[$elName]->process(array(&$this->_form->_linkNewValueFBs[$elName], 'processForm'), false);
@@ -2571,7 +2573,7 @@ class DB_DataObject_FormBuilder
                     $this->debug('ID ('.$pk.') of the new object: '.$id.'<br/>');
                     break;
                 case DB_DATAOBJECT_FORMBUILDER_QUERY_FORCEUPDATE:
-                    if (false === $this->_do->update()) {
+                    if (false === $this->_do->update($origDo)) {
                         $this->debug('Update of main record failed');
                         return $this->_raiseDoError('Update of main record failed', $this->_do);
                     }
@@ -2610,8 +2612,8 @@ class DB_DataObject_FormBuilder
                 if (is_callable($this->prepareLinkedDataObjectCallback)) {
                     call_user_func_array($this->prepareLinkedDataObjectCallback, array(&$do, $tripleLinkName));
                 }
+                $oldFieldValues = array();
                 if ($do->find()) {
-                    $oldFieldValues = array();
                     while ($do->fetch()) {
                         if (isset($rows[$do->$toField1]) && isset($rows[$do->$toField1][$do->$toField2])) {
                             $oldFieldValues[$do->$toField1][$do->$toField2] = true;
@@ -2688,8 +2690,8 @@ class DB_DataObject_FormBuilder
                 if (is_callable($this->prepareLinkedDataObjectCallback)) {
                     call_user_func_array($this->prepareLinkedDataObjectCallback, array(&$do, $crossLinkName));
                 }
+                $oldFieldValues = array();
                 if ($do->find()) {
-                    $oldFieldValues = array();
                     while ($do->fetch()) {
                         if (isset($fieldvalues[$do->$toField])) {
                             $oldFieldValues[$do->$toField] = clone($do);

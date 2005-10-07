@@ -1,9 +1,9 @@
-<?xml version="1.0" encoding="ISO-8859-1" ?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
-<package version="1.0" packagerversion="1.4.0a12">
+<package version="1.0" packagerversion="1.4.2">
  <name>DB_DataObject_FormBuilder</name>
  <summary>Class to automatically build HTML_QuickForm objects from a DB_DataObject-derived class</summary>
- <description>DB_DataObject_FormBuilder will aid you in rapid application development using the packages DB_DataObject and HTML_QuickForm. For having a quick but working prototype of your application, simply model the database, run DataObject's createTable script over it and write a script that passes one of the resulting objects to the FormBuilder class. The FormBuilder will automatically generate a simple but working HTML_QuickForm object that you can use to test your application. It also provides a processing method that will automatically detect if an insert() or update() command has to be executed after the form has been submitted. If you have set up DataObject's links.ini file correctly, it will also automatically detect if a table field is a foreign key and will populate a selectbox with the linked table's entries. There are many optional parameters that you can place in your DataObjects.ini or in the properties of your derived classes, that you can use to fine-tune the form-generation, gradually turning the prototypes into fully-featured forms, and you can take control at any stage of the process.
+ <description>DB_DataObject_FormBuilder will aid you in rapid application development using the packages DB_DataObject and HTML_QuickForm. For having a quick but working prototype of your application, simply model the database, run DataObject&apos;s createTable script over it and write a script that passes one of the resulting objects to the FormBuilder class. The FormBuilder will automatically generate a simple but working HTML_QuickForm object that you can use to test your application. It also provides a processing method that will automatically detect if an insert() or update() command has to be executed after the form has been submitted. If you have set up DataObject&apos;s links.ini file correctly, it will also automatically detect if a table field is a foreign key and will populate a selectbox with the linked table&apos;s entries. There are many optional parameters that you can place in your DataObjects.ini or in the properties of your derived classes, that you can use to fine-tune the form-generation, gradually turning the prototypes into fully-featured forms, and you can take control at any stage of the process.
  </description>
  <maintainers>
   <maintainer>
@@ -26,13 +26,13 @@
   </maintainer>
   </maintainers>
  <release>
-  <version>0.18.1</version>
-  <date>2005-08-23</date>
+  <version>1.0.0RC1</version>
+  <date>2005-10-07</date>
   <license>PHP License</license>
   <state>beta</state>
-  <notes>* Fix bug #5188 - date option callbacks default values do not work
+  <notes>* First RC for 1.0.0.
 
-* Implemented request #4647 - Added collapse support for reverseLinks
+* Fix a bug which caused nested linkNewValue forms and linkNewValue forms used in conjunction with elementNamePrefix/postfix not to insert a record
   </notes>
   <deps>
    <dep type="php" rel="ge" version="4.3.0"/>
@@ -51,6 +51,15 @@
  </release>
  <changelog>
    <release>
+    <version>0.18.1</version>
+    <date>2005-08-22</date>
+    <state>beta</state>
+    <notes>* Fix bug #5188 - date option callbacks default values do not work
+
+* Implemented request #4647 - Added collapse support for reverseLinks
+    </notes>
+   </release>
+   <release>
     <version>0.18.0</version>
     <date>2005-08-22</date>
     <state>beta</state>
@@ -58,7 +67,7 @@
 * Fig bug #4867 - enumOptions renumbered for NULL fields
 * Fixed bug where _array2Date added AM/PM to dates
 * Fixed bug where some callbacks set in PEAR::setStaticProperty or passed into the constructor would get overwritten with defaults
-* Fixed bug #5127 - cross/triple/reverseLinks don't work with pgsql
+* Fixed bug #5127 - cross/triple/reverseLinks don&apos;t work with pgsql
 * Fixed bug #4562 - date elements need to use addGroupRule
 
 * Altered create() to allow for any main class to be used
@@ -77,8 +86,8 @@
     <date>2005-06-17</date>
     <state>beta</state>
     <notes>* Fixed issue with setStaticProperty
-** Basically you don't need this line any more:
-** $_DB_DATAOBJECT_FORMBUILDER['CONFIG'] = $config['DB_DataObject_FormBuilder'];
+** Basically you don&apos;t need this line any more:
+** $_DB_DATAOBJECT_FORMBUILDER[&apos;CONFIG&apos;] = $config[&apos;DB_DataObject_FormBuilder&apos;];
 * Fixed problems with not null / required fields and the type option arrays (enumFields, textFields, etc) (bug #4617)
 * Fixed call-time-pass-by-ref error with preGenerateForm
 * Fixed elementNamePrefix/Postfix when collapsing crossLinks
@@ -108,7 +117,7 @@ Fixed bug #4440, Appended forms does not contain rules and errors
 Added fieldsRequired option to set non NOT NULL fields as required automatically
 Added support for multiple crossLink and tripleLink elements to the same table in one form
 Changed linkNewValue to use a SubForm element and a group instead of PopupSelect
-Removed PopupSelect as it's no longer used
+Removed PopupSelect as it&apos;s no longer used
     </notes>
    </release>
    <release>
@@ -138,7 +147,7 @@ New Features
 
 ** Note: useCallTimePassByRef is now needed only if you use the FormBuilder parameter in the getForm callback
 
-* If you set the 'collapse' key of a crossLink array to true, the unselected crossLink records will be hidden until you click the &quot;Show All&quot; link beneath them. This should help a lot for large amounts of records in crossLinks.
+* If you set the &apos;collapse&apos; key of a crossLink array to true, the unselected crossLink records will be hidden until you click the &quot;Show All&quot; link beneath them. This should help a lot for large amounts of records in crossLinks.
     </notes>
    </release>
    <release>
@@ -148,8 +157,8 @@ New Features
     <notes>Changes
 -BC Break, removed enum option reindexing altogether
 --enum option arrays *must* be indexed with the value you want to go into the DB. For normal enums, make the key and the value equal
---array('option1' =&gt; 'option1', 'option2' =&gt; 'option2')
---This *only* affects those who don't use the built-in callback to get the options from the DB automatically
+--array(&apos;option1&apos; =&gt; &apos;option1&apos;, &apos;option2&apos; =&gt; &apos;option2&apos;)
+--This *only* affects those who don&apos;t use the built-in callback to get the options from the DB automatically
 Fixes
 -Fixed typo which caused update errors to throw a fatal PHP error (bug #4364)
 New Features
@@ -164,11 +173,11 @@ New Features
 -BC break: Made enum options more flexible
 --Options in enumOptions or returned from enumOptionsCallback may be in one of two formats
 --If the first key of the array is an integer (such as 0) then the array is reformulated to have each value as the key. In other words, the key information is lost
---If you wish to have the keys kept as-is (inserted into the database as they are) make your keys are strings (such as '0')
+--If you wish to have the keys kept as-is (inserted into the database as they are) make your keys are strings (such as &apos;0&apos;)
 
 -Changed _getPrimaryKey, _date2Array, and _array2Date to allow them to be called statically
 Fixes
--Fixed notice when checking crossLink['type']
+-Fixed notice when checking crossLink[&apos;type&apos;]
 New Features
 -Added return of errors from processForm when DB operations fail
 --This is a slight BC break as further operations will no longer be attempted
@@ -187,7 +196,7 @@ New Features
     <state>beta</state>
     <notes>-It is now possible to use something other than the primary key for a link. This field must be unique, though, or you will have an inconsistent database. FormBuilder will *not* warn you if the field is not unique.
 -tripleLinks and crossLinks will now always use the field values from the links.ini instead of primary keys
--Added a 'multiselect' option to the elementTypeMap. You may now set a different QF element type for multiselects.
+-Added a &apos;multiselect&apos; option to the elementTypeMap. You may now set a different QF element type for multiselects.
 -Fixed a bug where tripleLinks and crossLinks were filled out in a new record (non-fetched DO)
     </notes>
    </release>
@@ -196,7 +205,7 @@ New Features
     <date>2005-04-08</date>
     <state>beta</state>
     <notes>-Fix Bug #3877 extra fields in crosslink table lost on update to parent table when crossLink type is select
--Fix fatal errors when crossLinkExtraFields is set and the crossLink is of type 'select'
+-Fix fatal errors when crossLinkExtraFields is set and the crossLink is of type &apos;select&apos;
 -Removed all direct use of Primary Key from crossLink and tripleLink code as it was technically incorrect. It now uses the value from the links.ini
 -Fixed issue with populateOptions being called in DataObject callbacks other than preGenerateForm
 -Fixed issue with crossLink tables with no primary key
@@ -224,7 +233,7 @@ New Features
     <version>0.12.1</version>
     <date>2005-03-05</date>
     <state>beta</state>
-    <notes>-Added a new feature, linkNewValue. This is on by default for now. When a link select box is created the bottom entry is &quot;--New Value--&quot;. When selected, this un-hides a form below the select box for creation of a new linked record. If you're not sure what this is, try it, it's a very neat feature. Note: this requires JavaScript.
+    <notes>-Added a new feature, linkNewValue. This is on by default for now. When a link select box is created the bottom entry is &quot;--New Value--&quot;. When selected, this un-hides a form below the select box for creation of a new linked record. If you&apos;re not sure what this is, try it, it&apos;s a very neat feature. Note: this requires JavaScript.
 -Added error return when enum options are not found
 -0.12.1 adds the missing file PopupSelect.php
     </notes>
@@ -233,7 +242,7 @@ New Features
     <version>0.12.0</version>
     <date>2005-03-04</date>
     <state>beta</state>
-    <notes>Added a new feature, linkNewValue. This is on by default for now. When a link select box is created the bottom entry is &quot;--New Value--&quot;. When selected, this un-hides a form below the select box for creation of a new linked record. If you're not sure what this is, try it, it's a very neat feature. Note: this requires JavaScript.
+    <notes>Added a new feature, linkNewValue. This is on by default for now. When a link select box is created the bottom entry is &quot;--New Value--&quot;. When selected, this un-hides a form below the select box for creation of a new linked record. If you&apos;re not sure what this is, try it, it&apos;s a very neat feature. Note: this requires JavaScript.
 Added error return when enum options are not found
     </notes>
    </release>
@@ -242,7 +251,7 @@ Added error return when enum options are not found
     <date>2005-03-03</date>
     <state>beta</state>
     <notes>-Fixed call-time-pass-by-ref warning with new getForm parameter
--Fixed date format 'A' type not working due to copy/paste error
+-Fixed date format &apos;A&apos; type not working due to copy/paste error
 -Fixed possible problem in _date2Array when posting empty values
     </notes>
    </release>
@@ -289,7 +298,7 @@ Added error return when enum options are not found
 -Fix auto-required rules not working with elementNamePre/Postfix (bug #3343)
 -Added elementTypeMap support for selects
 -Time / Date processing changes for Bug #3330
--- If only a time is passed to _date2Array it will prepend today's date so that PEAR::Date will process it correctly
+-- If only a time is passed to _date2Array it will prepend today&apos;s date so that PEAR::Date will process it correctly
 -- You no longer have to have all 3 date fields specified for a date to be output from _array2date
 --- For example, f only a day is specified, it will put 0000 for year and 00 for month
 --- The same applies to times *except* that seconds will only be output of they are specified
@@ -312,10 +321,10 @@ fixes:
 - Changed crossLink and tripleLink code to use setDefaults (bug #2913)
 - Fix tripleLinks not holding their value after a submit (related to bug #2913)
 - Added support for all date format types specified in bug# 2375
-   NOTE: 'l' and 'D' types are supported by _date2Array, but not _array2Date. This means they can be output, but upon submission they do nothing.
+   NOTE: &apos;l&apos; and &apos;D&apos; types are supported by _date2Array, but not _array2Date. This means they can be output, but upon submission they do nothing.
 - Fixed freezing problems with crossLinks and tripleLinks (bug #2915)
    A new QuickForm element type has been created for this. It is in DB/DataObject/FormBuilder/QuickForm/ElementTable.php. This element creates an HTML_Table with rows of elements. The table may or may not have row and column headers. Any QF element may be in each cell.
-- Fixed bug where time elements were created with 'date' type options (this should change nothing unless you use elementTypeMap)
+- Fixed bug where time elements were created with &apos;date&apos; type options (this should change nothing unless you use elementTypeMap)
 - 0 as primary key no longer causes unwanted insert (bug #2979)
 - Fixed elementNamePrefix and elementNamePostfix when used with crosslink and triplelink and dates
   [ and ] are no longer allowed in the prefix and postfix
@@ -327,7 +336,7 @@ changes:
 new:
 - Added multi-select support to QF driver
 - Re-added multi-select support for crossLinks
-- Added casting of '' to NULL for link fields (for selectAddEmpty)
+- Added casting of &apos;&apos; to NULL for link fields (for selectAddEmpty)
 - Added automatic entry of an empty option for link fields which are not DB_DATAOBJECT_NOTNULL
 - Added selectAddEmpty support for enum fields
 - Enum fields will automatically have an empty option if they are allowed to be NULL (same as for links)
@@ -389,13 +398,13 @@ Some few options have changed names. For example, follow_links is now linkDispla
 
 All options may be specified in the [DB_DataObject_FormBuilder] section of the ini file. For options that are DataObject specific, these are set as defaults. The DataObject may change them through its options. linkDisplayFields and linkOrderFields (see below) are arrays and set the same as elementTypeMap.
 
-All options in the [DB_DataObject_FormBuilder] section of the ini file are copied into the FormBuilder when it is instantiated. Hence, changing $GLOBALS['_DB_DATAOVJECT_FORMBUILDER']['CONFIG'] after you create your FormBuilder will no longer work.
+All options in the [DB_DataObject_FormBuilder] section of the ini file are copied into the FormBuilder when it is instantiated. Hence, changing $GLOBALS[&apos;_DB_DATAOVJECT_FORMBUILDER&apos;][&apos;CONFIG&apos;] after you create your FormBuilder will no longer work.
 
-All options in the DataObject (except for those that start with &quot;select&quot;) are copied to the FormBuilder after preGenerateForm is called. This is to cut down on the internal complexity of FormBuilder. This means that you cannot change options in the DataObject after preGenerateForm (such as in postGenerateForm). We don't see this as a problem as you can set everything up before then and (nearly) all options are used once postGenerateForm is called. If you know of a problem with this, please send us an e-mail or a bug report. This also means that you cannot re-use a FormBuilder object as the settings of the previous FormBuilder will persist.
+All options in the DataObject (except for those that start with &quot;select&quot;) are copied to the FormBuilder after preGenerateForm is called. This is to cut down on the internal complexity of FormBuilder. This means that you cannot change options in the DataObject after preGenerateForm (such as in postGenerateForm). We don&apos;t see this as a problem as you can set everything up before then and (nearly) all options are used once postGenerateForm is called. If you know of a problem with this, please send us an e-mail or a bug report. This also means that you cannot re-use a FormBuilder object as the settings of the previous FormBuilder will persist.
 
 The database.formBuilder.ini file is no longer used. Select display and order fields should be put in the DO file as linkDisplayFields and linkOrderFields. The fix0.9.0Files.php script will move these options into your DataObject classes automatically.
 
-If you were previously using the 0.9.0 release, the script in CVS called fix0.9.0Files.php should be able to fix all BC breaks in your code and ini files. If it doesn't please send an e-mail to justinpatrin@php.net so that I can fix it. You can download the script from this URL: http://cvs.php.net/pear/DB_DataObject_FormBuilder/fix0.9.0Files.php
+If you were previously using the 0.9.0 release, the script in CVS called fix0.9.0Files.php should be able to fix all BC breaks in your code and ini files. If it doesn&apos;t please send an e-mail to justinpatrin@php.net so that I can fix it. You can download the script from this URL: http://cvs.php.net/pear/DB_DataObject_FormBuilder/fix0.9.0Files.php
 
 If you were previously using a CVS version of FormBuilder.php after 1.36 up to 1.52, the script in CVS called fixPre1.52CVSFiles.php should be able to fix any BC problems you have. All this script does is rename sleect*Fields to link*Fields. You can download the script from this URL: http://cvs.php.net/pear/DB_DataObject_FormBuilder/fixPre1.52CVSFiles.php
 
@@ -414,8 +423,8 @@ FURTHER IMPROVEMENTS AND MODIFICATIONS:
 - Better array handling for ini-arrays
 - Added more ini options to array handling
 - Array based options may be single values without a comma
-- Array based options which have no need for keys (selectDisplayFields, etc.) don't need the key
-- Fixed bug where linked fields in selectDisplayFields didn't know their own selectDisplayFields
+- Array based options which have no need for keys (selectDisplayFields, etc.) don&apos;t need the key
+- Fixed bug where linked fields in selectDisplayFields didn&apos;t know their own selectDisplayFields
 - Fixed bug where cross/tripleLinks are frozen if not in userEditableFields array
 - Added missing createSubmit option
 - Fixed Bug #1715 (minutes and seconds are lost in _array2date)
@@ -458,14 +467,14 @@ http://opensource.21st.de/tiki-index.php?page=DB_DataObject_FormBuilder
 - You can now also use DATETIME fields, as more formatting
   options for date fields are supported (m,M,d,Y,H,i,s)
 - New experimental option &quot;dateFieldLanguage&quot; allows setting the
-  language for date fields, this doesn't seem to work yet though
+  language for date fields, this doesn&apos;t seem to work yet though
 - useForm() now knows a second parameter that allows to add elements
   from an existing form to the generated one ... this, too, is to be considered
   highly experimental as the current implementation relies on supposedly private
   QuickForm properties to be public
 - Support for a new callback method in your DataObjects: &quot;dateOptions()&quot;
   allows to return an option array for all or individual date elements. See docs
-  for QuickForm's date element for details on possible options
+  for QuickForm&apos;s date element for details on possible options
 - Added support for recursive link lookups (by Justin Patrin)
 - Implemented changes by Norbert Moscnik:
   a) added &quot;fieldsToRender&quot; configuration option

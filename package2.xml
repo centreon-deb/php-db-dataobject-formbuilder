@@ -1,5 +1,5 @@
-<?xml version="1.0"?>
-<package packagerversion="1.4.0a12" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0 http://pear.php.net/dtd/tasks-1.0.xsd http://pear.php.net/dtd/package-2.0 http://pear.php.net/dtd/package-2.0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<package packagerversion="1.4.2" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0 http://pear.php.net/dtd/tasks-1.0.xsd http://pear.php.net/dtd/package-2.0 http://pear.php.net/dtd/package-2.0.xsd">
  <name>DB_DataObject_FormBuilder</name>
  <channel>pear.php.net</channel>
  <summary>Class to automatically build HTML_QuickForm objects from a DB_DataObject-derived class</summary>
@@ -22,27 +22,27 @@
   <email>norbert@php.net</email>
   <active>yes</active>
  </developer>
- <date>2005-08-23</date>
- <time>14:06:16</time>
+ <date>2005-10-07</date>
+ <time>17:13:48</time>
  <version>
-  <release>0.18.1</release>
-  <api>0.18.1</api>
+  <release>1.0.0RC1</release>
+  <api>1.0.0RC1</api>
  </version>
  <stability>
   <release>beta</release>
   <api>beta</api>
  </stability>
  <license uri="http://www.php.net/license">PHP License</license>
- <notes>* Fix bug #5188 - date option callbacks default values do not work
+ <notes>* First RC for 1.0.0.
 
-* Implemented request #4647 - Added collapse support for reverseLinks</notes>
+* Fix a bug which caused nested linkNewValue forms and linkNewValue forms used in conjunction with elementNamePrefix/postfix not to insert a record</notes>
  <contents>
   <dir name="/">
    <file baseinstalldir="/DB/DataObject" md5sum="0f5a64aa240d24107ab607bd0b76d8f1" name="FormBuilder/QuickForm/ElementTable.php" role="php" />
    <file baseinstalldir="/DB/DataObject" md5sum="db0b70777ac611da693eb99e5a06779e" name="FormBuilder/QuickForm/SubForm.php" role="php" />
    <file baseinstalldir="/DB/DataObject" md5sum="2745b6267519597f76e1e9f965862b74" name="FormBuilder/QuickForm/SubFormFB.php" role="php" />
-   <file baseinstalldir="/DB/DataObject" md5sum="099880ee2d14254e5b7005eb29fd7712" name="FormBuilder/QuickForm.php" role="php" />
-   <file baseinstalldir="/DB/DataObject" md5sum="e7602b9ef9cdc7f63d03bc1df806c0d2" name="FormBuilder.php" role="php" />
+   <file baseinstalldir="/DB/DataObject" md5sum="caa832bc41c9ea32f3978d2da371d168" name="FormBuilder/QuickForm.php" role="php" />
+   <file baseinstalldir="/DB/DataObject" md5sum="4323ec8886b3ca64e13da2a4719be7e0" name="FormBuilder.php" role="php" />
   </dir>
  </contents>
  <dependencies>
@@ -51,7 +51,7 @@
     <min>4.3.0</min>
    </php>
    <pearinstaller>
-    <min>1.4.0a1</min>
+    <min>1.4.0b1</min>
    </pearinstaller>
    <package>
     <name>DB_DataObject</name>
@@ -76,6 +76,21 @@
  </dependencies>
  <phprelease />
  <changelog>
+  <release>
+   <version>
+    <release>0.18.1</release>
+    <api>0.18.1</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <date>2005-08-22</date>
+   <license uri="http://www.php.net/license">PHP License</license>
+   <notes>* Fix bug #5188 - date option callbacks default values do not work
+
+* Implemented request #4647 - Added collapse support for reverseLinks</notes>
+  </release>
   <release>
    <version>
     <release>0.18.0</release>

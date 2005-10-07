@@ -11,7 +11,7 @@
  * @license    http://www.php.net/license/3_0.txt  PHP License 3.0
  * @author   Markus Wolff <mw21st@php.net>
  * @author   Justin Patrin <papercrane@reversefold.com>
- * @version  $Id: QuickForm.php,v 1.59 2005/08/23 05:36:21 justinpatrin Exp $
+ * @version  $Id: QuickForm.php,v 1.61 2005/10/08 00:05:04 justinpatrin Exp $
  */
 
 require_once ('HTML/QuickForm.php');
@@ -504,12 +504,15 @@ class DB_DataObject_FormBuilder_QuickForm
             $this->_linkNewValueDOs[$elName]->fb_createSubmit = false;
             $this->_linkNewValueDOs[$elName]->fb_elementNamePrefix = $this->elementNamePrefix.$elName.'_'.$subTable.'__';
             $this->_linkNewValueDOs[$elName]->fb_elementNamePostfix = $this->elementNamePostfix;
-            $this->_linkNewValueDOs[$elName]->fb_linkNewValue = false;
+            //$this->_linkNewValueDOs[$elName]->fb_linkNewValue = false;
             $this->_linkNewValueFBs[$elName] =& DB_DataObject_FormBuilder::create($this->_linkNewValueDOs[$elName]);
             $this->_linkNewValueForms[$elName] =& $this->_linkNewValueFBs[$elName]->getForm();
             $this->_linkNewValueForms[$elName]->addElement('hidden',
-                                                           $this->elementNamePrefix.'__DB_DataObject_FormBuilder_linkNewValue_'.
-                                                           $this->elementNamePostfix.'__'.$elName, $subTable);
+                                                           ($this->elementNamePrefix.
+                                                            '__DB_DataObject_FormBuilder_linkNewValue__'.
+                                                            $elName.
+                                                            $this->elementNamePostfix),
+                                                           $subTable);
         }
     }
     
