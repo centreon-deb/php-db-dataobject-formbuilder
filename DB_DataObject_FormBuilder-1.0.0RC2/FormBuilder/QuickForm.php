@@ -11,7 +11,7 @@
  * @license    http://www.php.net/license/3_0.txt  PHP License 3.0
  * @author   Markus Wolff <mw21st@php.net>
  * @author   Justin Patrin <papercrane@reversefold.com>
- * @version  $Id: QuickForm.php,v 1.61 2005/10/08 00:05:04 justinpatrin Exp $
+ * @version  $Id: QuickForm.php,v 1.63 2005/10/12 18:03:56 justinpatrin Exp $
  */
 
 require_once ('HTML/QuickForm.php');
@@ -445,7 +445,7 @@ class DB_DataObject_FormBuilder_QuickForm
                                                               $this->_fb->getFieldName($fieldName),
                                                               $this->_fb->getFieldLabel($fieldName),
                                                               array($element, $subFormElement),
-                                                              '<br/>',
+                                                              '',
                                                               false);
                 }
             }
@@ -621,7 +621,7 @@ class DB_DataObject_FormBuilder_QuickForm
     function &_createDateElement($fieldName) {
         $dateOptions = array('format' => $this->dateElementFormat,
                              'language' => $this->dateFieldLanguage);
-        if (is_callable($this->dateOptionsCallback)) {
+        if ($this->_fb->isCallableAndExists($this->dateOptionsCallback)) {
             $dateOptions = array_merge($dateOptions,
                                        call_user_func_array($this->dateOptionsCallback,
                                                             array($fieldName, &$fb)));
@@ -655,7 +655,7 @@ class DB_DataObject_FormBuilder_QuickForm
     function &_createTimeElement($fieldName) {
         $timeOptions = array('format' => $this->timeElementFormat,
                              'language' => $this->dateFieldLanguage);
-        if (is_callable($this->timeOptionsCallback)) {
+        if ($this->_fb->isCallableAndExists($this->timeOptionsCallback)) {
             $timeOptions = array_merge($timeOptions,
                                        call_user_func_array($this->timeOptionsCallback,
                                                             array($fieldName, &$fb)));
@@ -687,7 +687,7 @@ class DB_DataObject_FormBuilder_QuickForm
     function &_createDateTimeElement($fieldName) {
         $dateOptions = array('format' => $this->dateTimeElementFormat,
                              'language' => $this->dateFieldLanguage);
-        if (is_callable($this->dateTimeOptionsCallback)) {
+        if ($this->_fb->isCallableAndExists($this->dateTimeOptionsCallback)) {
             $dateOptions = array_merge($dateOptions,
                                        call_user_func_array($this->dateTimeOptionsCallback,
                                                             array($fieldName, &$fb)));
@@ -778,6 +778,7 @@ class DB_DataObject_FormBuilder_QuickForm
         $ruleSide = $this->clientRules ? 'client' : 'server';
         foreach ($rules as $rule) {
             $realFieldName = $this->_fb->getFieldName($fieldName);
+            $this->_fb->debug('Setting rule for '.$realFieldName.' '.serialize($rule));
             $el =& $this->_form->getElement($realFieldName);
             if (is_a($el, 'HTML_QuickForm_Date')) {
                 $ruleFunction = 'addGroupRule';

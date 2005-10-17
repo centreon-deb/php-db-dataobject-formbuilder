@@ -89,7 +89,7 @@
  * @author     Justin Patrin <papercrane@reversefold.com>
  * @copyright  1997-2005 The PHP Group
  * @license    http://www.php.net/license/3_0.txt  PHP License 3.0
- * @version    $Id: FormBuilder.php,v 1.208 2005/10/07 23:56:24 justinpatrin Exp $
+ * @version    $Id: FormBuilder.php,v 1.211 2005/10/17 21:14:36 justinpatrin Exp $
  * @link       http://pear.php.net/package/DB_DataObject_FormBuilder
  * @see        DB_DataObject, HTML_QuickForm
  */
@@ -940,10 +940,10 @@ class DB_DataObject_FormBuilder
         // Check whether we now got valid callbacks for some callback properties,
         // otherwise correct them
         foreach(array('dateFromDatabaseCallback', 'dateToDatabaseCallback', 'enumOptionsCallback') as $callback) {
-            if (!is_callable($this->$callback)) {
+            if (!$this->isCallableAndExists($this->$callback)) {
                 if (is_array($this->$callback)
                     && count($this->$callback) == 1
-                    && is_callable($this->{$callback}[0])) {
+                    && $this->isCallableAndExists($this->{$callback}[0])) {
                     // Probably got messed up by _explodeArrString()
                     $this->$callback = $this->{$callback}[0];
                 }
@@ -1055,7 +1055,7 @@ class DB_DataObject_FormBuilder
 
         if ($this->addFormHeader) {
             // Add a header to the form - set addFormHeader property to false to prevent this
-            $this->_form->_addFormHeader(is_null($this->formHeaderText) ? $this->_do->tableName() : $this->formHeaderText);
+            $this->_form->_addFormHeader(is_null($this->formHeaderText) ? $this->prettyName($this->_do->tableName()) : $this->formHeaderText);
         }
 
         // Go through all table fields and create appropriate form elements
@@ -1137,7 +1137,7 @@ class DB_DataObject_FormBuilder
                     break;
                 case (($type & DB_DATAOBJECT_DATE) && ($type & DB_DATAOBJECT_TIME)):
                     $this->debug('DATE & TIME CONVERSION using callback for element '.$key.' ('.$this->_do->$key.')!', 'FormBuilder');
-                    if (is_callable($this->dateFromDatabaseCallback)) {
+                    if ($this->isCallableAndExists($this->dateFromDatabaseCallback)) {
                         $formValues[$key] = call_user_func($this->dateFromDatabaseCallback, $this->_do->$key);
                     } else {
                         $this->debug('WARNING: dateFromDatabaseCallback callback not callable', 'FormBuilder');
@@ -1149,7 +1149,7 @@ class DB_DataObject_FormBuilder
                     break;  
                 case ($type & DB_DATAOBJECT_DATE):
                     $this->debug('DATE CONVERSION using callback for element '.$key.' ('.$this->_do->$key.')!', 'FormBuilder');
-                    if (is_callable($this->dateFromDatabaseCallback)) {
+                    if ($this->isCallableAndExists($this->dateFromDatabaseCallback)) {
                         $formValues[$key] = call_user_func($this->dateFromDatabaseCallback, $this->_do->$key);
                     } else {
                         $this->debug('WARNING: dateFromDatabaseCallback callback not callable', 'FormBuilder');
@@ -1161,7 +1161,7 @@ class DB_DataObject_FormBuilder
                     break;
                 case ($type & DB_DATAOBJECT_TIME):
                     $this->debug('TIME CONVERSION using callback for element '.$key.' ('.$this->_do->$key.')!', 'FormBuilder');
-                    if (is_callable($this->dateFromDatabaseCallback)) {
+                    if ($this->isCallableAndExists($this->dateFromDatabaseCallback)) {
                         $formValues[$key] = call_user_func($this->dateFromDatabaseCallback, $this->_do->$key);
                     } else {
                         $this->debug('WARNING: dateFromDatabaseCallback callback not callable', 'FormBuilder');
@@ -1215,7 +1215,7 @@ class DB_DataObject_FormBuilder
                     $selected_options = array();
                     if (isset($this->_do->$fromfield)) {
                         $crossLinkDo->{$crossLink['fromField']} = $this->_do->$fromfield;
-                        if (is_callable($this->prepareLinkedDataObjectCallback)) {
+                        if ($this->isCallableAndExists($this->prepareLinkedDataObjectCallback)) {
                             call_user_func_array($this->prepareLinkedDataObjectCallback, array(&$crossLinkDo, $key));
                         }
                         if ($crossLinkDo->find() > 0) {
@@ -1337,7 +1337,7 @@ class DB_DataObject_FormBuilder
                     $selected_options = array();
                     if (isset($this->_do->$fromfield)) {
                         $tripleLinkDo->{$tripleLink['fromField']} = $this->_do->$fromfield;
-                        if (is_callable($this->prepareLinkedDataObjectCallback)) {
+                        if ($this->isCallableAndExists($this->prepareLinkedDataObjectCallback)) {
                             call_user_func_array($this->prepareLinkedDataObjectCallback, array(&$tripleLinkDo, $key));
                         }
                         if ($tripleLinkDo->find() > 0) {
@@ -1390,7 +1390,7 @@ class DB_DataObject_FormBuilder
                         if (isset($this->enumOptions[$key])) {
                             $options = $this->enumOptions[$key];
                         } else {
-                            if (is_callable($this->enumOptionsCallback)) {
+                            if ($this->isCallableAndExists($this->enumOptionsCallback)) {
                                 $options = call_user_func($this->enumOptionsCallback, $this->_do->__table, $key);
                             } else {
                                 $options =& PEAR::raiseError('enumOptionsCallback is an invalid callback');
@@ -1428,7 +1428,7 @@ class DB_DataObject_FormBuilder
                     $elName = $this->_sanitizeFieldName('__reverseLink_'.$this->reverseLinks[$key]['table'].'_'.$this->reverseLinks[$key]['field']);
                     unset($do);
                     $do =& DB_DataObject::factory($this->reverseLinks[$key]['table']);
-                    if (is_callable($this->prepareLinkedDataObjectCallback)) {
+                    if ($this->isCallableAndExists($this->prepareLinkedDataObjectCallback)) {
                         call_user_func_array($this->prepareLinkedDataObjectCallback, array(&$do, $key));
                     }
                     if (!is_array($rLinks = $do->links())) {
@@ -1725,7 +1725,22 @@ class DB_DataObject_FormBuilder
         if (isset($this->fieldLabels[$fieldName])) {
             return $this->fieldLabels[$fieldName];
         }
-        return ucwords(strtolower(preg_replace('/[^a-z]/Si', ' ', preg_replace('/([a-z])([A-Z])/S', '\1 \2', $fieldName))));
+        return $this->prettyName($fieldName);
+    }
+
+    /**
+     * DB_DataObject_FormBuilder::prettyName()
+     *
+     * "Pretties" a name.
+     * 'fieldName' => 'Field Name'
+     * 'TABLE_NAME' => 'Table Name'
+     *
+     * @param $name string The name to "pretty"
+     * @return string
+     * @access public
+     */
+    function prettyName($name) {
+        return ucwords(strtolower(preg_replace('/[^a-z0-9]/Si', ' ', preg_replace('/([a-z0-9])([A-Z])/S', '\1 \2', $name))));
     }
 
     /**
@@ -1861,7 +1876,7 @@ class DB_DataObject_FormBuilder
     function _getSelectOptions($table, $displayFields = false, $selectAddEmpty = false, $field = false, $valueField = false) {
         $opts =& DB_DataObject::factory($table);
         if (is_a($opts, 'db_dataobject')) {
-            if (is_callable($this->prepareLinkedDataObjectCallback)) {
+            if ($this->isCallableAndExists($this->prepareLinkedDataObjectCallback)) {
                 call_user_func_array($this->prepareLinkedDataObjectCallback, array(&$opts, $field));
             }
             if ($valueField === false) {
@@ -2140,7 +2155,7 @@ class DB_DataObject_FormBuilder
      */
     function &getForm($action = false, $target = '_self', $formName = false, $method = 'post')
     {
-        if (is_callable($this->preGenerateFormCallback)) {
+        if ($this->isCallableAndExists($this->preGenerateFormCallback)) {
             call_user_func_array($this->preGenerateFormCallback, array(&$this));
         }
         $this->populateOptions();
@@ -2153,7 +2168,7 @@ class DB_DataObject_FormBuilder
         } else {
             $obj =& $this->_generateForm($action, $target, $formName, $method);
         }
-        if (is_callable($this->postGenerateFormCallback)) {
+        if ($this->isCallableAndExists($this->postGenerateFormCallback)) {
             call_user_func_array($this->postGenerateFormCallback, array(&$obj, &$this));
         }
         return $obj;
@@ -2431,7 +2446,7 @@ class DB_DataObject_FormBuilder
             $values = $this->_getMyValues($values);
         }
         $this->debug('<br>...processing form data...<br>');
-        if (is_callable($this->preProcessFormCallback)) {
+        if ($this->isCallableAndExists($this->preProcessFormCallback)) {
             call_user_func_array($this->preProcessFormCallback, array(&$values, &$this));
         }
         $editableFields = $this->_getUserEditableFields();
@@ -2448,14 +2463,14 @@ class DB_DataObject_FormBuilder
                 if (isset($tableFields[$field])) {
                     if (($tableFields[$field] & DB_DATAOBJECT_DATE) || in_array($field, $this->dateFields)) {
                         $this->debug('DATE CONVERSION for using callback from '.$value.' ...');
-                        if (is_callable($this->dateToDatabaseCallback)) {
+                        if ($this->isCallableAndExists($this->dateToDatabaseCallback)) {
                             $value = call_user_func($this->dateToDatabaseCallback, $value);
                         } else {
                             $this->debug('WARNING: dateToDatabaseCallback not callable', 'FormBuilder');
                         }
                     } elseif (($tableFields[$field] & DB_DATAOBJECT_TIME) || in_array($field, $this->timeFields)) {
                         $this->debug('TIME CONVERSION for using callback from '.$value.' ...');
-                        if (is_callable($this->dateToDatabaseCallback)) {
+                        if ($this->isCallableAndExists($this->dateToDatabaseCallback)) {
                             $value = call_user_func($this->dateToDatabaseCallback, $value);
                         } else {
                             $this->debug('WARNING: dateToDatabaseCallback not callable', 'FormBuilder');
@@ -2609,7 +2624,7 @@ class DB_DataObject_FormBuilder
                 if ($doKey = $this->_getPrimaryKey($do)) {
                     $do->selectAdd($doKey);
                 }
-                if (is_callable($this->prepareLinkedDataObjectCallback)) {
+                if ($this->isCallableAndExists($this->prepareLinkedDataObjectCallback)) {
                     call_user_func_array($this->prepareLinkedDataObjectCallback, array(&$do, $tripleLinkName));
                 }
                 $oldFieldValues = array();
@@ -2687,7 +2702,7 @@ class DB_DataObject_FormBuilder
                 if ($doKey = $this->_getPrimaryKey($do)) {
                     $do->selectAdd($doKey);
                 }
-                if (is_callable($this->prepareLinkedDataObjectCallback)) {
+                if ($this->isCallableAndExists($this->prepareLinkedDataObjectCallback)) {
                     call_user_func_array($this->prepareLinkedDataObjectCallback, array(&$do, $crossLinkName));
                 }
                 $oldFieldValues = array();
@@ -2754,7 +2769,7 @@ class DB_DataObject_FormBuilder
                 $elName = $this->_sanitizeFieldName('__reverseLink_'.$reverseLink['table'].'_'.$reverseLink['field']);
                 unset($do);
                 $do =& DB_DataObject::factory($reverseLink['table']);
-                if (is_callable($this->prepareLinkedDataObjectCallback)) {
+                if ($this->isCallableAndExists($this->prepareLinkedDataObjectCallback)) {
                     call_user_func_array($this->prepareLinkedDataObjectCallback, array(&$do, $key));
                 }
                 if (!is_array($rLinks = $do->links())) {
@@ -2800,7 +2815,7 @@ class DB_DataObject_FormBuilder
             }
         }
 
-        if (is_callable($this->postProcessFormCallback)) {
+        if ($this->isCallableAndExists($this->postProcessFormCallback)) {
             call_user_func_array($this->postProcessFormCallback, array(&$values, &$this));
         }
 
@@ -3014,7 +3029,15 @@ class DB_DataObject_FormBuilder
         }
         return array_keys($this->_getFieldsToRender());
     }
-    
+
+    function isCallableAndExists($callback) {
+        return is_callable($callback)
+            && (is_array($callback)
+                ? (is_object($callback[0])
+                   ? method_exists($callback[0], $callback[1])
+                   : true)
+                : function_exists($callback));
+    }    
 }
 
 ?>

@@ -26,13 +26,14 @@
   </maintainer>
   </maintainers>
  <release>
-  <version>1.0.0RC1</version>
-  <date>2005-10-07</date>
+  <version>1.0.0RC2</version>
+  <date>2005-10-17</date>
   <license>PHP License</license>
   <state>beta</state>
-  <notes>* First RC for 1.0.0.
-
-* Fix a bug which caused nested linkNewValue forms and linkNewValue forms used in conjunction with elementNamePrefix/postfix not to insert a record
+  <notes>* Fix problems with callbacks and overloading (PHP5) (fixes date element array_merge errors)
+* Removed forced break between a link element and its linkNewValue sub-form
+* Fixed a bug in SubFormFB which broke some linkNewValue forms
+* Fixed issue with the encoding type of a form when a sub-form has a file element
   </notes>
   <deps>
    <dep type="php" rel="ge" version="4.3.0"/>
@@ -50,6 +51,15 @@
   </filelist>
  </release>
  <changelog>
+   <release>
+    <version>1.0.0RC1</version>
+    <date>2005-10-07</date>
+    <state>beta</state>
+    <notes>* First RC for 1.0.0.
+
+* Fix a bug which caused nested linkNewValue forms and linkNewValue forms used in conjunction with elementNamePrefix/postfix not to insert a record
+    </notes>
+   </release>
    <release>
     <version>0.18.1</version>
     <date>2005-08-22</date>

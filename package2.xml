@@ -22,27 +22,28 @@
   <email>norbert@php.net</email>
   <active>yes</active>
  </developer>
- <date>2005-10-07</date>
- <time>17:13:48</time>
+ <date>2005-10-17</date>
+ <time>14:30:33</time>
  <version>
-  <release>1.0.0RC1</release>
-  <api>1.0.0RC1</api>
+  <release>1.0.0RC2</release>
+  <api>1.0.0RC2</api>
  </version>
  <stability>
   <release>beta</release>
   <api>beta</api>
  </stability>
  <license uri="http://www.php.net/license">PHP License</license>
- <notes>* First RC for 1.0.0.
-
-* Fix a bug which caused nested linkNewValue forms and linkNewValue forms used in conjunction with elementNamePrefix/postfix not to insert a record</notes>
+ <notes>* Fix problems with callbacks and overloading (PHP5) (fixes date element array_merge errors)
+* Removed forced break between a link element and its linkNewValue sub-form
+* Fixed a bug in SubFormFB which broke some linkNewValue forms
+* Fixed issue with the encoding type of a form when a sub-form has a file element</notes>
  <contents>
   <dir name="/">
    <file baseinstalldir="/DB/DataObject" md5sum="0f5a64aa240d24107ab607bd0b76d8f1" name="FormBuilder/QuickForm/ElementTable.php" role="php" />
-   <file baseinstalldir="/DB/DataObject" md5sum="db0b70777ac611da693eb99e5a06779e" name="FormBuilder/QuickForm/SubForm.php" role="php" />
-   <file baseinstalldir="/DB/DataObject" md5sum="2745b6267519597f76e1e9f965862b74" name="FormBuilder/QuickForm/SubFormFB.php" role="php" />
-   <file baseinstalldir="/DB/DataObject" md5sum="caa832bc41c9ea32f3978d2da371d168" name="FormBuilder/QuickForm.php" role="php" />
-   <file baseinstalldir="/DB/DataObject" md5sum="4323ec8886b3ca64e13da2a4719be7e0" name="FormBuilder.php" role="php" />
+   <file baseinstalldir="/DB/DataObject" md5sum="5e1c54a126707d303e42ad7e7e497c19" name="FormBuilder/QuickForm/SubForm.php" role="php" />
+   <file baseinstalldir="/DB/DataObject" md5sum="365f62c8081f5f13c2c224ec39a20146" name="FormBuilder/QuickForm/SubFormFB.php" role="php" />
+   <file baseinstalldir="/DB/DataObject" md5sum="00a6190387b0ec6817cd394249622942" name="FormBuilder/QuickForm.php" role="php" />
+   <file baseinstalldir="/DB/DataObject" md5sum="4a275e4e9ebad03b0c801292c148768e" name="FormBuilder.php" role="php" />
   </dir>
  </contents>
  <dependencies>
@@ -76,6 +77,21 @@
  </dependencies>
  <phprelease />
  <changelog>
+  <release>
+   <version>
+    <release>1.0.0RC1</release>
+    <api>1.0.0RC1</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <date>2005-10-07</date>
+   <license uri="http://www.php.net/license">PHP License</license>
+   <notes>* First RC for 1.0.0.
+
+* Fix a bug which caused nested linkNewValue forms and linkNewValue forms used in conjunction with elementNamePrefix/postfix not to insert a record</notes>
+  </release>
   <release>
    <version>
     <release>0.18.1</release>

@@ -108,6 +108,7 @@ class HTML_QuickForm_SubForm extends HTML_QuickForm_static {
     function setForm(&$form)
     {
         $this->_subForm =& $form;
+        $this->_checkForEnctype();
     }
 
 
@@ -170,6 +171,7 @@ class HTML_QuickForm_SubForm extends HTML_QuickForm_static {
         $this->_parentForm =& $form;
         $this->_parentForm->addFormRule(array(&$this, 'checkSubFormRules'));
         $this->_ruleRegistered = true;
+        $this->_checkForEnctype();
     }
 
     /**
@@ -238,6 +240,21 @@ class HTML_QuickForm_SubForm extends HTML_QuickForm_static {
             break;
         }
         return true;
+    }
+
+    function _checkForEnctype() {
+        if ($this->_subForm && $this->_parentForm) {
+            if ($this->_subForm->getAttribute('enctype') == 'multipart/form-data') {
+                $this->_parentForm->updateAttributes(array('enctype' => 'multipart/form-data'));
+                $this->_parentForm->setMaxFileSize();
+            }
+            /*foreach (array_keys($this->_subForm->_elements) as $key) {
+                if (is_a($this->_subForm->_elements[$key], 'HTML_QuickForm_file')) {
+                    $this->_parentForm->updateAttributes(array('enctype' => 'multipart/form-data'));
+                    $this->_parentForm->setMaxFileSize();
+                }
+            }*/
+        }
     }
 }
 
