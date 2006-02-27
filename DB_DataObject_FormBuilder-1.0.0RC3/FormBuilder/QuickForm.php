@@ -11,7 +11,7 @@
  * @license    http://www.php.net/license/3_0.txt  PHP License 3.0
  * @author   Markus Wolff <mw21st@php.net>
  * @author   Justin Patrin <papercrane@reversefold.com>
- * @version  $Id: QuickForm.php,v 1.63 2005/10/12 18:03:56 justinpatrin Exp $
+ * @version  $Id: QuickForm.php,v 1.65 2006/02/25 05:30:02 justinpatrin Exp $
  */
 
 require_once ('HTML/QuickForm.php');
@@ -441,6 +441,7 @@ class DB_DataObject_FormBuilder_QuickForm
                     $subFormElement->selectName = $this->_fb->getFieldName($fieldName);
                     $el =& $this->_form->addElement('hidden', $this->_fb->getFieldName($fieldName).'__subForm__displayed');
                     $el->updateAttributes(array('id' => $el->getName()));
+                    //echo $this->_fb->getFieldName($fieldName).'<br/>';
                     $element =& HTML_QuickForm::createElement('group',
                                                               $this->_fb->getFieldName($fieldName),
                                                               $this->_fb->getFieldLabel($fieldName),
@@ -452,6 +453,28 @@ class DB_DataObject_FormBuilder_QuickForm
         }
         return $element;
     }
+    
+    /**
+     * DB_DataObject_FormBuilder_QuickForm::_createSubForm()
+     * 
+     * Returns a QuickForm element for a SubForm.
+     * Used in _generateForm().
+     *
+     * @param string    $fieldName  The field name to use for the QuickForm element
+     * @param string    $label      The label to use for the QuickForm element
+     * @param           $subForm    HTML_QuickForm element
+     * @return object               The HTML_QuickForm_element object.
+     * @see DB_DataObject_FormBuilder::_generateForm()
+     */
+     function &_createSubForm($fieldName, $label, &$subForm)
+     {
+        require_once('DB/DataObject/FormBuilder/QuickForm/SubForm.php');
+        $element =& HTML_QuickForm::createElement('subForm',
+                                                  $fieldName,
+                                                  $label,
+                                                  $subForm);
+        return $element;
+     }
 
     /**
      * Adds a form rule for linkNew entries
@@ -500,7 +523,7 @@ class DB_DataObject_FormBuilder_QuickForm
      */
     function _prepareForLinkNewValue($elName, $subTable) {
         if (!isset($this->_linkNewValueDOs[$elName])) {
-            $this->_linkNewValueDOs[$elName] =& DB_DataObject::factory($subTable);
+            $this->_linkNewValueDOs[$elName] = DB_DataObject::factory($subTable);
             $this->_linkNewValueDOs[$elName]->fb_createSubmit = false;
             $this->_linkNewValueDOs[$elName]->fb_elementNamePrefix = $this->elementNamePrefix.$elName.'_'.$subTable.'__';
             $this->_linkNewValueDOs[$elName]->fb_elementNamePostfix = $this->elementNamePostfix;

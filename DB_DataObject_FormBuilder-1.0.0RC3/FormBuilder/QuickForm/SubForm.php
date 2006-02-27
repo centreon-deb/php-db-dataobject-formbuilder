@@ -51,7 +51,7 @@ if ( substr(phpversion(),0,1) != 5) {
  *   display: none;
  * }
  * 
- * Apply that class to a div surrounding the SubForm (I use an eltered
+ * Apply that class to a div surrounding the SubForm (I use an altered
  * elementTemplate for QF). You also need a link which calls the
  * javascript below (I've added it to the template for simplicity).
  * Also, only hide it if the sub form was not displayed (if the
@@ -96,6 +96,7 @@ class HTML_QuickForm_SubForm extends HTML_QuickForm_static {
     var $_parentForm;
     var $_name;
     var $_preValidationCallback;
+    var $_clientValidationSet = false;
 
     function HTML_QuickForm_SubForm($name=null, $label=null, $form=null)
     {
@@ -227,6 +228,38 @@ class HTML_QuickForm_SubForm extends HTML_QuickForm_static {
     {
         if (is_a($caller, 'html_quickform')) {
             $this->setParentForm($caller);
+            if ($event != 'createElement'
+                && !$this->_clientValidationSet) {
+                if ($caller->elementExists($this->getName())) {
+                    $caller->addRule($this->getName(),
+                                     '',
+                                     'subFormRule',
+                                     array('form' => &$this->_subForm),
+                                     'client');
+                } else {
+                    //echo $event.'<br/>';
+                    $name = preg_replace('/(.*)__subForm/', '\1', $this->getName());
+                    $caller->_rules[$name][] = array(
+                                                     'type'        => 'subFormRule',
+                                                     'format'      => array('form' => &$this->_subForm,
+                                                                            'element' => &$this),
+                                                     'message'     => '',
+                                                     'validation'  => 'client',
+                                                     'reset'       => false,
+                                                     'dependent'   => $name
+                                                     );
+                    /*foreach ($caller->_elements as $el) {
+                        echo get_class($el).'<br/>';
+                    }
+                    $caller->addGroupRule($name,
+                                          '',
+                                          'subFormRule',
+                                          array('form' => &$this->_subForm),
+                                          1,
+                                          'client');*/
+                }
+                $this->_clientValidationSet = true;
+            }
         }
 
         switch ($event) {
@@ -258,8 +291,41 @@ class HTML_QuickForm_SubForm extends HTML_QuickForm_static {
     }
 }
 
-if (class_exists('HTML_QuickForm')) {
-    HTML_QuickForm::registerElementType('subForm', __FILE__, 'HTML_QuickForm_SubForm');
+require_once('HTML/QuickForm.php');
+//if (class_exists('HTML_QuickForm')) {
+HTML_QuickForm::registerElementType('subForm', __FILE__, 'HTML_QuickForm_SubForm');
+//}
+
+require_once('HTML/QuickForm/Rule.php');
+require_once('HTML/QuickForm/RuleRegistry.php');
+class HTML_QuickForm_Rule_SubForm extends HTML_QuickForm_Rule {
+    function validate($value) {
+        return true;
+    }
+
+    function getValidationScript($options = null) {
+        //print_r_html($options);
+        //echo ' validate_'.$options['form']->_attributes['id'].'(frm) ';
+        $js = $options['form']->getValidationScript();
+        preg_match('/_qfMsg = \'\';\s+(.*)\s+if \(_qfMsg != \'\'\)/s', $js, $matches);
+        return array('
+if (frm.elements["'.preg_replace('/(.*)__subForm/', '\1', $options['element']->getName()).'"].value == "--New Value--") {
+alert(frm.elements[\'genre_id_genre__name\'].value);
+  '.$matches[1].'
 }
+', 'false');
+    }
+
+    function register() {
+        $rr =& HTML_QuickForm_RuleRegistry::singleton();
+        $rr->registerRule('subFormRule',
+                          '',//'function',
+                          'HTML_QuickForm_Rule_SubForm'
+                          //'HTML_QuickForm_Rule_SubForm',
+                          //__FILE__
+                          );
+    }
+}
+HTML_QuickForm_Rule_SubForm::register();
 
 ?>

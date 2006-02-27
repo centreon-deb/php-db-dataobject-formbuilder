@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<package packagerversion="1.4.2" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0 http://pear.php.net/dtd/tasks-1.0.xsd http://pear.php.net/dtd/package-2.0 http://pear.php.net/dtd/package-2.0.xsd">
+<package packagerversion="1.4.6" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0 http://pear.php.net/dtd/tasks-1.0.xsd http://pear.php.net/dtd/package-2.0 http://pear.php.net/dtd/package-2.0.xsd">
  <name>DB_DataObject_FormBuilder</name>
  <channel>pear.php.net</channel>
  <summary>Class to automatically build HTML_QuickForm objects from a DB_DataObject-derived class</summary>
@@ -22,28 +22,32 @@
   <email>norbert@php.net</email>
   <active>yes</active>
  </developer>
- <date>2005-10-17</date>
- <time>14:30:33</time>
+ <date>2006-02-27</date>
+ <time>19:35:09</time>
  <version>
-  <release>1.0.0RC2</release>
-  <api>1.0.0RC2</api>
+  <release>1.0.0RC3</release>
+  <api>1.0.0RC3</api>
  </version>
  <stability>
   <release>beta</release>
   <api>beta</api>
  </stability>
  <license uri="http://www.php.net/license">PHP License</license>
- <notes>* Fix problems with callbacks and overloading (PHP5) (fixes date element array_merge errors)
-* Removed forced break between a link element and its linkNewValue sub-form
-* Fixed a bug in SubFormFB which broke some linkNewValue forms
-* Fixed issue with the encoding type of a form when a sub-form has a file element</notes>
+ <notes>* Fixed &quot;only variables should be assigned by reference&quot; notices (bug #5733)
+* Fixed a bug where boolean fields in the booleanFields option were overridden when not set as editable
+* Fixed a bug where cross/reverse/tripleLinks were processed when not set editable or rendered
+* Fixed notice about undefined variable $ordered (bug #6894)
+
+* Added linkNewNalue support for reverseLinks (Thanks to Brett Beiber for this patch)
+** Adds _createSubForm in the QuickForm renderer
+** Multiple SubForms are allowed for each reverseLink</notes>
  <contents>
   <dir name="/">
    <file baseinstalldir="/DB/DataObject" md5sum="0f5a64aa240d24107ab607bd0b76d8f1" name="FormBuilder/QuickForm/ElementTable.php" role="php" />
-   <file baseinstalldir="/DB/DataObject" md5sum="5e1c54a126707d303e42ad7e7e497c19" name="FormBuilder/QuickForm/SubForm.php" role="php" />
+   <file baseinstalldir="/DB/DataObject" md5sum="3537f1e65dc7c5d02d4bb5e34e3b28e3" name="FormBuilder/QuickForm/SubForm.php" role="php" />
    <file baseinstalldir="/DB/DataObject" md5sum="365f62c8081f5f13c2c224ec39a20146" name="FormBuilder/QuickForm/SubFormFB.php" role="php" />
-   <file baseinstalldir="/DB/DataObject" md5sum="00a6190387b0ec6817cd394249622942" name="FormBuilder/QuickForm.php" role="php" />
-   <file baseinstalldir="/DB/DataObject" md5sum="4a275e4e9ebad03b0c801292c148768e" name="FormBuilder.php" role="php" />
+   <file baseinstalldir="/DB/DataObject" md5sum="4db639ccf11eb71dc51868cb0a442b4d" name="FormBuilder/QuickForm.php" role="php" />
+   <file baseinstalldir="/DB/DataObject" md5sum="c6236876b0c2b2b38104ac2afa100be2" name="FormBuilder.php" role="php" />
   </dir>
  </contents>
  <dependencies>
@@ -77,6 +81,22 @@
  </dependencies>
  <phprelease />
  <changelog>
+  <release>
+   <version>
+    <release>1.0.0RC2</release>
+    <api>1.0.0RC2</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <date>2005-10-17</date>
+   <license uri="http://www.php.net/license">PHP License</license>
+   <notes>* Fix problems with callbacks and overloading (PHP5) (fixes date element array_merge errors)
+* Removed forced break between a link element and its linkNewValue sub-form
+* Fixed a bug in SubFormFB which broke some linkNewValue forms
+* Fixed issue with the encoding type of a form when a sub-form has a file element</notes>
+  </release>
   <release>
    <version>
     <release>1.0.0RC1</release>
