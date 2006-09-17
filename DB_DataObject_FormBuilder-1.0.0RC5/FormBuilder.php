@@ -89,7 +89,7 @@
  * @author     Justin Patrin <papercrane@reversefold.com>
  * @copyright  1997-2005 The PHP Group
  * @license    http://www.php.net/license/3_0.txt  PHP License 3.0
- * @version    $Id: FormBuilder.php,v 1.217 2006/02/25 05:30:02 justinpatrin Exp $
+ * @version    $Id: FormBuilder.php,v 1.232 2006/09/17 07:11:11 justinpatrin Exp $
  * @link       http://pear.php.net/package/DB_DataObject_FormBuilder
  * @see        DB_DataObject, HTML_QuickForm
  */
@@ -141,8 +141,7 @@ class DB_DataObject_FormBuilder
     //PROTECTED vars
     /**
      * If you want to use the generator on an existing form object, pass it
-     * to the factory method within the options array, element name: 'form'
-     * (who would have guessed?)
+     * to useForm().
      *
      * @access protected
      * @see DB_DataObject_Formbuilder()
@@ -242,7 +241,7 @@ class DB_DataObject_FormBuilder
      * A format string that represents the display settings for QuickForm date elements.
      * Example: "d-m-Y". See QuickForm documentation for details on format strings.
      * Legal letters to use in the format string that work with FormBuilder are:
-     * d,m,Y,H,i,s
+     * d,m,M,y,Y
      */
     var $dateElementFormat = 'd-m-Y';
 
@@ -250,7 +249,7 @@ class DB_DataObject_FormBuilder
      * A format string that represents the display settings for QuickForm time elements.
      * Example: "H:i:s". See QuickForm documentation for details on format strings.
      * Legal letters to use in the format string that work with FormBuilder are:
-     * d,m,Y,H,i,s
+     * H,i,s
      */
     var $timeElementFormat = 'H:i:s';
 
@@ -258,7 +257,7 @@ class DB_DataObject_FormBuilder
      * A format string that represents the display settings for QuickForm datetime elements.
      * Example: "d-m-Y H:i:s". See QuickForm documentation for details on format strings.
      * Legal letters to use in the format string that work with FormBuilder are:
-     * d,m,Y,H,i,s
+     * d,m,M,y,Y,H,i,s
      */
     var $dateTimeElementFormat = 'd-m-Y H:i:s';
 
@@ -478,9 +477,14 @@ class DB_DataObject_FormBuilder
     var $selectAddEmpty = array();
 
     /**
-     * An string to put in the "empty option" added to select fields
+     * A string to put in the "empty option" added to select fields
      */
     var $selectAddEmptyLabel = '';
+
+    /**
+     * A string to put in the "empty option" added to radio fields
+     */
+    var $radioAddEmptyLabel = '';
 
     /**
      * By default, hidden fields are generated for the primary key of a
@@ -850,6 +854,41 @@ class DB_DataObject_FormBuilder
     var $fieldAttributes = array();
 
     /**
+     * Set to true to use accessor methods (getters) for accessing field values, if they exist.
+     *
+     * If this is set to true and a method exists of the name getFieldName where
+     * FieldName is the name of the field then it will be called to get the value
+     * of the field.
+     *
+     * Note: The following field names will not work with getters due to function collisions
+     * in DB_DataObject. Do not use fields with these names in conjunction with useAccessors.
+     * * Link
+     * * Links
+     * * LinkArray
+     * * DatabaseConnection
+     * * DatabaseResult
+     *
+     * Note: Accessors may not be used to get link field values. Link field values are
+     * internal to a database and are assumed not to need accessors.
+     */
+    var $useAccessors = false;
+
+    /**
+     * Set to true to use mutator methods (setters) for setting field values, if they exist.
+     *
+     * If this is set to true and a method exists of the name setFieldName where
+     * FieldName is the name of the field then it will be called to set the value
+     * of the field.
+     *
+     * Note: Do not use a field named From if you use this option. DB_DataObject
+     * has a default method setFrom which will cause problems.
+     *
+     * Note: Mutators may not be used to set link fields. Link field values are internal
+     * to a database and are assumed not to need mutators.
+     */
+    var $useMutators = false;
+
+    /**
      * DB_DataObject_FormBuilder::create()
      *
      * Factory method. As this is meant as an abstract class, it is the only supported
@@ -880,26 +919,43 @@ class DB_DataObject_FormBuilder
             return $err;
         }
 
-        if (class_exists($mainClass)) {
-            $fb =& new $mainClass($do, $options);        
-            $className = 'db_dataobject_formbuilder_'.strtolower($driver);
-            $fileName = 'DB/DataObject/FormBuilder/'.$driver.'.php';
-            if (class_exists($className) || @include_once($fileName)) {
-                if (class_exists($className)) {
-                    $fb->_form =& new $className($fb);
-                    return $fb;
-                }
-                $err =& PEAR::raiseError('DB_DataObject_FormBuilder::create(): Driver class "'.$className.'" not found.',
-                                         DB_DATAOBJECT_FORMBUILDER_ERROR_UNKNOWNDRIVER);
-            } else {
-                $err =& PEAR::raiseError('DB_DataObject_FormBuilder::create(): File "'.$fileName.'" for driver class "'.$className.'" not found.',
-                                         DB_DATAOBJECT_FORMBUILDER_ERROR_UNKNOWNDRIVER);
-            }
-        } else {
+        if (!class_exists($mainClass)) {
             $err =& PEAR::raiseError('DB_DataObject_FormBuilder::create(): Main class "'.$mainClass.'" not found',
                                      DB_DATAOBJECT_FORMBUILDER_ERROR_UNKNOWNDRIVER);
+            return $err;
         }
-        return $err;
+        $fb =& new $mainClass($do, $options);        
+        $className = 'db_dataobject_formbuilder_'.strtolower($driver);
+        $fileName = 'DB/DataObject/FormBuilder/'.$driver.'.php';
+
+        if (!class_exists($className)) {
+            /*$exists = false;
+            foreach (split(PATH_SEPARATOR, get_include_path()) as $path) {
+                if (file_exists($path.'/'.$fileName)
+                    && is_readable($path.'/'.$fileName)) {
+                    $exists = true;
+                    break;
+                }
+            }*/
+            $fp = @fopen($fileName, 'r', true);
+            if ($fp === false) {
+                $err =& PEAR::raiseError('DB_DataObject_FormBuilder::create(): File "'.$fileName.
+                                         '" for driver class "'.$className.'" not found or not readable.',
+                                         DB_DATAOBJECT_FORMBUILDER_ERROR_UNKNOWNDRIVER);
+                return $err;
+            }
+            fclose($fp);
+            include_once($fileName);
+            if (!class_exists($className)) {
+                $err =& PEAR::raiseError('DB_DataObject_FormBuilder::create(): Driver class "'.$className.
+                                         '" not found after including "'.$fileName.'".',
+                                         DB_DATAOBJECT_FORMBUILDER_ERROR_UNKNOWNDRIVER);
+                return $err;
+            }
+        }
+
+        $fb->_form =& new $className($fb);
+        return $fb;
     }
 
 
@@ -1001,14 +1057,32 @@ class DB_DataObject_FormBuilder
      */    
     function _getEnumOptions($table, $field) {
         $db = $this->_do->getDatabaseConnection();
-        if (isset($GLOBALS['_DB_DATAOBJECT']['CONFIG']['quote_identifiers']) && $GLOBALS['_DB_DATAOBJECT']['CONFIG']['quote_identifiers']) {
+        if (isset($GLOBALS['_DB_DATAOBJECT']['CONFIG']['quote_identifiers'])
+            && $GLOBALS['_DB_DATAOBJECT']['CONFIG']['quote_identifiers']) {
             $table = $db->quoteIdentifier($table);
         }
-        $option = $db->getRow('SHOW COLUMNS FROM '.$table.' LIKE '.$db->quoteSmart($field), DB_FETCHMODE_ASSOC);
+        if (!isset($GLOBALS['_DB_DATAOBJECT']['CONFIG']['db_driver'])
+            || $GLOBALS['_DB_DATAOBJECT']['CONFIG']['db_driver'] == 'DB') {
+            $option = $db->getRow('SHOW COLUMNS FROM '.$table.' LIKE '.$db->quoteSmart($field),
+                                  DB_FETCHMODE_ASSOC);
+        } else {
+            $option = $db->queryRow('SHOW COLUMNS FROM '.$table.' LIKE '.$db->quote($field),
+                                    null,
+                                    MDB2_FETCHMODE_ASSOC);
+        }
         if (PEAR::isError($option)) {
             return PEAR::raiseError('There was an error querying for the enum options for field "'.$field.'". You likely need to use enumOptionsCallback.', null, null, null, $option);
         }
-        $option = substr($option['Type'], strpos($option['Type'], '(') + 1);
+        foreach ($option as $key => $value) {
+            if (strtolower($key) == 'type') {
+                $option = $value;
+                break;
+            }
+        }
+        if (is_array($option)) {
+            return PEAR::raiseError('There was an error querying for the enum options for field "'.$field.'". You likely need to use enumOptionsCallback.');
+        }
+        $option = substr($option, strpos($option, '(') + 1);
         $option = substr($option, 0, strrpos($option, ')') - strlen($option));
         $split = explode(',', $option);
         $options = array();
@@ -1121,8 +1195,12 @@ class DB_DataObject_FormBuilder
                     $element =& $this->preDefElements[$key];
                 } elseif (isset($links[$key])) {
                     // If this field links to another table, display selectbox or radiobuttons
-                    $opt = $this->getSelectOptions($key, false, !($type & DB_DATAOBJECT_NOTNULL));
-                    if (isset($this->linkElementTypes[$key]) && $this->linkElementTypes[$key] == 'radio') {
+                    $isRadio = isset($this->linkElementTypes[$key]) && $this->linkElementTypes[$key] == 'radio';
+                    $opt = $this->getSelectOptions($key,
+                                                   false,
+                                                   !($type & DB_DATAOBJECT_NOTNULL),
+                                                   $isRadio ? $this->radioAddEmptyLabel : $this->selectAddEmptyLabel);
+                    if ($isRadio) {
                         $element =& $this->_form->_createRadioButtons($key, $opt);
                     } else {
                         $element =& $this->_form->_createSelectBox($key, $opt);
@@ -1137,13 +1215,26 @@ class DB_DataObject_FormBuilder
                 // Auto-detect field types depending on field's database type
                 switch (true) {
                 case ($type & DB_DATAOBJECT_BOOL):
-                    $formValues[$key] = $this->_do->$key;
+                    if ($this->useAccessors
+                        && method_exists($this->_do, 'get' . $key)) {
+                        $formValues[$key] = $this->_do->{'get'.$key}();
+                    } else {
+                        $formValues[$key] = $this->_do->$key;
+                    }
+                    if ($formValues[$key] === 'f') {
+                        $formValues[$key] = 0;
+                    }
                     if (!isset($element)) {
                         $element =& $this->_form->_createCheckbox($key, null, null, $this->getFieldLabel($key));
                     }
                     break;
                 case ($type & DB_DATAOBJECT_INT):
-                    $formValues[$key] = $this->_do->$key;
+                    if ($this->useAccessors
+                        && method_exists($this->_do, 'get' . $key)) {
+                        $formValues[$key] = $this->_do->{'get'.$key}();
+                    } else {
+                        $formValues[$key] = $this->_do->$key;
+                    }
                     if (!isset($element)) {
                         $element =& $this->_form->_createIntegerField($key);
                         $elValidator = 'numeric';
@@ -1151,11 +1242,17 @@ class DB_DataObject_FormBuilder
                     break;
                 case (($type & DB_DATAOBJECT_DATE) && ($type & DB_DATAOBJECT_TIME)):
                     $this->debug('DATE & TIME CONVERSION using callback for element '.$key.' ('.$this->_do->$key.')!', 'FormBuilder');
+                    if ($this->useAccessors
+                        && method_exists($this->_do, 'get' . $key)) {
+                        $fieldValue = $this->_do->{'get'.$key}();
+                    } else {
+                        $fieldValue = $this->_do->$key;
+                    }
                     if ($this->isCallableAndExists($this->dateFromDatabaseCallback)) {
-                        $formValues[$key] = call_user_func($this->dateFromDatabaseCallback, $this->_do->$key);
+                        $formValues[$key] = call_user_func($this->dateFromDatabaseCallback, $fieldValue);
                     } else {
                         $this->debug('WARNING: dateFromDatabaseCallback callback not callable', 'FormBuilder');
-                        $formValues[$key] = $this->_do->$key;
+                        $formValues[$key] = $fieldValue;
                     }
                     if (!isset($element)) {
                         $element =& $this->_form->_createDateTimeElement($key);  
@@ -1163,11 +1260,17 @@ class DB_DataObject_FormBuilder
                     break;  
                 case ($type & DB_DATAOBJECT_DATE):
                     $this->debug('DATE CONVERSION using callback for element '.$key.' ('.$this->_do->$key.')!', 'FormBuilder');
+                    if ($this->useAccessors
+                        && method_exists($this->_do, 'get' . $key)) {
+                        $fieldValue = $this->_do->{'get'.$key}();
+                    } else {
+                        $fieldValue = $this->_do->$key;
+                    }
                     if ($this->isCallableAndExists($this->dateFromDatabaseCallback)) {
-                        $formValues[$key] = call_user_func($this->dateFromDatabaseCallback, $this->_do->$key);
+                        $formValues[$key] = call_user_func($this->dateFromDatabaseCallback, $fieldValue);
                     } else {
                         $this->debug('WARNING: dateFromDatabaseCallback callback not callable', 'FormBuilder');
-                        $formValues[$key] = $this->_do->$key;
+                        $formValues[$key] = $fieldValue;
                     }
                     if (!isset($element)) {
                         $element =& $this->_form->_createDateElement($key);
@@ -1175,24 +1278,40 @@ class DB_DataObject_FormBuilder
                     break;
                 case ($type & DB_DATAOBJECT_TIME):
                     $this->debug('TIME CONVERSION using callback for element '.$key.' ('.$this->_do->$key.')!', 'FormBuilder');
+                    if ($this->useAccessors
+                        && method_exists($this->_do, 'get' . $key)) {
+                        $fieldValue = $this->_do->{'get'.$key}();
+                    } else {
+                        $fieldValue = $this->_do->$key;
+                    }
                     if ($this->isCallableAndExists($this->dateFromDatabaseCallback)) {
-                        $formValues[$key] = call_user_func($this->dateFromDatabaseCallback, $this->_do->$key);
+                        $formValues[$key] = call_user_func($this->dateFromDatabaseCallback, $fieldValue);
                     } else {
                         $this->debug('WARNING: dateFromDatabaseCallback callback not callable', 'FormBuilder');
-                        $formValues[$key] = $this->_do->$key;
+                        $formValues[$key] = $fieldValue;
                     }
                     if (!isset($element)) {
                         $element =& $this->_form->_createTimeElement($key);
                     }
                     break;
                 case ($type & DB_DATAOBJECT_TXT || $type & DB_DATAOBJECT_BLOB):
-                    $formValues[$key] = $this->_do->$key;
+                    if ($this->useAccessors
+                        && method_exists($this->_do, 'get' . $key)) {
+                        $formValues[$key] = $this->_do->{'get'.$key}();
+                    } else {
+                        $formValues[$key] = $this->_do->$key;
+                    }
                     if (!isset($element)) {
                         $element =& $this->_form->_createTextArea($key);
                     }
                     break;
                 case ($type & DB_DATAOBJECT_STR):
-                    $formValues[$key] = $this->_do->$key;
+                    if ($this->useAccessors
+                        && method_exists($this->_do, 'get' . $key)) {
+                        $formValues[$key] = $this->_do->{'get'.$key}();
+                    } else {
+                        $formValues[$key] = $this->_do->$key;
+                    }
                     if (!isset($element)) {
                         // If field content contains linebreaks, make textarea - otherwise, standard textbox
                         if (isset($this->_do->$key) && strlen($this->_do->$key) && strstr($this->_do->$key, "\n")) {
@@ -1268,7 +1387,10 @@ class DB_DataObject_FormBuilder
                                     $extraFieldDo = DB_DataObject::factory($crossLink['table']);
                                 }
                                 unset($tempFb);
-                                $tempFb =& DB_DataObject_FormBuilder::create($extraFieldDo);
+                                $tempFb =& DB_DataObject_FormBuilder::create($extraFieldDo,
+                                                                             false,
+                                                                             'QuickForm',
+                                                                             get_class($this));
                                 $extraFieldDo->fb_fieldsToRender = $crossLinkDo->fb_crossLinkExtraFields;
                                 $extraFieldDo->fb_elementNamePrefix = $elementNamePrefix;
                                 $extraFieldDo->fb_elementNamePostfix = $elementNamePostfix;
@@ -1399,8 +1521,15 @@ class DB_DataObject_FormBuilder
                     unset($columnNames, $rowNames, $rows);
                     break;
                 case ($type & DB_DATAOBJECT_FORMBUILDER_ENUM):
-                    $formValues[$key] = $this->_do->$key;
+                    if ($this->useAccessors
+                        && method_exists($this->_do, 'get' . $key)) {
+                        $formValues[$key] = $this->_do->{'get'.$key}();
+                    } else {
+                        $formValues[$key] = $this->_do->$key;
+                    }
                     if (!isset($element)) {
+                        $isRadio = isset($this->linkElementTypes[$key])
+                            && $this->linkElementTypes[$key] == 'radio';
                         if (isset($this->enumOptions[$key])) {
                             $options = $this->enumOptions[$key];
                         } else {
@@ -1422,13 +1551,16 @@ class DB_DataObject_FormBuilder
                         }*/
                         if (in_array($key, $this->selectAddEmpty)
                             || !($type & DB_DATAOBJECT_NOTNULL)) {
-                            $options = array('' => $this->selectAddEmptyLabel) + $options;
+                            $options = array('' => ($isRadio
+                                                    ? $this->radioAddEmptyLabel
+                                                    : $this->selectAddEmptyLabel))
+                                + $options;
                         }
                         if (!$options) {
                             return PEAR::raiseError('There are no options defined for the enum field "'.$key.'". You may need to set the options in the enumOptions option or use your own enumOptionsCallback.');
                         }
                         $element = array();
-                        if (isset($this->linkElementTypes[$key]) && $this->linkElementTypes[$key] == 'radio') {
+                        if ($isRadio) {
                             $element =& $this->_form->_createRadioButtons($key, $options);
                         } else {
                             $element =& $this->_form->_createSelectBox($key, $options);
@@ -1455,11 +1587,13 @@ class DB_DataObject_FormBuilder
                     if ($this->reverseLinks[$key]['collapse']) {
                         $table = $rowNames = array();
                     }
+                    /*
                     if (isset($this->linkElementTypes[$elName])
                         && $this->linkElementTypes[$elName] == 'subForm') {
                         // Do this to find only reverseLinks with the correct foreign key.
                         $do->{$this->reverseLinks[$key]['field']} = $this->_do->{$this->_getPrimaryKey($this->_do)};
                     }
+                    */
                     if ($do->find()) {
                         while ($do->fetch()) {
                             $label = $this->getDataObjectString($do);
@@ -1471,7 +1605,10 @@ class DB_DataObject_FormBuilder
                             if (isset($this->linkElementTypes[$elName])
                                 && $this->linkElementTypes[$elName] == 'subForm') {
                                 unset($subFB, $subForm, $subFormEl);
-                                $subFB =& DB_DataObject_FormBuilder::create($do);
+                                $subFB =& DB_DataObject_FormBuilder::create($do,
+                                                                            false,
+                                                                            'QuickForm',
+                                                                            get_class($this));
                                 $this->reverseLinks[$key]['FBs'][] =& $subFB;
                                 $subFB->elementNamePrefix = $elName;
                                 $subFB->elementNamePostfix = '_'.count($this->reverseLinks[$key]['FBs']);
@@ -1503,7 +1640,10 @@ class DB_DataObject_FormBuilder
                             // Add a subform to add a new reverseLink record.
                             $do = DB_DataObject::factory($this->reverseLinks[$key]['table']);
                             $do->{$lField} = $this->_do->{$this->_getPrimaryKey($this->_do)};
-                            $subFB =& DB_DataObject_FormBuilder::create($do);
+                            $subFB =& DB_DataObject_FormBuilder::create($do,
+                                                                        false,
+                                                                        'QuickForm',
+                                                                        get_class($this));
                             $this->reverseLinks[$key]['FBs'][] =& $subFB;
                             $subFB->elementNamePrefix = $elName;
                             $subFB->elementNamePostfix = '_'.count($this->reverseLinks[$key]['FBs']);
@@ -1531,7 +1671,12 @@ class DB_DataObject_FormBuilder
                     $element =& $this->_form->_createHiddenField($key.'__placeholder');
                     break;
                 default:
-                    $formValues[$key] = $this->_do->$key;
+                    if ($this->useAccessors
+                        && method_exists($this->_do, 'get' . $key)) {
+                        $formValues[$key] = $this->_do->{'get'.$key}();
+                    } else {
+                        $formValues[$key] = $this->_do->$key;
+                    }
                     if (!isset($element)) {
                         $element =& $this->_form->_createTextField($key);
                     }
@@ -1730,18 +1875,22 @@ class DB_DataObject_FormBuilder
     function _getSpecialElementNames() {
         $ret = array();
         foreach ($this->tripleLinks as $tripleLink) {
-            $ret['__tripleLink_'.$tripleLink['table'].
-                 '_'.$tripleLink['fromField'].
-                 '_'.$tripleLink['toField1'].
-                 '_'.$tripleLink['toField2']] = DB_DATAOBJECT_FORMBUILDER_TRIPLELINK;
+            $ret[$this->_sanitizeFieldname('__tripleLink_'.$tripleLink['table'].
+                                           '_'.$tripleLink['fromField'].
+                                           '_'.$tripleLink['toField1'].
+                                           '_'.$tripleLink['toField2'])]
+                = DB_DATAOBJECT_FORMBUILDER_TRIPLELINK;
         }
         foreach ($this->crossLinks as $crossLink) {
-            $ret['__crossLink_'.$crossLink['table'].
-                 '_'.$crossLink['fromField'].
-                 '_'.$crossLink['toField']] = DB_DATAOBJECT_FORMBUILDER_CROSSLINK;
+            $ret[$this->_sanitizeFieldName('__crossLink_'.$crossLink['table'].
+                                           '_'.$crossLink['fromField'].
+                                           '_'.$crossLink['toField'])]
+                = DB_DATAOBJECT_FORMBUILDER_CROSSLINK;
         }
         foreach ($this->reverseLinks as $reverseLink) {
-            $ret['__reverseLink_'.$reverseLink['table'].'_'.$reverseLink['field']] = DB_DATAOBJECT_FORMBUILDER_REVERSELINK;
+            $ret[$this->_sanitizeFieldName('__reverseLink_'.$reverseLink['table'].
+                                           '_'.$reverseLink['field'])]
+                = DB_DATAOBJECT_FORMBUILDER_REVERSELINK;
         }
         foreach ($this->preDefGroups as $group) {
             $ret[$group] = DB_DATAOBJECT_FORMBUILDER_GROUP;
@@ -1898,10 +2047,12 @@ class DB_DataObject_FormBuilder
      * @param string $displayFields  (Optional) The name of the field used for the display text of the options
      * @param bool   $selectAddEmpty (Optional) If true, an empty option will be added to the list of options
      *                                          If false, the selectAddEmpty member var will be checked
+     * @param string $emptyLabel     (Optional) Label to use for empty options (defaults to $this->selectAddEmptyLabel)
+     *
      * @return array strings representing all of the records in the table $field links to.
      * @access public
      */
-    function getSelectOptions($field, $displayFields = false, $selectAddEmpty = false)
+    function getSelectOptions($field, $displayFields = false, $selectAddEmpty = false, $emptyLabel = false)
     {
         if (empty($this->_do->_database)) {
             // TEMPORARY WORKAROUND !!! Guarantees that DataObject config has
@@ -1917,29 +2068,31 @@ class DB_DataObject_FormBuilder
                                         $displayFields,
                                         $selectAddEmpty || in_array($field, $this->selectAddEmpty),
                                         $field,
-                                        $link[1]);
+                                        $link[1],
+                                        $emptyLabel);
 
-        if ($res !== false) {
-            return $res;
-        }
-
-        $this->debug('Error: '.get_class($opts).' does not inherit from DB_DataObject');
-        return array();
+        return $res;
     }
 
     /**
-     * Internal function to get the select potions for a table.
+     * Internal function to get the select options for a table.
      *
      * @param string The table to get the select display strings for.
      * @param array  array of diaply fields to use. Will default to the FB or DO options.
      * @param bool   If set to true, there will be an empty option in the returned array.
      * @param string the field in the current table which we're getting options for
      * @param string the field to use for the value of the options. Defaults to the PK of the $table
+     * @param string label to use for an empty option (defaults to $this->selectAddEmptyLabel)
      *
      * @return array strings representing all of the records in $table.
      * @access protected
      */
-    function _getSelectOptions($table, $displayFields = false, $selectAddEmpty = false, $field = false, $valueField = false) {
+    function _getSelectOptions($table,
+                               $displayFields = false,
+                               $selectAddEmpty = false,
+                               $field = false,
+                               $valueField = false,
+                               $emptyLabel = false) {
         $opts = DB_DataObject::factory($table);
         if (is_a($opts, 'db_dataobject')) {
             if ($this->isCallableAndExists($this->prepareLinkedDataObjectCallback)) {
@@ -1983,7 +2136,7 @@ class DB_DataObject_FormBuilder
                 
                 // FIXME!
                 if ($selectAddEmpty) {
-                    $list[''] = $this->selectAddEmptyLabel;
+                    $list[''] = $emptyLabel !== false ? $emptyLabel : $this->selectAddEmptyLabel;
                 }
                 // FINALLY, let's see if there are any results
                 if ($opts->find() > 0) {
@@ -2487,7 +2640,7 @@ class DB_DataObject_FormBuilder
      */
     function &_raiseDoError($message, &$do) {
         if (PEAR::isError($do->_lastError)) {
-            $message .= ' - Error from DataObject: '.$do->_lastError->getMessage();
+            $message .= ' - Error from DataObject: '.$do->_lastError->getMessage().' '.$do->_lastError->getUserInfo();
         }
         return PEAR::raiseError($message, null, null, null, $do);
     }
@@ -2528,12 +2681,12 @@ class DB_DataObject_FormBuilder
      * been done. Use this for filtering data, notifying users of changes etc.pp. ...
      *
      * @param array $values   The values of the submitted form
-     * @param string $queryType If the standard query behaviour ain't good enough for you, you can force a certain type of query
      * @return mixed        TRUE if database operations were performed, FALSE if not, PEAR_Error on error
      * @access public
      */
     function processForm($values)
     {
+        $origDo = clone($this->_do);
         if ($this->elementNamePrefix !== '' || $this->elementNamePostfix !== '') {
             $origValues = $values;
             $values = $this->_getMyValues($values);
@@ -2548,7 +2701,6 @@ class DB_DataObject_FormBuilder
         if (!is_array($links = $this->_do->links())) {
             $links = array();
         }
-        $origDo = clone($this->_do);
         foreach ($values as $field => $value) {
             $this->debug('Field '.$field.' ');
             // Double-check if the field may be edited by the user... if not, don't
@@ -2593,7 +2745,8 @@ class DB_DataObject_FormBuilder
                     $this->debug('is substituted with "'.print_r($value, true).'".<br/>');
 
                     // See if a setter method exists in the DataObject - if so, use that one
-                    if (method_exists($this->_do, 'set' . $field)) {
+                    if ($this->useMutators
+                        && method_exists($this->_do, 'set' . $field)) {
                         $this->_do->{'set'.$field}($value);
                     } else {
                         // Otherwise, just set the property 'normally'...
@@ -2607,16 +2760,26 @@ class DB_DataObject_FormBuilder
             }
         }
         foreach ($this->booleanFields as $boolField) {
-            if (in_array($field, $editableFields)
+            if (in_array($boolField, $editableFields)
                 && !isset($values[$boolField])) {
-                $this->_do->$boolField = 0;
+                if ($this->useMutators
+                    && method_exists($this->_do, 'set' . $boolField)) {
+                    $this->_do->{'set'.$boolField}(0);
+                } else {
+                    $this->_do->$boolField = 0;
+                }
             }
         }
         foreach ($tableFields as $field => $type) {
             if (($type & DB_DATAOBJECT_BOOL)
                 && in_array($field, $editableFields)
                 && !isset($values[$field])) {
-                $this->_do->$field = 0;
+                if ($this->useMutators
+                    && method_exists($this->_do, 'set' . $field)) {
+                    $this->_do->{'set'.$field}(0);
+                } else {
+                    $this->_do->$field = 0;
+                }
             }
         }
 
@@ -2673,7 +2836,7 @@ class DB_DataObject_FormBuilder
                     $action = DB_DATAOBJECT_FORMBUILDER_QUERY_FORCEINSERT;
                 }
             }
-            
+
             switch ($action) {
             case DB_DATAOBJECT_FORMBUILDER_QUERY_FORCEINSERT:
                 if (false === ($id = $this->_do->insert())) {

@@ -11,7 +11,7 @@
  * @license    http://www.php.net/license/3_0.txt  PHP License 3.0
  * @author   Markus Wolff <mw21st@php.net>
  * @author   Justin Patrin <papercrane@reversefold.com>
- * @version  $Id: QuickForm.php,v 1.65 2006/02/25 05:30:02 justinpatrin Exp $
+ * @version  $Id: QuickForm.php,v 1.69 2006/06/21 16:14:22 justinpatrin Exp $
  */
 
 require_once ('HTML/QuickForm.php');
@@ -246,7 +246,7 @@ class DB_DataObject_FormBuilder_QuickForm
      */
     function _addFormHeader($text)
     {
-        $this->_form->addElement('header', '', $text);
+        $this->_form->addElement('header', $this->_fb->getFieldName('__header__'), $text);
     }
     
     /**
@@ -528,7 +528,10 @@ class DB_DataObject_FormBuilder_QuickForm
             $this->_linkNewValueDOs[$elName]->fb_elementNamePrefix = $this->elementNamePrefix.$elName.'_'.$subTable.'__';
             $this->_linkNewValueDOs[$elName]->fb_elementNamePostfix = $this->elementNamePostfix;
             //$this->_linkNewValueDOs[$elName]->fb_linkNewValue = false;
-            $this->_linkNewValueFBs[$elName] =& DB_DataObject_FormBuilder::create($this->_linkNewValueDOs[$elName]);
+            $this->_linkNewValueFBs[$elName] =& DB_DataObject_FormBuilder::create($this->_linkNewValueDOs[$elName],
+                                                                                  false,
+                                                                                  'QuickForm',
+                                                                                  get_class($this->_fb));
             $this->_linkNewValueForms[$elName] =& $this->_linkNewValueFBs[$elName]->getForm();
             $this->_linkNewValueForms[$elName]->addElement('hidden',
                                                            ($this->elementNamePrefix.
@@ -647,7 +650,7 @@ class DB_DataObject_FormBuilder_QuickForm
         if ($this->_fb->isCallableAndExists($this->dateOptionsCallback)) {
             $dateOptions = array_merge($dateOptions,
                                        call_user_func_array($this->dateOptionsCallback,
-                                                            array($fieldName, &$fb)));
+                                                            array($fieldName, &$this->_fb)));
         }
         if (!isset($dateOptions['addEmptyOption']) && in_array($fieldName, $this->_fb->selectAddEmpty)) {
             $dateOptions['addEmptyOption'] = true;
@@ -681,7 +684,7 @@ class DB_DataObject_FormBuilder_QuickForm
         if ($this->_fb->isCallableAndExists($this->timeOptionsCallback)) {
             $timeOptions = array_merge($timeOptions,
                                        call_user_func_array($this->timeOptionsCallback,
-                                                            array($fieldName, &$fb)));
+                                                            array($fieldName, &$this->_fb)));
         }
         if (!isset($timeOptions['addEmptyOption']) && in_array($fieldName, $this->_fb->selectAddEmpty)) {
             $timeOptions['addEmptyOption'] = true;
@@ -713,7 +716,7 @@ class DB_DataObject_FormBuilder_QuickForm
         if ($this->_fb->isCallableAndExists($this->dateTimeOptionsCallback)) {
             $dateOptions = array_merge($dateOptions,
                                        call_user_func_array($this->dateTimeOptionsCallback,
-                                                            array($fieldName, &$fb)));
+                                                            array($fieldName, &$this->_fb)));
         }
         if (!isset($dateOptions['addEmptyOption']) && in_array($fieldName, $this->_fb->selectAddEmpty)) {
             $dateOptions['addEmptyOption'] = true;
@@ -739,7 +742,7 @@ class DB_DataObject_FormBuilder_QuickForm
      * @param array          $rows        an array of rows, each row being an array of HTML_QuickForm elements
      */
     function _addElementTable($fieldName, $columnNames, $rowNames, &$rows) {
-        if (!HTML_QuickForm::isTypeRegistered('elementTable')) {
+        if (!HTML_QuickForm::isTypeRegistered('elementtable')) {
             HTML_QuickForm::registerElementType('elementTable',
                                                 'DB/DataObject/FormBuilder/QuickForm/ElementTable.php',
                                                 'DB_DataObject_FormBuilder_QuickForm_ElementTable');
