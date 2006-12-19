@@ -77,19 +77,13 @@
  *
  * PHP versions 4 and 5
  *
- * LICENSE: This source file is subject to version 3.0 of the PHP license
- * that is available through the world-wide-web at the following URI:
- * http://www.php.net/license/3_0.txt.  If you did not receive a copy of
- * the PHP License and are unable to obtain it through the web, please
- * send a note to license@php.net so we can mail you a copy immediately.
- *
  * @category   DB
  * @package    DB_DataObject_FormBuilder
  * @author     Markus Wolff <mw21st@php.net>
  * @author     Justin Patrin <papercrane@reversefold.com>
- * @copyright  1997-2005 The PHP Group
- * @license    http://www.php.net/license/3_0.txt  PHP License 3.0
- * @version    $Id: FormBuilder.php,v 1.232 2006/09/17 07:11:11 justinpatrin Exp $
+ * @copyright  1997-2006 The PHP Group
+ * @license    http://www.gnu.org/licenses/lgpl.txt LGPL 2.1
+ * @version    $Id: FormBuilder.php,v 1.237 2006/12/19 19:13:11 justinpatrin Exp $
  * @link       http://pear.php.net/package/DB_DataObject_FormBuilder
  * @see        DB_DataObject, HTML_QuickForm
  */
@@ -834,7 +828,7 @@ class DB_DataObject_FormBuilder
                                 'select'    => 'select',
                                 'multiselect'    => 'select',
                                 'popupSelect' => 'popupSelect',
-                                'elementTable' => 'elementTable');
+                                'elementGrid' => 'elementGrid');
 
     /**
      * Array of attributes for each element type. See the keys of elementTypeMap
@@ -1431,7 +1425,7 @@ class DB_DataObject_FormBuilder
                             unset($crossLinkElement);
                         }
                         if (isset($crossLinkDo->fb_crossLinkExtraFields) || $crossLink['collapse']) {
-                            $this->_form->_addElementTable($groupName, array_values($colNames), $rowNames, $element);
+                            $this->_form->_addElementGrid($groupName, array_values($colNames), $rowNames, $element);
                         } else {
                             $this->_form->_addElementGroup($element, $groupName, $this->crossLinkSeparator);
                         }
@@ -1517,7 +1511,7 @@ class DB_DataObject_FormBuilder
                         $rows[] =& $row;
                         unset($row);
                     }
-                    $this->_form->_addElementTable($elName, $columnNames, $rowNames, $rows);
+                    $this->_form->_addElementGrid($elName, $columnNames, $rowNames, $rows);
                     unset($columnNames, $rowNames, $rows);
                     break;
                 case ($type & DB_DATAOBJECT_FORMBUILDER_ENUM):
@@ -1659,7 +1653,7 @@ class DB_DataObject_FormBuilder
                         }
                     }
                     if ($this->reverseLinks[$key]['collapse']) {
-                        $this->_form->_addElementTable($elName, array(), $rowNames, $table);
+                        $this->_form->_addElementGrid($elName, array(), $rowNames, $table);
                         $this->_form->_collapseRecordList($elName);
                     } else {
                         $this->_form->_addElementGroup($element, $elName, $this->crossLinkSeparator);
@@ -2204,25 +2198,26 @@ class DB_DataObject_FormBuilder
                 }
             }
             unset($this->crossLinks[$key]);
-            $groupName  = '__crossLink_'.$crossLink['table'].
-                '_'.$fromField.
-                '_'.$toField;
+            $groupName  = $this->_sanitizeFieldName('__crossLink_'.$crossLink['table'].
+                                                    '_'.$fromField.
+                                                    '_'.$toField);
             $this->crossLinks[$groupName] = array_merge($crossLink,
                                                         array('fromField' => $fromField,
                                                               'toField' => $toField));
             foreach (array('preDefOrder', 'fieldsToRender', 'userEditableFields') as $arrName) {
                 foreach ($this->{$arrName} as $key => $value) {
-                    if ($value == '__crossLink_'.$crossLink['table']) {
+                    if ($this->_sanitizeFieldName($value)
+                        == $this->_sanitizeFieldName('__crossLink_'.$crossLink['table'])) {
                         $this->{$arrName}[$key] = $groupName;
                     }
                 }
             }
             foreach (array('preDefElements', 'fieldLabels', 'fieldAttributes') as $arrName) {
-                if (isset($this->{$arrName}['__crossLink_'.$crossLink['table']])) {
+                if (isset($this->{$arrName}[$this->_sanitizeFieldName('__crossLink_'.$crossLink['table'])])) {
                     if (!isset($this->{$arrName}[$groupName])) {
                         $this->{$arrName}[$groupName] =& $this->{$arrName}['__crossLink_'.$crossLink['table']];
                     }
-                    unset($this->{$arrName}['__crossLink_'.$crossLink['table']]);
+                    unset($this->{$arrName}[$this->_sanitizeFieldName('__crossLink_'.$crossLink['table'])]);
                 }
             }
         }
@@ -2265,27 +2260,28 @@ class DB_DataObject_FormBuilder
                 }
             }
             unset($this->tripleLinks[$key]);
-            $elName  = '__tripleLink_' . $tripleLink['table'].
-                '_'.$fromField.
-                '_'.$toField1.
-                '_'.$toField2;
+            $elName  = $this->_sanitizeFieldName('__tripleLink_' . $tripleLink['table'].
+                                                 '_'.$fromField.
+                                                 '_'.$toField1.
+                                                 '_'.$toField2);
             $this->tripleLinks[$elName] = array_merge($tripleLink,
                                                       array('fromField' => $fromField,
                                                             'toField1' => $toField1,
                                                             'toField2' => $toField2));
             foreach (array('preDefOrder', 'fieldsToRender', 'userEditableFields') as $arrName) {
                 foreach ($this->{$arrName} as $key => $value) {
-                    if ($value == '__tripleLink_'.$tripleLink['table']) {
+                    if ($this->_sanitizeFieldName($value)
+                        == $this->_sanitizeFieldName('__tripleLink_'.$tripleLink['table'])) {
                         $this->{$arrName}[$key] = $elName;
                     }
                 }
             }
             foreach (array('preDefElements', 'fieldLabels', 'fieldAttributes') as $arrName) {
-                if (isset($this->{$arrName}['__tripleLink_'.$tripleLink['table']])) {
+                if (isset($this->{$arrName}[$this->_sanitizeFieldName('__tripleLink_'.$tripleLink['table'])])) {
                     if (!isset($this->{$arrName}[$elName])) {
-                        $this->{$arrName}[$elName] =& $this->{$arrName}['__tripleLink_'.$tripleLink['table']];
+                        $this->{$arrName}[$elName] =& $this->{$arrName}[$this->_sanitizeFieldName('__tripleLink_'.$tripleLink['table'])];
                     }
-                    unset($this->{$arrName}['__tripleLink_'.$tripleLink['table']]);
+                    unset($this->{$arrName}[$this->_sanitizeFieldName('__tripleLink_'.$tripleLink['table'])]);
                 }
             }
         }
@@ -2304,8 +2300,8 @@ class DB_DataObject_FormBuilder
                     }
                 }
             }
-            $elName  = '__reverseLink_'.$reverseLink['table'].
-                '_'.$reverseLink['field'];
+            $elName  = $this->_sanitizeFieldName('__reverseLink_'.$reverseLink['table'].
+                                                 '_'.$reverseLink['field']);
             if (!isset($reverseLink['linkText'])) {
                 $reverseLink['linkText'] = ' - currently linked to - ';
             }
@@ -2316,17 +2312,18 @@ class DB_DataObject_FormBuilder
             $this->reverseLinks[$elName] = $reverseLink;
             foreach (array('preDefOrder', 'fieldsToRender', 'userEditableFields') as $arrName) {
                 foreach ($this->{$arrName} as $key => $value) {
-                    if ($value == '__reverseLink_'.$reverseLink['table']) {
+                    if ($this->_sanitizeFieldName($value)
+                        == $this->_sanitizeFieldName('__reverseLink_'.$reverseLink['table'])) {
                         $this->{$arrName}[$key] = $elName;
                     }
                 }
             }
             foreach (array('preDefElements', 'fieldLabels', 'fieldAttributes', 'reverseLinkNewValue') as $arrName) {
-                if (isset($this->{$arrName}['__reverseLink_'.$reverseLink['table']])) {
+                if (isset($this->{$arrName}[$this->_sanitizeFieldName('__reverseLink_'.$reverseLink['table'])])) {
                     if (!isset($this->{$arrName}[$elName])) {
-                        $this->{$arrName}[$elName] =& $this->{$arrName}['__reverseLink_'.$reverseLink['table']];
+                        $this->{$arrName}[$elName] =& $this->{$arrName}[$this->_sanitizeFieldName('__reverseLink_'.$reverseLink['table'])];
                     }
-                    unset($this->{$arrName}['__reverseLink_'.$reverseLink['table']]);
+                    unset($this->{$arrName}[$this->_sanitizeFieldName('__reverseLink_'.$reverseLink['table'])]);
                 }
             }
         }
@@ -2460,6 +2457,7 @@ class DB_DataObject_FormBuilder
             if ($da['h'] == 0) {
                 $da['h'] = 12;
             }
+            $da['g'] = $da['h'];
             $da['i'] = $dObj->getMinute();
             $da['s'] = $dObj->getSecond();
             if ($da['H'] >= 12) {
@@ -2481,6 +2479,7 @@ class DB_DataObject_FormBuilder
             $da['m'] = $da['M'] = $da['F'] = date('m', $time);
             $da['Y'] = $da['y'] = date('Y', $time);
             $da['H'] = date('H', $time);
+            $da['g'] = date('g', $time);
             $da['h'] = date('h', $time);
             $da['i'] = date('i', $time);
             $da['s'] = date('s', $time);
@@ -2525,8 +2524,12 @@ class DB_DataObject_FormBuilder
         }
         if (isset($dateInput['H'])) {
             $hour = $dateInput['H'];
-        } elseif (isset($dateInput['h'])) {
-            $hour = $dateInput['h'];
+        } elseif (isset($dateInput['h']) || isset($dateInput['g'])) {
+            if (isset($dateInput['h'])) {
+                $hour = $dateInput['h'];
+            } elseif (isset($dateInput['g'])) {
+                $hour = $dateInput['g'];
+            }
             if (isset($dateInput['a'])) {
                 $ampm = $dateInput['a'];
             } elseif (isset($dateInput['A'])) {
@@ -3036,7 +3039,13 @@ class DB_DataObject_FormBuilder
                         foreach($reverseLink['SFs'] as $sfkey => $subform) {
                             // Process each subform that was rendered.
                             if ($subform->validate()) {
-                                $subform->process(array(&$reverseLink['FBs'][$sfkey], 'processForm'), false);
+                                $ret = $subform->process(array(&$reverseLink['FBs'][$sfkey], 'processForm'), false);
+                                if (PEAR::isError($ret)) {
+                                    $this->debug('Failed to process subForm for reverseLink '.serialize($reverseLink['FBs'][$sfkey]->_do));
+                                    return PEAR::raiseError('Failed to process extraFields crossLink - Error from processForm: '
+                                                            .$ret->getMessage()
+                                                            , null, null, null, $reverseLink['FBs'][$sfkey]->_do);
+                                }
                             }
                         }
                     } else {
