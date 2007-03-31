@@ -83,7 +83,7 @@
  * @author     Justin Patrin <papercrane@reversefold.com>
  * @copyright  1997-2006 The PHP Group
  * @license    http://www.gnu.org/licenses/lgpl.txt LGPL 2.1
- * @version    $Id: FormBuilder.php,v 1.237 2006/12/19 19:13:11 justinpatrin Exp $
+ * @version    $Id: FormBuilder.php,v 1.239 2007/03/31 16:17:07 justinpatrin Exp $
  * @link       http://pear.php.net/package/DB_DataObject_FormBuilder
  * @see        DB_DataObject, HTML_QuickForm
  */
@@ -700,7 +700,7 @@ class DB_DataObject_FormBuilder
      * Justin Patrin - currently linked to - Male
      * 
      * If the link field is set as NOT NULL then FormBuilder will not process
-     * and unchecked checkbox unless you specify a default value to set the link
+     * an unchecked checkbox unless you specify a default value to set the link
      * to. If null is allowed, the link will be set to NULL. To specify a default
      * value:
      * <code>
@@ -1747,7 +1747,7 @@ class DB_DataObject_FormBuilder
             while (list($grp, $elements) = each($groups)) {
                 if (count($elements) == 1) {  
                     $this->_form->_addElement($elements[0]);
-                    $this->_form->_moveElementBefore($this->_getElementName($elements[0]), $grp.'__placeholder');
+                    $this->_form->_moveElementBefore($this->_form->_getElementName($elements[0]), $grp.'__placeholder');
                 } elseif (count($elements) > 1) {
                     $this->_form->_addElementGroup($elements, $grp, '&nbsp;');
                     $this->_form->_moveElementBefore($grp, $grp.'__placeholder');
