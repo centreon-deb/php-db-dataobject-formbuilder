@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<package packagerversion="1.5.1" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0 http://pear.php.net/dtd/tasks-1.0.xsd http://pear.php.net/dtd/package-2.0 http://pear.php.net/dtd/package-2.0.xsd">
+<package packagerversion="1.6.1" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0 http://pear.php.net/dtd/tasks-1.0.xsd http://pear.php.net/dtd/package-2.0 http://pear.php.net/dtd/package-2.0.xsd">
  <name>DB_DataObject_FormBuilder</name>
  <channel>pear.php.net</channel>
  <summary>Class to automatically build HTML_QuickForm objects from a DB_DataObject-derived class</summary>
@@ -22,59 +22,64 @@
   <email>norbert@php.net</email>
   <active>yes</active>
  </developer>
- <date>2007-03-31</date>
- <time>11:36:56</time>
+ <date>2009-05-26</date>
+ <time>09:48:09</time>
  <version>
-  <release>1.0.0RC7</release>
-  <api>1.0.0RC6</api>
+  <release>1.0.0</release>
+  <api>1.0.0</api>
  </version>
  <stability>
-  <release>beta</release>
-  <api>beta</api>
+  <release>stable</release>
+  <api>stable</api>
  </stability>
  <license uri="http://www.gnu.org/licenses/lgpl.txt">LGPL</license>
- <notes>* Fix Bug #10574: Line 1750 [justinpatrin]</notes>
+ <notes>First stable release.
+
+Fixes:
+* Fixed driver name case issues (bug #13071)
+* Fixed _array2date() notices (bug #14079)
+* Made unit tests skip instead of fail when configuration isn&apos;t present</notes>
  <contents>
   <dir baseinstalldir="/" name="/">
    <file baseinstalldir="/" md5sum="2ed71cb70b1774674ff3950542d930bb" name="examples/classes/Category.php" role="doc" />
    <file baseinstalldir="/" md5sum="fd2aacbc20ed4779ca10cbe317ee6f5c" name="examples/classes/formbuilder.ini" role="doc" />
    <file baseinstalldir="/" md5sum="5a8d2aafb6db44a5b0774232b29f61a4" name="examples/classes/formbuilder.links.ini" role="doc" />
-   <file baseinstalldir="/" md5sum="eec24479ceab9d562be1780dab311c46" name="examples/classes/Manufacturer.php" role="doc" />
+   <file baseinstalldir="/" md5sum="7b0b062e5386d984ab96fb369a5455d2" name="examples/classes/Manufacturer.php" role="doc" />
    <file baseinstalldir="/" md5sum="f1eadcfb6937b8cd0bdb9d8c84b57ac0" name="examples/classes/Product.php" role="doc" />
    <file baseinstalldir="/" md5sum="62ca78779ca6521640c2c36ce25b302d" name="examples/sql/schema.gif" role="doc" />
    <file baseinstalldir="/" md5sum="ae96182ee440ebcdcb0a31fc42861d55" name="examples/sql/schema.sql" role="doc" />
    <file baseinstalldir="/" md5sum="cd9d9856a29ba92743c12e82b39ef223" name="examples/config_inc.php" role="doc" />
-   <file baseinstalldir="/" md5sum="c881fa7029127b6cd01e3c39ef99cbfd" name="examples/dataObject.ini" role="doc" />
+   <file baseinstalldir="/" md5sum="0039a7a0fbaaedc17e14ecbe1e16ccd5" name="examples/dataObject.ini" role="doc" />
    <file baseinstalldir="/" md5sum="3416573d53ce0c8087c337143c174bf1" name="examples/index.php" role="doc" />
    <file baseinstalldir="/DB/DataObject" md5sum="425dd46e2e382a21d0a8a23b51379db0" name="FormBuilder/QuickForm/SubForm.php" role="php" />
    <file baseinstalldir="/DB/DataObject" md5sum="80a786148f4b074c908d55741eb085b6" name="FormBuilder/QuickForm/SubFormFB.php" role="php" />
    <file baseinstalldir="/DB/DataObject" md5sum="82b75d42f4797c572b9643d10bb56897" name="FormBuilder/QuickForm.php" role="php" />
-   <file baseinstalldir="/" md5sum="b457a3c29134bf5ebc68dff7e068fd30" name="tests/array2date.phpt" role="test" />
-   <file baseinstalldir="/" md5sum="24c357c43733106e650cbf0d174e250c" name="tests/config.php" role="test" />
-   <file baseinstalldir="/" md5sum="e0249cba1333ec20ecf965e46aefba96" name="tests/configAndOverride.phpt" role="test" />
-   <file baseinstalldir="/" md5sum="e42b296c74a53af0ee98c9369d3baf89" name="tests/create.phpt" role="test" />
-   <file baseinstalldir="/" md5sum="b069c89870d47b09ddbdf457b5d39416" name="tests/createSubmit.phpt" role="test" />
-   <file baseinstalldir="/" md5sum="ea67e603073c14d2e359f0659c8cda82" name="tests/createWithDriver.phpt" role="test" />
-   <file baseinstalldir="/" md5sum="a7b15d0a293df45e98b8292369db72bd" name="tests/createWithOptions.phpt" role="test" />
-   <file baseinstalldir="/" md5sum="2701dc07fec65a48f382e9989235be84" name="tests/dateElement.phpt" role="test" />
-   <file baseinstalldir="/" md5sum="e7d06b7d24845624cacee6a67bfdb8da" name="tests/dateOptionsCallbacks.phpt" role="test" />
-   <file baseinstalldir="/" md5sum="4390e186cc7e77533c239ee3e1e966fd" name="tests/elementNamePrefix_Postfix.phpt" role="test" />
-   <file baseinstalldir="/" md5sum="8744af0210ac94d30e5ddc13b3157871" name="tests/enum.phpt" role="test" />
-   <file baseinstalldir="/" md5sum="e5331c8128eecac17e7c8f3505643db4" name="tests/existingRecordUpdated.phpt" role="test" />
-   <file baseinstalldir="/" md5sum="af6d57694394f0aec07c30b4698e4f8e" name="tests/forceInsert.phpt" role="test" />
-   <file baseinstalldir="/" md5sum="26ec2108055237acde9ea66ebe126676" name="tests/formHeaderText.phpt" role="test" />
-   <file baseinstalldir="/" md5sum="09c635f6725f1fd9224a95c6a95fcb08" name="tests/getForm.phpt" role="test" />
-   <file baseinstalldir="/" md5sum="49cc77851dadeb8ee175efa60cd9315d" name="tests/links.phpt" role="test" />
+   <file baseinstalldir="/" md5sum="f566957423ab18f122418f24fdbba251" name="tests/array2date.phpt" role="test" />
+   <file baseinstalldir="/" md5sum="7c74f6e81b89b167128375180bce477d" name="tests/config.php" role="test" />
+   <file baseinstalldir="/" md5sum="58a5ebdb88f717ecd256f00a2869b873" name="tests/configAndOverride.phpt" role="test" />
+   <file baseinstalldir="/" md5sum="fc966ce12f8848041da88de76c6e90ba" name="tests/create.phpt" role="test" />
+   <file baseinstalldir="/" md5sum="b69863c15b2b4e3c5e60d09539704cba" name="tests/createSubmit.phpt" role="test" />
+   <file baseinstalldir="/" md5sum="74a411216d3423451b8896bb84f43a38" name="tests/createWithDriver.phpt" role="test" />
+   <file baseinstalldir="/" md5sum="f14abf7cc0917c8bc5df8b5250cf5fc6" name="tests/createWithOptions.phpt" role="test" />
+   <file baseinstalldir="/" md5sum="de52d1c7996a9aad3ea7e88f58851e72" name="tests/dateElement.phpt" role="test" />
+   <file baseinstalldir="/" md5sum="5d705aff4eb4f3214fcded330a7b4a3b" name="tests/dateOptionsCallbacks.phpt" role="test" />
+   <file baseinstalldir="/" md5sum="07ac20763e557245151d910898a8f584" name="tests/elementNamePrefix_Postfix.phpt" role="test" />
+   <file baseinstalldir="/" md5sum="60bb8157981a0ea949c2dea87db1e4df" name="tests/enum.phpt" role="test" />
+   <file baseinstalldir="/" md5sum="db9394a205fce3d43ae23945bf7a57c7" name="tests/existingRecordUpdated.phpt" role="test" />
+   <file baseinstalldir="/" md5sum="a35be54ec879ac1881cd966473c14ecd" name="tests/forceInsert.phpt" role="test" />
+   <file baseinstalldir="/" md5sum="597f74033e7656efedfa307b186f65cb" name="tests/formHeaderText.phpt" role="test" />
+   <file baseinstalldir="/" md5sum="4bca6252ff9f2ed7d73085dbdd0eeb50" name="tests/getForm.phpt" role="test" />
+   <file baseinstalldir="/" md5sum="08e82417c774c7a34a14f9fa9c9b4ede" name="tests/links.phpt" role="test" />
    <file baseinstalldir="/" md5sum="e3708001904def6e41a73b3524d3a110" name="tests/movie.sql" role="test" />
-   <file baseinstalldir="/" md5sum="817b16aa114006d8df017ce4ac89e3e6" name="tests/newRecordInserted.phpt" role="test" />
-   <file baseinstalldir="/" md5sum="6b1dc10e97293ff5759db645aad1f481" name="tests/notNullFieldRequired.phpt" role="test" />
-   <file baseinstalldir="/" md5sum="7d21ced13fe039b896314a47bc14131f" name="tests/primaryKeyIsHidden.phpt" role="test" />
-   <file baseinstalldir="/" md5sum="fa5f0a5b10ff55f5b8d658035822c9c7" name="tests/submitText.phpt" role="test" />
-   <file baseinstalldir="/" md5sum="20e5443bced1c5126c9c72c414663c9b" name="tests/textElement.phpt" role="test" />
-   <file baseinstalldir="/" md5sum="39d26be98536f38741a0a0f610140b01" name="tests/typeArrays.phpt" role="test" />
+   <file baseinstalldir="/" md5sum="f53fad2246e19df85d13d7a6c8ca8dc5" name="tests/newRecordInserted.phpt" role="test" />
+   <file baseinstalldir="/" md5sum="27ae6668db2e9ffa1a0c8bf96f33e5db" name="tests/notNullFieldRequired.phpt" role="test" />
+   <file baseinstalldir="/" md5sum="b78c56c780ee6276ed31758a96266324" name="tests/primaryKeyIsHidden.phpt" role="test" />
+   <file baseinstalldir="/" md5sum="a1040784c9401fbcd494cffcca30e553" name="tests/submitText.phpt" role="test" />
+   <file baseinstalldir="/" md5sum="368f8f4f7f532762e8aa7eb0715081d3" name="tests/textElement.phpt" role="test" />
+   <file baseinstalldir="/" md5sum="cbc40dfe772eb8ca2b41c45db7983eab" name="tests/typeArrays.phpt" role="test" />
    <file baseinstalldir="/" md5sum="c94076ba9d873e29c1018d8d4e2a9925" name="tools/fix0.9.0Files.php" role="data" />
    <file baseinstalldir="/" md5sum="1fadc88639677583f81ad2842018d6eb" name="tools/fixPre1.52CVSFiles.php" role="data" />
-   <file baseinstalldir="/DB/DataObject" md5sum="53833bffd0dbe1895d10a72279d6d24d" name="FormBuilder.php" role="php" />
+   <file baseinstalldir="/DB/DataObject" md5sum="173a05710b130f0c9cfde9e9fff6cc4a" name="FormBuilder.php" role="php" />
   </dir>
  </contents>
  <dependencies>
@@ -118,6 +123,36 @@
  <changelog>
   <release>
    <version>
+    <release>1.0.0</release>
+    <api>1.0.0</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <date>2009-05-26</date>
+   <license uri="http://www.gnu.org/licenses/lgpl.txt">LGPL</license>
+   <notes>First stable release.
+
+Fixes:
+* Fixed driver name case issues (bug #13071)
+* Fixed _array2date() notices (bug #14079)
+* Made unit tests skip instead of fail when configuration isn&apos;t present</notes>
+  </release>
+  <release>
+   <version>
+    <release>1.0.0RC7</release>
+    <api>1.0.0RC6</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <license uri="http://www.gnu.org/licenses/lgpl.txt">LGPL</license>
+   <notes>* Fix Bug #10574: Line 1750 [justinpatrin]</notes>
+  </release>
+  <release>
+   <version>
     <release>1.0.0RC6</release>
     <api>1.0.0RC6</api>
    </version>
@@ -138,59 +173,6 @@ Changes:
 - The internal ElementTable QuickForm element is no longer used in favor of HTML_QuickForm_ElementGrid
 - package.xml 2.0 is now used exclusively, you must have PEAR 1.4.4 or greater installed to install DB_DataObject_FormBuilder
 - This package is now licensed under the LGPL</notes>
-  </release>
-  <release>
-   <version>
-    <release>1.0.0RC6</release>
-    <api>1.0.0RC6</api>
-   </version>
-   <stability>
-    <release>beta</release>
-    <api>beta</api>
-   </stability>
-   <date>2006-12-19</date>
-   <license uri="http://www.gnu.org/licenses/lgpl.txt">LGPL</license>
-   <notes>Additions:
-- Request #8721 CrossLinks now have a tri-state link which can hide all (thanks to peter at niebling dot name)
-
-Bugs Fixed:
-- Form processing will now fail when a reverseLink subForm fails processing
-- Bug #8105 The &quot;g&quot; formatter is now available in the default date formatter callbacks (thanks to dsanders at baselinesolutions dot com dot au)
-- Bug #6962 Crosslinks with special chars in their names, such as postgres tables, are processed again
-
-Changes:
-- The internal ElementTable QuickForm element is no longer used in favor of HTML_QuickForm_ElementGrid
-- package.xml 2.0 is now used exclusively, you must have PEAR 1.4.4 or greater installed to install DB_DataObject_FormBuilder
-- This package is now licensed under the LGPL</notes>
-  </release>
-  <release>
-   <version>
-    <release>1.0.0RC5</release>
-    <api>1.0.0RC5</api>
-   </version>
-   <stability>
-    <release>beta</release>
-    <api>beta</api>
-   </stability>
-   <license uri="http://www.php.net/license">PHP License</license>
-   <notes>* BC Break!
-** useMutators must now be set for setters to be used (this gets around problems with overloading)
-** useAccessors will now cause getters to be used to get non-link data
-*** accessors and mutators may not be used for link fields
-
-* Form values changed in preProcessFormCallback are now honored
-* De-silenced include_once (fopen now used to check for file readability)
-* _getEnumOptions() now works with MDB2
-* Boolean fields which are set editable but are not set as DB_DATAOBJECT_BOOL will now be set correctly
-* Fixed displaying of postgresql booleans
-* _sanitizeFieldName is now used when listing special elements (fixes some cross/triple/reverse link bugs)
-* Added more info to error output
-* Extended FormBuilder classes will now be re-used for sub-FormBuilders
-* Added an option to set the empty label for radios which is distinct from the select empty label (Request #7919)
-* Header elements now have a name
-* Fixed some docs
-* Fixed an undefined reference
-* SubForm.php now outputs a type attribute in all &lt;script&gt; output</notes>
   </release>
   <release>
    <version>
@@ -897,6 +879,35 @@ http://opensource.21st.de/tiki-index.php?page=DB_DataObject_FormBuilder</notes>
    <date>2003-08-21</date>
    <license uri="http://www.php.net/license">PHP License</license>
    <notes>- Initial release.</notes>
+  </release>
+  <release>
+   <version>
+    <release>1.0.0RC5</release>
+    <api>1.0.0RC5</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <license uri="http://www.php.net/license">PHP License</license>
+   <notes>* BC Break!
+** useMutators must now be set for setters to be used (this gets around problems with overloading)
+** useAccessors will now cause getters to be used to get non-link data
+*** accessors and mutators may not be used for link fields
+
+* Form values changed in preProcessFormCallback are now honored
+* De-silenced include_once (fopen now used to check for file readability)
+* _getEnumOptions() now works with MDB2
+* Boolean fields which are set editable but are not set as DB_DATAOBJECT_BOOL will now be set correctly
+* Fixed displaying of postgresql booleans
+* _sanitizeFieldName is now used when listing special elements (fixes some cross/triple/reverse link bugs)
+* Added more info to error output
+* Extended FormBuilder classes will now be re-used for sub-FormBuilders
+* Added an option to set the empty label for radios which is distinct from the select empty label (Request #7919)
+* Header elements now have a name
+* Fixed some docs
+* Fixed an undefined reference
+* SubForm.php now outputs a type attribute in all &lt;script&gt; output</notes>
   </release>
  </changelog>
 </package>

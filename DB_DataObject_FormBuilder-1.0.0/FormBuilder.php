@@ -83,7 +83,7 @@
  * @author     Justin Patrin <papercrane@reversefold.com>
  * @copyright  1997-2006 The PHP Group
  * @license    http://www.gnu.org/licenses/lgpl.txt LGPL 2.1
- * @version    $Id: FormBuilder.php,v 1.239 2007/03/31 16:17:07 justinpatrin Exp $
+ * @version    $Id: FormBuilder.php,v 1.241 2008/06/05 15:11:17 justinpatrin Exp $
  * @link       http://pear.php.net/package/DB_DataObject_FormBuilder
  * @see        DB_DataObject, HTML_QuickForm
  */
@@ -905,7 +905,7 @@ class DB_DataObject_FormBuilder
      * @access public
      * @returns object        DB_DataObject_FormBuilder or PEAR_Error object
      */
-    function &create(&$do, $options = false, $driver = 'QuickForm', $mainClass = 'db_dataobject_formbuilder')
+    function &create(&$do, $options = false, $driver = 'QuickForm', $mainClass = 'DB_DataObject_FormBuilder')
     {
         if (!is_a($do, 'db_dataobject')) {
             $err =& PEAR::raiseError('DB_DataObject_FormBuilder::create(): Object does not extend DB_DataObject.',
@@ -919,7 +919,7 @@ class DB_DataObject_FormBuilder
             return $err;
         }
         $fb =& new $mainClass($do, $options);        
-        $className = 'db_dataobject_formbuilder_'.strtolower($driver);
+        $className = 'DB_DataObject_FormBuilder_'.strtolower($driver);
         $fileName = 'DB/DataObject/FormBuilder/'.$driver.'.php';
 
         if (!class_exists($className)) {
@@ -2535,7 +2535,7 @@ class DB_DataObject_FormBuilder
             } elseif (isset($dateInput['A'])) {
                 $ampm = $dateInput['A'];
             }
-            if (strtolower(preg_replace('/[\.\s,]/', '', $ampm)) == 'pm') {
+            if (isset($ampm) && strtolower(preg_replace('/[\.\s,]/', '', $ampm)) == 'pm') {
                 if ($hour != '12') {
                     $hour += 12;
                     if ($hour == 24) {
