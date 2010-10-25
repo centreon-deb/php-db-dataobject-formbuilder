@@ -11,7 +11,7 @@
  * @license    http://www.gnu.org/licenses/lgpl.txt LGPL 2.1
  * @author   Markus Wolff <mw21st@php.net>
  * @author   Justin Patrin <papercrane@reversefold.com>
- * @version  $Id: QuickForm.php,v 1.72 2006/12/19 19:13:11 justinpatrin Exp $
+ * @version  $Id: QuickForm.php 225313 2006-12-19 19:13:11Z justinpatrin $
  */
 
 require_once ('HTML/QuickForm.php');

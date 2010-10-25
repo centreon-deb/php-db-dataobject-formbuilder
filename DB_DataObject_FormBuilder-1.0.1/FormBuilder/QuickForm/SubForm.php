@@ -12,7 +12,7 @@
  * @copyright  1997-2006 The PHP Group
  * @license    http://www.gnu.org/licenses/lgpl.txt LGPL 2.1
  * @author   Justin Patrin <papercrane@reversefold.com>
- * @version  $Id: SubForm.php,v 1.7 2006/12/19 19:13:11 justinpatrin Exp $
+ * @version  $Id: SubForm.php 225313 2006-12-19 19:13:11Z justinpatrin $
  */
 
 require_once('HTML/QuickForm/static.php');

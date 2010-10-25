@@ -83,7 +83,7 @@
  * @author     Justin Patrin <papercrane@reversefold.com>
  * @copyright  1997-2006 The PHP Group
  * @license    http://www.gnu.org/licenses/lgpl.txt LGPL 2.1
- * @version    $Id: FormBuilder.php,v 1.241 2008/06/05 15:11:17 justinpatrin Exp $
+ * @version    $Id: FormBuilder.php 260779 2008-06-05 15:11:17Z justinpatrin $
  * @link       http://pear.php.net/package/DB_DataObject_FormBuilder
  * @see        DB_DataObject, HTML_QuickForm
  */
