@@ -1,0 +1,16 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+
+# Uncomment this to turn on verbose mode.
+export DH_VERBOSE=1
+
+
+PACKAGE=php-db-dataobject-formbuilder
+PACKAGEDIR=debian/$(PACKAGE)
+%:
+	dh $@ --buildsystem=phppear --with phppear
+
+# override_dh_phppear:
+# 	dh_phppear -O--buildsystem=phppear
+# 	rm -rf debian/$(PACKAGE)/usr/bin/DB \
+# 		debian/$(PACKAGE)/usr/share/doc/$(PACKAGE)/docs/LICENCE.txt
