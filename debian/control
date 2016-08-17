@@ -7,7 +7,7 @@ Standards-Version: 3.9.5
 Homepage: https://pear.php.net/package/DB_DataObject_FormBuilder
 
 Package: php-db-dataobject-formbuilder
-Architecture: any
+Architecture: all
 Depends: ${misc:Depends}, ${phppear:Debian-Depends}
 Recommends: ${phppear:Debian-Recommends}
 Breaks: ${phppear:Debian-Breaks}
